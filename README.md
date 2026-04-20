@@ -6,11 +6,11 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Tests](https://github.com/SonFire03/autohack/actions/workflows/tests.yml/badge.svg)
 
-AUTOHACK LAB COMMANDER is a terminal application for organizing, searching, documenting, and running security lab commands from one place. It is built for students, CTF players, homelab users, and security practitioners who want a structured command catalog instead of scattered notes.
+AUTOHACK LAB COMMANDER is a terminal application for organizing, searching, documenting, and carefully running security lab commands from one place. It is built for students, CTF players, homelab users, and security practitioners who want a structured command catalog instead of scattered notes.
 
 The project provides both an interactive Rich-powered terminal UI and a non-interactive CLI. The catalog currently contains 1,331 commands across 13 categories, including system checks, local network diagnostics, Tor/Privoxy, Scrapy, Elasticsearch, reconnaissance, web testing, password auditing, post-exploitation lab workflows, and XSS payloads.
 
-> Important: this project is intended for legal labs, owned systems, CTFs, training environments, and authorized security assessments only. Many commands are intrusive or dangerous outside a controlled environment.
+> Important: this project is intended for legal labs, owned systems, CTFs, training environments, and authorized security assessments only. Many catalog entries can be intrusive or dangerous outside a controlled environment.
 
 ## Why I Built This
 
@@ -29,7 +29,7 @@ AUTOHACK helps you:
 - track local command history and favorites
 - check which required tools are installed on your machine
 
-It is not an exploitation framework and it does not hide what commands do. The goal is to make command usage clearer, safer, and easier to review before execution.
+It is not an exploitation framework and it does not hide what commands do. The goal is to make command usage clearer, safer, and easier to review before anything is executed.
 
 ## What This Is Not
 
@@ -96,7 +96,7 @@ Dependencies are intentionally small:
 - `pyperclip` for clipboard integration
 - `pytest` for tests
 
-Some catalog commands require external security tools such as `nmap`, `ffuf`, `hydra`, `hashcat`, `sqlmap`, `tor`, `privoxy`, `nuclei`, and others. AUTOHACK can detect missing tools, but it does not install system packages automatically.
+Some catalog commands require external security tools such as `nmap`, `ffuf`, `hydra`, `hashcat`, `sqlmap`, `tor`, `privoxy`, `nuclei`, and others. AUTOHACK can report missing tools, but it does not install system packages automatically.
 
 Deactivate the virtual environment later:
 
@@ -111,7 +111,8 @@ Launch the interactive interface:
 ```bash
 python3 main.py
 ```
-<img width="1580" height="1309" alt="Menu_Principal" src="https://github.com/user-attachments/assets/3480b699-05d5-4f3a-8d50-9e2d8cf0fc45" />
+
+<img width="1580" height="1309" alt="AUTOHACK main menu" src="https://github.com/user-attachments/assets/3480b699-05d5-4f3a-8d50-9e2d8cf0fc45" />
 
 Search the catalog:
 
@@ -119,8 +120,8 @@ Search the catalog:
 python3 main.py --search tor
 python3 main.py --search "graphql introspection"
 ```
-<img width="1580" height="1309" alt="tor" src="https://github.com/user-attachments/assets/4b1f30cf-12dd-4185-a299-da4b9cb33792" />
 
+<img width="1580" height="1309" alt="AUTOHACK search results for Tor commands" src="https://github.com/user-attachments/assets/4b1f30cf-12dd-4185-a299-da4b9cb33792" />
 
 Show one category:
 
@@ -128,8 +129,8 @@ Show one category:
 python3 main.py --category recon
 python3 main.py --category web_attack
 ```
-<img width="1580" height="1309" alt="recon" src="https://github.com/user-attachments/assets/c071e8f4-486e-4d64-84ca-fe21a8f904ec" />
 
+<img width="1580" height="1309" alt="AUTOHACK reconnaissance category view" src="https://github.com/user-attachments/assets/c071e8f4-486e-4d64-84ca-fe21a8f904ec" />
 
 Preview a command without executing it:
 
@@ -209,7 +210,7 @@ Common fields:
 - `risks`: human-readable risk explanation
 - `prerequisites`: what must be true before using the command
 
-AUTOHACK is designed to slow you down before risky actions. It shows warnings, command previews, prerequisites, and risk notes so you can review commands before using them.
+AUTOHACK is designed to slow you down before risky actions. It shows warnings, command previews, prerequisites, and risk notes so each command can be reviewed before use.
 
 Still, you are responsible for where and how commands are executed. Do not run intrusive commands against systems you do not own or do not have permission to test.
 
@@ -225,6 +226,8 @@ Runtime data is stored locally. These files are not meant to be committed:
 
 The repository includes `.gitkeep` files so `logs/` and `exports/` exist, but generated content inside them is ignored by Git.
 
+If your local working tree contains old generated files, remove them locally after confirming you do not need them. They are ignored by Git and are not required to run the project.
+
 ## Project Structure
 
 ```text
@@ -232,11 +235,13 @@ autohack/
 ├── main.py                  # CLI entrypoint and TUI launcher
 ├── commands_catalog.json    # Command and payload catalog
 ├── requirements.txt         # Python dependencies
+├── pyproject.toml           # Packaging metadata and console script
+├── .github/workflows/       # GitHub Actions test workflow
 ├── config/                  # App settings and category labels
 ├── core/                    # Catalog, executor, checker, exports, theme, config
 ├── menus/                   # Rich terminal UI screens
 ├── tests/                   # Pytest suite
-├── docs/                    # Design notes and planning docs
+├── docs/examples/           # Example generated report
 ├── logs/                    # Runtime logs, ignored except .gitkeep
 └── exports/                 # Generated exports, ignored except .gitkeep
 ```
@@ -276,6 +281,8 @@ Common optional fields:
 
 Search uses IDs, names, tags, descriptions, purpose text, and command text. Multi-word searches use AND logic, so every searched word must match somewhere in the command metadata.
 
+An example generated Markdown report is available at `docs/examples/example_report.md`.
+
 ## Shell Completion
 
 Generate completion scripts from the live catalog:
@@ -286,6 +293,14 @@ python3 main.py --generate-completion zsh
 ```
 
 The generated completion includes command IDs, categories, and CLI flags.
+
+## Versioning
+
+The application version is defined in `config/version.py` and reused by the CLI and packaging metadata. Check the installed version with:
+
+```bash
+python3 main.py --version
+```
 
 ## Development
 
@@ -311,6 +326,8 @@ python3 -m pytest
 python3 main.py --stats
 ```
 
+For contribution rules, setup notes, and catalog guidelines, see `CONTRIBUTING.md`.
+
 ## Adding Commands
 
 To add a command:
@@ -329,6 +346,7 @@ For broad catalog additions, add tests in `tests/test_catalog.py` so the coverag
 
 - [x] GitHub Actions CI
 - [x] Modern packaging metadata with `pyproject.toml`
+- [x] Centralized app version
 - [ ] Split `commands_catalog.json` by category and generate the merged catalog
 - [ ] Improve HTML export styling
 - [ ] Add demo/screenshot mode for repeatable screenshots
