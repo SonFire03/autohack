@@ -20,10 +20,12 @@ def run(*args, timeout=10):
 # ── --version ────────────────────────────────────────────────────────────────
 
 def test_version_flag():
+    from config.version import __version__
+
     r = run("--version")
     assert r.returncode == 0
     assert "autohack" in r.stdout
-    assert "2.0.0" in r.stdout
+    assert __version__ in r.stdout
 
 
 # ── --list-ids ────────────────────────────────────────────────────────────────
@@ -162,6 +164,13 @@ def test_export_json_creates_valid_file(tmp_path, monkeypatch):
     assert "Export créé" in r.stdout
 
 
+def test_export_html_creates_file():
+    r = run("--export", "html")
+    assert r.returncode == 0
+    assert "Export créé" in r.stdout
+    assert ".html" in r.stdout
+
+
 # ── Catalogue enrichi ─────────────────────────────────────────────────────────
 
 def test_new_commands_in_catalog():
@@ -285,6 +294,22 @@ def test_missing_tools_lists_tools_or_all_ok():
     r = run("--missing-tools")
     assert r.returncode == 0
     assert ("manquant" in r.stdout.lower() or "installés" in r.stdout.lower())
+
+
+# ── --generate-completion ─────────────────────────────────────────────────────
+
+def test_generate_completion_bash_contains_new_flags():
+    r = run("--generate-completion", "bash")
+    assert r.returncode == 0
+    assert "--tag" in r.stdout
+    assert "--missing-tools" in r.stdout
+
+
+def test_generate_completion_zsh_contains_new_flags():
+    r = run("--generate-completion", "zsh")
+    assert r.returncode == 0
+    assert "--tag" in r.stdout
+    assert "--missing-tools" in r.stdout
 
 
 # ── --category prefix matching ─────────────────────────────────────────────────

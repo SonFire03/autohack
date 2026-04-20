@@ -1,10 +1,20 @@
 # AUTOHACK LAB COMMANDER
 
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![Platform](https://img.shields.io/badge/Platform-Linux-informational)
+![Status](https://img.shields.io/badge/Status-Active-success)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Tests](https://github.com/SonFire03/autohack/actions/workflows/tests.yml/badge.svg)
+
 AUTOHACK LAB COMMANDER is a terminal application for organizing, searching, documenting, and running security lab commands from one place. It is built for students, CTF players, homelab users, and security practitioners who want a structured command catalog instead of scattered notes.
 
 The project provides both an interactive Rich-powered terminal UI and a non-interactive CLI. The catalog currently contains 1,331 commands across 13 categories, including system checks, local network diagnostics, Tor/Privoxy, Scrapy, Elasticsearch, reconnaissance, web testing, password auditing, post-exploitation lab workflows, and XSS payloads.
 
 > Important: this project is intended for legal labs, owned systems, CTFs, training environments, and authorized security assessments only. Many commands are intrusive or dangerous outside a controlled environment.
+
+## Why I Built This
+
+I wanted a structured terminal tool to centralize security lab commands, reduce note sprawl, and make command usage easier to review before execution.
 
 ## What It Does
 
@@ -20,6 +30,15 @@ AUTOHACK helps you:
 - check which required tools are installed on your machine
 
 It is not an exploitation framework and it does not hide what commands do. The goal is to make command usage clearer, safer, and easier to review before execution.
+
+## What This Is Not
+
+AUTOHACK is not:
+
+- an autonomous exploitation framework
+- a botnet tool
+- a stealth malware platform
+- a replacement for understanding what commands do
 
 ## Main Features
 
@@ -59,12 +78,16 @@ Requirements:
 
 - Python 3.10+
 - Linux is recommended
-- `pip`
 
-Install Python dependencies:
+Clone the repository and create a virtual environment:
 
 ```bash
-python3 -m pip install -r requirements.txt
+git clone https://github.com/SonFire03/autohack.git
+cd autohack
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 Dependencies are intentionally small:
@@ -74,6 +97,12 @@ Dependencies are intentionally small:
 - `pytest` for tests
 
 Some catalog commands require external security tools such as `nmap`, `ffuf`, `hydra`, `hashcat`, `sqlmap`, `tor`, `privoxy`, `nuclei`, and others. AUTOHACK can detect missing tools, but it does not install system packages automatically.
+
+Deactivate the virtual environment later:
+
+```bash
+deactivate
+```
 
 ## Quick Start
 
@@ -152,6 +181,20 @@ Available options:
 | `--missing-tools` | List required tools missing locally |
 | `--generate-completion SHELL` | Generate Bash or Zsh completion |
 | `--version` | Print the app version |
+
+## Legal and Safe Usage
+
+This project is intended only for:
+
+- personal labs
+- owned systems
+- CTF environments
+- training platforms
+- explicitly authorized security assessments
+
+Do not use this tool against third-party systems without written authorization.
+
+AUTOHACK does not automate stealth, persistence, or unauthorized exploitation. Its goal is to make security lab commands easier to organize, review, and execute safely.
 
 ## Safety Model
 
@@ -281,6 +324,33 @@ To add a command:
 7. Run the tests.
 
 For broad catalog additions, add tests in `tests/test_catalog.py` so the coverage cannot disappear silently later.
+
+## Roadmap
+
+- [x] GitHub Actions CI
+- [x] Modern packaging metadata with `pyproject.toml`
+- [ ] Split `commands_catalog.json` by category and generate the merged catalog
+- [ ] Improve HTML export styling
+- [ ] Add demo/screenshot mode for repeatable screenshots
+- [ ] Add coverage reporting
+- [ ] Add linting with Ruff
+
+## Future Catalog Refactor
+
+The current catalog is intentionally stored in one JSON file for simple loading and deployment. As it grows, a cleaner structure would be:
+
+```text
+catalog/
+├── system.json
+├── network.json
+├── recon.json
+├── web_attack.json
+├── passwords.json
+├── post_exploit.json
+└── xss.json
+```
+
+A small build script could merge those files into `commands_catalog.json`. That would make Git diffs smaller, reviews easier, and category contributions less error-prone.
 
 ## Legal Notice
 

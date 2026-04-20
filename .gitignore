@@ -1,6 +1,8 @@
 .venv/
+venv/
 __pycache__/
 *.py[cod]
+.pytest_cache/
 
 logs/*
 !logs/.gitkeep
@@ -8,7 +10,16 @@ logs/*
 exports/*
 !exports/.gitkeep
 
+# Generated reports and local data
+*_report.txt
+xssnow-filtered-payloads-*.txt
+
+# Local assistant/editor state
 .remember/
 .claude/
 .codex
-.pytest_cache/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

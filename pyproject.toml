@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autohack-lab-commander"
+dynamic = ["version"]
+description = "Terminal application for organizing, searching, documenting, and running security lab commands."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "SonFire03" }
+]
+dependencies = [
+  "rich",
+  "pyperclip"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest"
+]
+
+[project.scripts]
+autohack = "main:main"
+
+[tool.setuptools]
+py-modules = ["main"]
+
+[tool.setuptools.packages.find]
+include = ["config*", "core*", "menus*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "config.version.__version__" }

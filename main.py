@@ -296,7 +296,7 @@ _autohack_complete() {{
     cur="${{COMP_WORDS[COMP_CWORD]}}"
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
 
-    local opts="--run --dry-run --search --category --export --check --list-ids --list-categories --stats --favorites --generate-completion --version"
+    local opts="--run --dry-run --search --category --export --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --version"
     local ids="{ids}"
     local cats="{cats}"
     local formats="md txt json html"
@@ -341,6 +341,8 @@ _autohack() {{
         '--stats[Statistiques]' \\
         '--favorites[Afficher les favoris]' \\
         '--generate-completion[Complétion shell]:shell:(bash zsh)' \\
+        '--tag[Lister les commandes ayant un tag]:tag:' \\
+        '--missing-tools[Lister les outils requis non installés]' \\
         '--version[Afficher la version]' \\
         ':id:($ids)'
 }}

@@ -1,4 +1,5 @@
 from pathlib import Path
+from config.version import __version__
 
 BASE_DIR = Path(__file__).parent.parent
 CATALOG_PATH = BASE_DIR / "commands_catalog.json"
@@ -11,7 +12,7 @@ EXPORTS_DIR.mkdir(exist_ok=True)
 LOG_FILE = LOGS_DIR / "autohack.log"
 
 APP_NAME = "AUTOHACK LAB COMMANDER"
-APP_VERSION = "2.0.0"
+APP_VERSION = __version__
 APP_DESCRIPTION = "Centralisateur de commandes de lab — Recon · Web · Passwords · Post-Exploit · Tor · Scrapy"
 
 CATEGORY_LABELS = {

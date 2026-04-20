@@ -40,6 +40,17 @@ def test_export_json_creates_valid_json(exporter, tmp_path, monkeypatch):
     assert "command" in data[0]
 
 
+def test_export_html_creates_searchable_document(exporter, tmp_path, monkeypatch):
+    monkeypatch.setattr("core.exporter.EXPORTS_DIR", tmp_path)
+    path = exporter.export_html()
+    assert path.suffix == ".html"
+    assert path.exists()
+    content = path.read_text(encoding="utf-8")
+    assert "<!DOCTYPE html>" in content
+    assert "AUTOHACK LAB COMMANDER" in content
+    assert "sys_001" in content
+
+
 def test_export_markdown_contains_all_categories(exporter, tmp_path, monkeypatch):
     monkeypatch.setattr("core.exporter.EXPORTS_DIR", tmp_path)
     path = exporter.export_markdown()
