@@ -4,6 +4,7 @@
 
 - Split source catalog into `catalog/*.json` with `scripts/build_catalog.py` generating `commands_catalog.json`.
 - Added functional advanced lab commands for NetExec, Certipy, NTLM relay/coercion, Windows/Linux privesc, and web attack tooling.
+- Added dependency installer profiles with dry-run, confirmation, and manual-step reporting.
 
 ## 0.1.0
 

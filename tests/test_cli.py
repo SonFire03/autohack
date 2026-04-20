@@ -294,6 +294,21 @@ def test_missing_tools_lists_tools_or_all_ok():
     assert ("manquant" in r.stdout.lower() or "installés" in r.stdout.lower())
 
 
+# ── --install-profile ─────────────────────────────────────────────────────────
+
+def test_install_profile_basic_dry_run():
+    r = run("--install-profile", "basic", "--install-dry-run")
+    assert r.returncode == 0
+    assert "Installation profile" in r.stdout
+    assert "Dry-run only" in r.stdout
+
+
+def test_install_profile_advanced_dry_run_mentions_managers():
+    r = run("--install-profile", "advanced", "--install-dry-run")
+    assert r.returncode == 0
+    assert "pipx" in r.stdout or "go" in r.stdout or "apt" in r.stdout
+
+
 # ── --generate-completion ─────────────────────────────────────────────────────
 
 def test_generate_completion_bash_contains_new_flags():
@@ -301,6 +316,7 @@ def test_generate_completion_bash_contains_new_flags():
     assert r.returncode == 0
     assert "--tag" in r.stdout
     assert "--missing-tools" in r.stdout
+    assert "--install-profile" in r.stdout
 
 
 def test_generate_completion_zsh_contains_new_flags():
@@ -308,6 +324,7 @@ def test_generate_completion_zsh_contains_new_flags():
     assert r.returncode == 0
     assert "--tag" in r.stdout
     assert "--missing-tools" in r.stdout
+    assert "--install-profile" in r.stdout
 
 
 # ── --category prefix matching ─────────────────────────────────────────────────

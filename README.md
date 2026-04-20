@@ -50,6 +50,7 @@ AUTOHACK is not:
 - Tagged command search with accent-insensitive matching
 - Safety metadata: `safe`, `dry-run`, `lab-only`, `dangerous`, `sudo`
 - Tool availability checks
+- Optional dependency installer profiles with dry-run support
 - Favorites and session history
 - Export support: `md`, `txt`, `json`, `html`
 - Shell completion generation for Bash and Zsh
@@ -168,6 +169,14 @@ python3 -m ruff check .
 python3 -m pytest --cov --cov-report=term-missing
 ```
 
+Review missing tools or preview dependency installation:
+
+```bash
+python3 main.py --missing-tools
+python3 main.py --install-profile basic --install-dry-run
+python3 main.py --install-profile advanced --install-dry-run
+```
+
 ## CLI Reference
 
 ```text
@@ -190,6 +199,9 @@ Available options:
 | `--favorites` | Show saved favorites |
 | `--tag TAG` | List commands matching a tag |
 | `--missing-tools` | List required tools missing locally |
+| `--install-profile PROFILE` | Install missing dependencies for `basic`, `advanced`, or `all` |
+| `--install-dry-run` | Preview install commands without running them |
+| `--yes` | Confirm installation commands automatically |
 | `--generate-completion SHELL` | Generate Bash or Zsh completion |
 | `--version` | Print the app version |
 
@@ -223,6 +235,8 @@ Common fields:
 AUTOHACK is designed to slow you down before risky actions. It shows warnings, command previews, prerequisites, and risk notes so each command can be reviewed before use.
 
 Still, you are responsible for where and how commands are executed. Do not run intrusive commands against systems you do not own or do not have permission to test.
+
+Installer profiles only install known tool dependencies. They do not download sensitive Windows binaries such as credential dumping or privilege escalation executables; those remain manual steps and should only be handled in controlled, authorized lab environments.
 
 ## Data And Local Files
 

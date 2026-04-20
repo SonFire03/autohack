@@ -52,6 +52,12 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Lister les commandes ayant un tag donné")
     group.add_argument("--missing-tools", action="store_true",
                        help="Lister les outils requis non installés")
+    group.add_argument("--install-profile", choices=["basic", "advanced", "all"],
+                       help="Installer les dépendances manquantes d'un profil (basic | advanced | all)")
+    parser.add_argument("--install-dry-run", action="store_true",
+                        help="Afficher les commandes d'installation sans les exécuter")
+    parser.add_argument("-y", "--yes", action="store_true",
+                        help="Confirmer automatiquement les installations")
     return parser
 
 
@@ -266,6 +272,67 @@ def cli_missing_tools() -> None:
     console.print(table)
 
 
+def cli_install_profile(profile: str, dry_run: bool = False, assume_yes: bool = False) -> None:
+    from rich.prompt import Confirm
+
+    from core.installer import ToolInstaller
+
+    catalog, _, _ = _get_core()
+    required_tools = [cmd.get("tool_required", "") for cmd in catalog.get_all()]
+    installer = ToolInstaller(required_tools)
+    plan = installer.plan(profile)
+    commands = plan.commands()
+
+    console.print(f"\n[bold]Installation profile:[/bold] [cyan]{profile}[/cyan]\n")
+
+    table = Table(show_header=True, header_style="bold cyan", box=box.SIMPLE_HEAVY)
+    table.add_column("Manager", style="bold white", width=12)
+    table.add_column("Packages / command", style="magenta")
+    if plan.apt_packages:
+        table.add_row("apt", " ".join(plan.apt_packages))
+    if plan.pipx_packages:
+        table.add_row("pipx", " ".join(plan.pipx_packages))
+    if plan.go_packages:
+        table.add_row("go", "\n".join(plan.go_packages))
+    if not commands:
+        table.add_row("auto", "[green]No automatic installs needed[/green]")
+    console.print(table)
+
+    if plan.manual:
+        manual = Table(show_header=True, header_style="bold yellow", box=box.SIMPLE_HEAVY)
+        manual.add_column("Manual tool", style="bold white", width=22)
+        manual.add_column("Reason / instruction", style="yellow")
+        for tool, hint in plan.manual.items():
+            manual.add_row(tool, hint)
+        console.print("\n[bold yellow]Manual steps still required:[/bold yellow]")
+        console.print(manual)
+
+    if commands:
+        console.print("\n[bold]Commands to run:[/bold]")
+        for command in commands:
+            console.print("  [cyan]" + " ".join(command) + "[/cyan]")
+
+    if dry_run:
+        console.print("\n[bold yellow]Dry-run only. Nothing was installed.[/bold yellow]")
+        return
+    if not commands:
+        console.print("\n[bold green]Nothing to install automatically.[/bold green]")
+        return
+
+    if not assume_yes and not Confirm.ask(
+        "\n[bold yellow]Run these installation commands now?[/bold yellow]",
+        default=False,
+    ):
+        console.print("[dim]Installation cancelled.[/dim]")
+        return
+
+    code = installer.run(plan)
+    if code != 0:
+        console.print(f"[bold red]Installation failed with exit code {code}.[/bold red]")
+        sys.exit(code)
+    console.print("[bold green]Installation commands completed.[/bold green]")
+
+
 def cli_list_categories() -> None:
     from config.settings import CATEGORY_LABELS, CATEGORY_ICONS
     catalog, _, _ = _get_core()
@@ -293,17 +360,19 @@ _autohack_complete() {{
     cur="${{COMP_WORDS[COMP_CWORD]}}"
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
 
-    local opts="--run --dry-run --search --category --export --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --version"
+    local opts="--run --dry-run --search --category --export --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --yes --version"
     local ids="{ids}"
     local cats="{cats}"
     local formats="md txt json html"
     local shells="bash zsh"
+    local profiles="basic advanced all"
 
     case "$prev" in
         --run|--dry-run) COMPREPLY=($(compgen -W "$ids" -- "$cur")) ; return ;;
         --category)      COMPREPLY=($(compgen -W "$cats" -- "$cur")) ; return ;;
         --export)        COMPREPLY=($(compgen -W "$formats" -- "$cur")) ; return ;;
         --generate-completion) COMPREPLY=($(compgen -W "$shells" -- "$cur")) ; return ;;
+        --install-profile) COMPREPLY=($(compgen -W "$profiles" -- "$cur")) ; return ;;
     esac
 
     if [[ "$cur" == -* ]]; then
@@ -340,6 +409,9 @@ _autohack() {{
         '--generate-completion[Complétion shell]:shell:(bash zsh)' \\
         '--tag[Lister les commandes ayant un tag]:tag:' \\
         '--missing-tools[Lister les outils requis non installés]' \\
+        '--install-profile[Installer les dépendances manquantes]:profile:(basic advanced all)' \\
+        '--install-dry-run[Afficher les commandes sans installer]' \\
+        '--yes[Confirmer automatiquement]' \\
         '--version[Afficher la version]' \\
         ':id:($ids)'
 }}
@@ -380,6 +452,8 @@ def main() -> None:
         cli_tag(args.tag)
     elif getattr(args, "missing_tools", False):
         cli_missing_tools()
+    elif getattr(args, "install_profile", None):
+        cli_install_profile(args.install_profile, args.install_dry_run, args.yes)
     else:
         # Mode interactif par défaut
         try:
