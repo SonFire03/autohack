@@ -1220,6 +1220,166 @@
         "web"
       ],
       "execution_policy": "normal"
+    },
+    {
+      "id": "web_048",
+      "name": "Dalfox — scan XSS avancé",
+      "short_name": "dalfox url",
+      "description": "Scanner XSS moderne avec mining de paramètres, payloads et vérifications automatisées",
+      "command": "dalfox url 'http://$TARGET/page?param=test' --skip-bav --worker 20",
+      "purpose": "Tester rapidement une URL paramétrée contre des vecteurs XSS reflected et DOM avec validation automatisée.",
+      "expected_output": "Findings XSS potentiels avec payload, paramètre et preuve de réflexion/exécution",
+      "risks": "Génère de nombreuses requêtes et payloads actifs. Peut déclencher WAF, alertes ou blocage IP.",
+      "prerequisites": [
+        "dalfox installé",
+        "URL autorisée avec paramètres testables"
+      ],
+      "tool_required": "dalfox",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "dalfox",
+        "xss",
+        "web",
+        "scanner",
+        "payload"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_049",
+      "name": "XSStrike — analyse XSS contextuelle",
+      "short_name": "xsstrike",
+      "description": "Analyse les contextes d'injection XSS et génère des payloads adaptés",
+      "command": "python3 xsstrike.py -u 'http://$TARGET/page?param=test' --crawl --skip",
+      "purpose": "Détecter des XSS en tenant compte du contexte HTML/JS et du filtrage applicatif.",
+      "expected_output": "Paramètres vulnérables, payloads proposés et contexte d'injection détecté",
+      "risks": "Crawl et payloads actifs sur l'application. Peut générer du bruit applicatif.",
+      "prerequisites": [
+        "XSStrike disponible",
+        "Application web autorisée"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "xsstrike",
+        "xss",
+        "web",
+        "crawl",
+        "payload"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_050",
+      "name": "Tplmap — SSTI scan et exploitation",
+      "short_name": "tplmap",
+      "description": "Détecte et exploite les injections Server-Side Template Injection",
+      "command": "python3 tplmap.py -u 'http://$TARGET/page?name=test' --os-shell",
+      "purpose": "Identifier un moteur de template vulnérable et tenter une exécution de commande si exploitable.",
+      "expected_output": "Moteur détecté, payload SSTI fonctionnel, shell OS si vulnérable",
+      "risks": "Peut exécuter des commandes côté serveur. Strictement réservé aux environnements autorisés.",
+      "prerequisites": [
+        "tplmap disponible",
+        "Paramètre suspect SSTI identifié"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "tplmap",
+        "ssti",
+        "rce",
+        "web",
+        "template"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_051",
+      "name": "Commix — command injection automatique",
+      "short_name": "commix",
+      "description": "Détecte et exploite les injections de commandes système",
+      "command": "commix -u 'http://$TARGET/ping?host=127.0.0.1' --batch --technique=classic,eval,time",
+      "purpose": "Tester un paramètre suspect contre plusieurs techniques d'injection de commandes.",
+      "expected_output": "Injection détectée, technique utilisée et possibilité de shell interactif",
+      "risks": "Peut exécuter des commandes sur la cible. Très intrusif hors lab/autorisation.",
+      "prerequisites": [
+        "commix installé",
+        "Paramètre suspect command injection"
+      ],
+      "tool_required": "commix",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "commix",
+        "command-injection",
+        "rce",
+        "web"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_052",
+      "name": "Arjun — discovery paramètres GET/POST",
+      "short_name": "arjun",
+      "description": "Découvre des paramètres cachés dans les endpoints web",
+      "command": "arjun -u http://$TARGET/endpoint -m GET,POST --stable -oT arjun_params.txt",
+      "purpose": "Trouver des paramètres non documentés à tester ensuite pour XSS, IDOR, SQLi, SSRF ou logique métier.",
+      "expected_output": "Liste de paramètres découverts et sauvegarde dans arjun_params.txt",
+      "risks": "Fuzzing HTTP bruyant pouvant déclencher rate-limit ou WAF.",
+      "prerequisites": [
+        "arjun installé",
+        "Endpoint web autorisé"
+      ],
+      "tool_required": "arjun",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "arjun",
+        "parameters",
+        "fuzzing",
+        "web"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_053",
+      "name": "GraphQL Cop — audit endpoint GraphQL",
+      "short_name": "graphql-cop",
+      "description": "Teste les mauvaises configurations GraphQL courantes",
+      "command": "python3 graphql-cop.py -t http://$TARGET/graphql",
+      "purpose": "Contrôler introspection, batching, alias abuse, CSRF et mauvaises pratiques GraphQL.",
+      "expected_output": "Résultats par test GraphQL avec vulnérabilités potentielles",
+      "risks": "Peut envoyer des requêtes lourdes ou bruyantes selon les tests activés.",
+      "prerequisites": [
+        "graphql-cop disponible",
+        "Endpoint GraphQL autorisé"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "graphql",
+        "graphql-cop",
+        "api",
+        "web",
+        "audit"
+      ],
+      "execution_policy": "normal"
     }
   ]
 }

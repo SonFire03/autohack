@@ -1072,6 +1072,112 @@
         "root"
       ],
       "execution_policy": "normal"
+    },
+    {
+      "id": "rec_043",
+      "name": "Subfinder — découverte passive de sous-domaines",
+      "short_name": "subfinder",
+      "description": "Enumère les sous-domaines depuis des sources passives",
+      "command": "subfinder -d $DOMAIN -all -silent -o subdomains.txt",
+      "purpose": "Construire une surface d'attaque initiale sans scanner activement la cible.",
+      "expected_output": "Sous-domaines sauvegardés dans subdomains.txt",
+      "risks": "Faible risque, mais dépend de sources externes et peut exposer l'intérêt pour un domaine.",
+      "prerequisites": [
+        "subfinder installé",
+        "Domaine autorisé"
+      ],
+      "tool_required": "subfinder",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "subfinder",
+        "subdomain",
+        "recon",
+        "passive"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_044",
+      "name": "Httpx — probe HTTP massif",
+      "short_name": "httpx",
+      "description": "Probe des hôtes HTTP/HTTPS avec titres, technologies et codes status",
+      "command": "httpx -l subdomains.txt -title -tech-detect -status-code -follow-redirects -o httpx.txt",
+      "purpose": "Transformer une liste de domaines en endpoints HTTP exploitables et priorisés.",
+      "expected_output": "URLs vivantes avec titre, status code et technologies détectées",
+      "risks": "Envoie des requêtes à beaucoup d'hôtes. Peut être visible dans les logs.",
+      "prerequisites": [
+        "httpx installé",
+        "subdomains.txt disponible"
+      ],
+      "tool_required": "httpx",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "httpx",
+        "http",
+        "probe",
+        "recon",
+        "technology"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_045",
+      "name": "Katana — crawler web moderne",
+      "short_name": "katana",
+      "description": "Crawler rapide pour découvrir endpoints, paramètres et assets",
+      "command": "katana -u http://$TARGET -depth 3 -jc -kf all -o katana_urls.txt",
+      "purpose": "Découvrir routes, fichiers JS, paramètres et endpoints API depuis une application web.",
+      "expected_output": "URLs découvertes sauvegardées dans katana_urls.txt",
+      "risks": "Crawl actif pouvant générer de nombreuses requêtes applicatives.",
+      "prerequisites": [
+        "katana installé",
+        "Application autorisée"
+      ],
+      "tool_required": "katana",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "katana",
+        "crawler",
+        "web",
+        "recon",
+        "javascript"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_046",
+      "name": "Amass — enum DNS approfondie",
+      "short_name": "amass enum",
+      "description": "Enumération de surface DNS avec sources passives et actives",
+      "command": "amass enum -d $DOMAIN -o amass_subdomains.txt",
+      "purpose": "Obtenir une cartographie plus complète des sous-domaines et relations DNS.",
+      "expected_output": "Sous-domaines et relations DNS sauvegardés dans amass_subdomains.txt",
+      "risks": "Peut effectuer des requêtes actives selon configuration. À limiter aux domaines autorisés.",
+      "prerequisites": [
+        "amass installé",
+        "Domaine autorisé"
+      ],
+      "tool_required": "amass",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "amass",
+        "dns",
+        "subdomain",
+        "recon"
+      ],
+      "execution_policy": "normal"
     }
   ]
 }
