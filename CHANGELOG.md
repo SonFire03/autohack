@@ -6,6 +6,7 @@
 - Added functional advanced lab commands for NetExec, Certipy, NTLM relay/coercion, Windows/Linux privesc, and web attack tooling.
 - Added dependency installer profiles with dry-run, confirmation, and manual-step reporting.
 - Added cloud/Kubernetes, forensics/DFIR, binary/reverse, and API security command coverage.
+- Added advanced CLI search filters and guided read-only command packs.
 
 ## 0.1.0
 

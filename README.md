@@ -126,6 +126,9 @@ Search the catalog:
 ```bash
 python3 main.py --search tor
 python3 main.py --search "graphql introspection"
+python3 main.py --search aws --category cloud
+python3 main.py --search xss --dangerous --limit 20
+python3 main.py --search certipy --tool certipy
 ```
 
 <img width="1580" height="1309" alt="AUTOHACK search results for Tor commands" src="docs/screenshots/search-tor.png" />
@@ -138,6 +141,14 @@ python3 main.py --category web_attack
 ```
 
 <img width="1580" height="1309" alt="AUTOHACK reconnaissance category view" src="docs/screenshots/category-recon.png" />
+
+Show a guided command pack:
+
+```bash
+python3 main.py --pack web-recon
+python3 main.py --pack ad-lab
+python3 main.py --pack cloud-audit
+```
 
 Preview a command without executing it:
 
@@ -194,7 +205,12 @@ Available options:
 | `--run CMD_ID` | Execute a command by catalog ID |
 | `--dry-run CMD_ID` | Show a command without executing it |
 | `--search KEYWORD` | Search the catalog with multi-word matching |
-| `--category CAT` | List commands in a category |
+| `--pack PACK` | Show a guided read-only command pack |
+| `--category CAT` | List commands in a category, or filter `--search` |
+| `--safe` | Filter `--search` to safe commands |
+| `--dangerous` | Filter `--search` to dangerous commands |
+| `--tool TOOL` | Filter `--search` by required tool |
+| `--limit N` | Limit `--search` results |
 | `--export FORMAT` | Export catalog as `md`, `txt`, `json`, or `html` |
 | `--check` | Run safe tool checks |
 | `--list-ids` | Print all command IDs |
@@ -208,6 +224,16 @@ Available options:
 | `--yes` | Confirm installation commands automatically |
 | `--generate-completion SHELL` | Generate Bash or Zsh completion |
 | `--version` | Print the app version |
+
+Available command packs:
+
+| Pack | Purpose |
+|---|---|
+| `web-recon` | Subdomains, HTTP probing, crawling, templates, and web recon |
+| `ad-lab` | Active Directory lab workflow for discovery, Kerberos, ADCS, relay, and privesc review |
+| `cloud-audit` | Cloud and Kubernetes posture checks |
+| `forensics` | DFIR triage for memory, logs, YARA, and timelines |
+| `binary-ctf` | Reverse engineering and pwn CTF analysis workflow |
 
 ## Legal and Safe Usage
 

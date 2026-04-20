@@ -38,7 +38,7 @@ def build_parser() -> argparse.ArgumentParser:
     group.add_argument("--run",      metavar="CMD_ID",  help="Exécuter une commande par son ID")
     group.add_argument("--dry-run",  metavar="CMD_ID",  help="Afficher une commande sans l'exécuter")
     group.add_argument("--search",   metavar="KEYWORD", help="Rechercher dans le catalogue (multi-mots)")
-    group.add_argument("--category", metavar="CAT",     help="Lister les commandes d'une catégorie")
+    group.add_argument("--pack",     metavar="PACK",    help="Afficher un pack de commandes guidé")
     group.add_argument("--export",   metavar="FORMAT",  choices=["md", "txt", "json", "html"],
                        help="Exporter le catalogue (md | txt | json | html)")
     group.add_argument("--check",    action="store_true", help="Lancer toutes les vérifications safe")
@@ -54,6 +54,16 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Lister les outils requis non installés")
     group.add_argument("--install-profile", choices=["basic", "advanced", "all"],
                        help="Installer les dépendances manquantes d'un profil (basic | advanced | all)")
+    parser.add_argument("--category", metavar="CAT",
+                        help="Lister une catégorie, ou filtrer --search par catégorie")
+    parser.add_argument("--safe", action="store_true",
+                        help="Filtrer --search sur les commandes safe")
+    parser.add_argument("--dangerous", action="store_true",
+                        help="Filtrer --search sur les commandes dangereuses")
+    parser.add_argument("--tool", metavar="TOOL",
+                        help="Filtrer --search sur l'outil requis")
+    parser.add_argument("--limit", metavar="N", type=int,
+                        help="Limiter le nombre de résultats --search")
     parser.add_argument("--install-dry-run", action="store_true",
                         help="Afficher les commandes d'installation sans les exécuter")
     parser.add_argument("-y", "--yes", action="store_true",
@@ -91,20 +101,101 @@ def cli_dry_run(cmd_id: str) -> None:
     executor.dry_run(cmd)
 
 
-def cli_search(keyword: str) -> None:
-    catalog, _, checker = _get_core()
+def cli_search(
+    keyword: str,
+    category: str | None = None,
+    tool: str | None = None,
+    safe: bool = False,
+    dangerous: bool = False,
+    limit: int | None = None,
+) -> None:
+    catalog, _, _ = _get_core()
     results = catalog.search(keyword)
+    filters = []
+    if safe and dangerous:
+        console.print("[bold red]❌ --safe et --dangerous sont incompatibles.[/bold red]")
+        sys.exit(1)
+    if category:
+        resolved_cat = catalog.resolve_category(category)
+        if not resolved_cat:
+            available = ", ".join(sorted(catalog.get_categories()))
+            console.print(
+                f"[bold red]❌ Catégorie inconnue : {category}[/bold red]\n"
+                f"[dim]Disponibles : {available}[/dim]"
+            )
+            sys.exit(1)
+        results = [cmd for cmd in results if cmd["category"] == resolved_cat]
+        filters.append(f"category={resolved_cat}")
+    if tool:
+        wanted_tool = tool.lower().strip()
+        results = [cmd for cmd in results if cmd.get("tool_required", "").lower() == wanted_tool]
+        filters.append(f"tool={wanted_tool}")
+    if safe:
+        results = [cmd for cmd in results if cmd.get("safe_to_run")]
+        filters.append("safe")
+    if dangerous:
+        results = [cmd for cmd in results if cmd.get("dangerous")]
+        filters.append("dangerous")
+    if limit is not None:
+        if limit < 1:
+            console.print("[bold red]❌ --limit doit être supérieur à 0.[/bold red]")
+            sys.exit(1)
+        results = results[:limit]
+        filters.append(f"limit={limit}")
     if not results:
         console.print(f"[yellow]Aucun résultat pour « {keyword} »[/yellow]")
         sys.exit(0)
-    console.print(f"\n[bold green]{len(results)} résultat(s) pour « {keyword} »[/bold green]\n")
+    suffix = f" [dim]({' · '.join(filters)})[/dim]" if filters else ""
+    console.print(f"\n[bold green]{len(results)} résultat(s) pour « {keyword} »[/bold green]{suffix}\n")
     table = Table(show_header=True, header_style="bold cyan", box=box.SIMPLE_HEAVY)
     table.add_column("ID", style="dim", width=10)
     table.add_column("Catégorie", style="cyan", width=14)
     table.add_column("Nom", style="bold white", min_width=22)
+    table.add_column("Outil", style="yellow", width=14)
     table.add_column("Commande", style="magenta")
     for r in results:
-        table.add_row(r["id"], r["category"], r["name"], r["command"][:60])
+        table.add_row(r["id"], r["category"], r["name"], r.get("tool_required", ""), r["command"][:60])
+    console.print(table)
+
+
+def cli_pack(pack_name: str) -> None:
+    from core.packs import get_pack, list_pack_names
+
+    catalog, _, checker = _get_core()
+    pack = get_pack(pack_name)
+    if not pack:
+        console.print(
+            f"[bold red]❌ Pack inconnu : {pack_name}[/bold red]\n"
+            f"[dim]Disponibles : {', '.join(list_pack_names())}[/dim]"
+        )
+        sys.exit(1)
+
+    console.print(f"\n[bold cyan]{pack.title}[/bold cyan] [dim]({pack.name})[/dim]")
+    console.print(f"[dim]{pack.description}[/dim]\n")
+    table = Table(show_header=True, header_style="bold cyan", box=box.SIMPLE_HEAVY)
+    table.add_column("#", style="dim", width=4, justify="right")
+    table.add_column("ID", style="dim", width=10)
+    table.add_column("Catégorie", style="cyan", width=14)
+    table.add_column("Nom", style="bold white", min_width=22)
+    table.add_column("Outil", style="yellow", width=14)
+    table.add_column("Dispo", width=6)
+    table.add_column("Commande", style="magenta", min_width=28)
+    for index, cmd_id in enumerate(pack.command_ids, start=1):
+        cmd = catalog.get_by_id(cmd_id)
+        if not cmd:
+            table.add_row(str(index), cmd_id, "[red]?[/red]", "[red]ID introuvable[/red]", "", "", "")
+            continue
+        tool = cmd.get("tool_required", "")
+        badge = checker.badge(tool) if tool else "  "
+        table.add_row(
+            str(index),
+            cmd["id"],
+            cmd["category"],
+            cmd["name"],
+            tool,
+            badge,
+            cmd["command"][:55],
+        )
     console.print(table)
 
 
@@ -346,9 +437,11 @@ def cli_list_categories() -> None:
 
 def cli_generate_completion(shell: str) -> None:
     from core.catalog import CommandCatalog
+    from core.packs import list_pack_names
     catalog = CommandCatalog()
     ids = " ".join(cmd["id"] for cmd in catalog.get_all())
     cats = " ".join(catalog.get_categories())
+    packs = " ".join(list_pack_names())
 
     if shell == "bash":
         script = f"""# Autohack bash completion — source this file or add to ~/.bashrc
@@ -360,15 +453,17 @@ _autohack_complete() {{
     cur="${{COMP_WORDS[COMP_CWORD]}}"
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
 
-    local opts="--run --dry-run --search --category --export --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --yes --version"
+    local opts="--run --dry-run --search --pack --category --safe --dangerous --tool --limit --export --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --yes --version"
     local ids="{ids}"
     local cats="{cats}"
+    local packs="{packs}"
     local formats="md txt json html"
     local shells="bash zsh"
     local profiles="basic advanced all"
 
     case "$prev" in
         --run|--dry-run) COMPREPLY=($(compgen -W "$ids" -- "$cur")) ; return ;;
+        --pack)          COMPREPLY=($(compgen -W "$packs" -- "$cur")) ; return ;;
         --category)      COMPREPLY=($(compgen -W "$cats" -- "$cur")) ; return ;;
         --export)        COMPREPLY=($(compgen -W "$formats" -- "$cur")) ; return ;;
         --generate-completion) COMPREPLY=($(compgen -W "$shells" -- "$cur")) ; return ;;
@@ -391,15 +486,21 @@ complete -F _autohack_complete "python3 main.py"
 # Usage: eval "$(python3 main.py --generate-completion zsh)"
 
 _autohack() {{
-    local -a ids cats
+    local -a ids cats packs
     ids=({ids})
     cats=({cats})
+    packs=({packs})
 
     _arguments \\
         '--run[Exécuter une commande]:id:($ids)' \\
         '--dry-run[Afficher sans exécuter]:id:($ids)' \\
         '--search[Rechercher]:keyword:' \\
+        '--pack[Afficher un pack guidé]:pack:($packs)' \\
         '--category[Lister une catégorie]:cat:($cats)' \\
+        '--safe[Filtrer la recherche sur les commandes safe]' \\
+        '--dangerous[Filtrer la recherche sur les commandes dangereuses]' \\
+        '--tool[Filtrer la recherche par outil]:tool:' \\
+        '--limit[Limiter les résultats de recherche]:limit:' \\
         '--export[Exporter le catalogue]:format:(md txt json html)' \\
         '--check[Vérifications safe]' \\
         '--list-ids[Lister les IDs]' \\
@@ -431,7 +532,9 @@ def main() -> None:
     elif getattr(args, "dry_run", None):
         cli_dry_run(args.dry_run)
     elif args.search:
-        cli_search(args.search)
+        cli_search(args.search, args.category, args.tool, args.safe, args.dangerous, args.limit)
+    elif getattr(args, "pack", None):
+        cli_pack(args.pack)
     elif args.export:
         cli_export(args.export)
     elif args.check:

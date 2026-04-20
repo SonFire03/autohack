@@ -289,6 +289,33 @@ def test_search_checksec_finds_binary_command():
     assert "bin_002" in r.stdout
 
 
+def test_search_can_filter_by_category():
+    r = run("--search", "aws", "--category", "cloud")
+    assert r.returncode == 0
+    assert "cloud_" in r.stdout
+    assert "category=cloud" in r.stdout
+
+
+def test_search_can_filter_by_tool():
+    r = run("--search", "certipy", "--tool", "certipy")
+    assert r.returncode == 0
+    assert "certipy" in r.stdout.lower()
+    assert "tool=certipy" in r.stdout
+
+
+def test_search_can_filter_dangerous_with_limit():
+    r = run("--search", "xss", "--dangerous", "--limit", "5")
+    assert r.returncode == 0
+    assert "dangerous" in r.stdout
+    assert "limit=5" in r.stdout
+
+
+def test_search_rejects_conflicting_risk_filters():
+    r = run("--search", "tor", "--safe", "--dangerous")
+    assert r.returncode == 1
+    assert "incompatibles" in r.stdout
+
+
 # ── --tag ──────────────────────────────────────────────────────────────────────
 
 def test_tag_known_tag_returns_results():
@@ -331,6 +358,23 @@ def test_install_profile_advanced_dry_run_mentions_managers():
     assert "pipx" in r.stdout or "go" in r.stdout or "apt" in r.stdout
 
 
+# ── --pack ────────────────────────────────────────────────────────────────────
+
+def test_pack_web_recon_lists_curated_commands():
+    r = run("--pack", "web-recon")
+    assert r.returncode == 0
+    assert "Web Recon" in r.stdout
+    assert "rec_043" in r.stdout
+    assert "web_059" in r.stdout
+
+
+def test_pack_unknown_exits_1():
+    r = run("--pack", "unknown-pack")
+    assert r.returncode == 1
+    assert "Pack inconnu" in r.stdout
+    assert "web-recon" in r.stdout
+
+
 # ── --generate-completion ─────────────────────────────────────────────────────
 
 def test_generate_completion_bash_contains_new_flags():
@@ -339,6 +383,9 @@ def test_generate_completion_bash_contains_new_flags():
     assert "--tag" in r.stdout
     assert "--missing-tools" in r.stdout
     assert "--install-profile" in r.stdout
+    assert "--pack" in r.stdout
+    assert "--dangerous" in r.stdout
+    assert "web-recon" in r.stdout
 
 
 def test_generate_completion_zsh_contains_new_flags():
@@ -347,6 +394,9 @@ def test_generate_completion_zsh_contains_new_flags():
     assert "--tag" in r.stdout
     assert "--missing-tools" in r.stdout
     assert "--install-profile" in r.stdout
+    assert "--pack" in r.stdout
+    assert "--safe" in r.stdout
+    assert "binary-ctf" in r.stdout
 
 
 # ── --category prefix matching ─────────────────────────────────────────────────
