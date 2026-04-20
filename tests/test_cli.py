@@ -1,7 +1,6 @@
 """Tests end-to-end du CLI (invocation subprocess de main.py)."""
 import subprocess
 import sys
-import json
 from pathlib import Path
 
 MAIN = [sys.executable, str(Path(__file__).parent.parent / "main.py")]
@@ -33,7 +32,7 @@ def test_version_flag():
 def test_list_ids_produces_tsv():
     r = run("--list-ids")
     assert r.returncode == 0
-    lines = [l for l in r.stdout.splitlines() if l.strip()]
+    lines = [line for line in r.stdout.splitlines() if line.strip()]
     assert len(lines) >= 100  # au moins 100 commandes
     for line in lines[:5]:
         parts = line.split("\t")
@@ -147,7 +146,6 @@ def test_dry_run_unknown_id_exits_1():
 
 def test_export_json_creates_valid_file(tmp_path, monkeypatch):
     """Export JSON via CLI produit un fichier JSON valide."""
-    import importlib
     import config.settings as settings
     orig = settings.EXPORTS_DIR
     settings.EXPORTS_DIR = tmp_path
@@ -198,7 +196,7 @@ def test_new_ops_commands_in_catalog():
 
 def test_catalog_total_at_least_120():
     r = run("--list-ids")
-    lines = [l for l in r.stdout.splitlines() if l.strip()]
+    lines = [line for line in r.stdout.splitlines() if line.strip()]
     assert len(lines) >= 120
 
 

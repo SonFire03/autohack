@@ -169,7 +169,6 @@ def cli_category(cat: str) -> None:
 
 
 def cli_stats() -> None:
-    from collections import Counter
     from config.settings import CATEGORY_LABELS, CATEGORY_ICONS
     catalog, _, checker = _get_core()
     cmds = catalog.get_all()
@@ -180,7 +179,7 @@ def cli_stats() -> None:
     tools = {c.get("tool_required") for c in cmds if c.get("tool_required")}
     tools_ok = sum(1 for t in tools if checker.check(t))
 
-    console.print(f"\n[bold]AUTOHACK — Statistiques du catalogue[/bold]\n")
+    console.print("\n[bold]AUTOHACK — Statistiques du catalogue[/bold]\n")
 
     summary = Table(show_header=False, box=box.SIMPLE, padding=(0, 2))
     summary.add_column("Clé", style="dim")
@@ -248,8 +247,6 @@ def cli_tag(tag: str) -> None:
     table.add_column("Nom", style="bold white", min_width=22)
     table.add_column("Commande", style="magenta")
     for r in results:
-        tool = r.get("tool_required", "")
-        badge = checker.badge(tool) if tool else "  "
         table.add_row(r["id"], r["category"], r["name"], r["command"][:55])
     console.print(table)
 

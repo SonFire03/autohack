@@ -180,7 +180,7 @@ class CommandExecutor:
                 prompt = (
                     f"  [bold yellow]${var}[/bold yellow]  [dim]{hint}[/dim]"
                     + (f"  [[dim]{cached}[/dim]]" if cached else "")
-                    + f"\n  [bold yellow]> [/bold yellow]"
+                    + "\n  [bold yellow]> [/bold yellow]"
                 )
                 raw = console.input(prompt).strip()
                 val = raw if raw else cached

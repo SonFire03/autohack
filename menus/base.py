@@ -6,8 +6,6 @@ from rich.text import Text
 from rich.syntax import Syntax
 from rich.columns import Columns
 from rich.rule import Rule
-from rich.align import Align
-from rich import box
 from core.catalog import CommandCatalog
 from core.executor import CommandExecutor
 from core.checker import ToolChecker
@@ -16,8 +14,8 @@ from core.session_history import SessionHistory
 from core.favorites import Favorites
 from core.palette import parse_palette_command
 from core.theme import (
-    page_header, C_ACCENT, C_DIM, C_OK, C_DANGER, C_WARN,
-    C_PRIMARY, BOX_TABLE, BOX_PANEL, status_bar, help_footer, metric_cards, legend_panel,
+    page_header, C_ACCENT, C_OK, C_DANGER, C_WARN,
+    C_PRIMARY, BOX_TABLE, status_bar, help_footer, metric_cards, legend_panel,
 )
 from config.settings import CATEGORY_ICONS, CATEGORY_LABELS
 
@@ -447,20 +445,20 @@ class BaseMenu:
                 code = self._executor.confirm_and_run(cmd, skip_confirm=skip)
                 if code is not None:
                     self._history.add(cmd, code)
-                console.input(f"\n  [grey50]Entrée pour continuer…[/grey50]")
+                console.input("\n  [grey50]Entrée pour continuer…[/grey50]")
 
             elif choice == "d":
                 self._executor.dry_run(cmd)
                 self._history.add(cmd, 0, dry_run=True)
-                console.input(f"\n  [grey50]Entrée pour continuer…[/grey50]")
+                console.input("\n  [grey50]Entrée pour continuer…[/grey50]")
 
             elif choice == "e":
                 self._show_explanation(cmd)
-                console.input(f"\n  [grey50]Entrée pour continuer…[/grey50]")
+                console.input("\n  [grey50]Entrée pour continuer…[/grey50]")
 
             elif choice == "c":
                 self._executor.copy_to_clipboard(cmd)
-                console.input(f"\n  [grey50]Entrée pour continuer…[/grey50]")
+                console.input("\n  [grey50]Entrée pour continuer…[/grey50]")
 
             elif choice == "s":
                 path, save_code = self._executor.run_and_save(
@@ -468,11 +466,11 @@ class BaseMenu:
                 )
                 if path is not None:
                     self._history.add(cmd, save_code)
-                console.input(f"\n  [grey50]Entrée pour continuer…[/grey50]")
+                console.input("\n  [grey50]Entrée pour continuer…[/grey50]")
 
             elif choice == "p":
                 self._show_prerequisites(cmd)
-                console.input(f"\n  [grey50]Entrée pour continuer…[/grey50]")
+                console.input("\n  [grey50]Entrée pour continuer…[/grey50]")
 
             elif choice == "f":
                 added = self._favorites.toggle(cmd["id"])
@@ -480,12 +478,12 @@ class BaseMenu:
                     console.print(f"  [bright_yellow]⭐ Ajouté aux favoris : {cmd['id']}[/bright_yellow]")
                 else:
                     console.print(f"  [grey50]Retiré des favoris : {cmd['id']}[/grey50]")
-                console.input(f"\n  [grey50]Entrée pour continuer…[/grey50]")
+                console.input("\n  [grey50]Entrée pour continuer…[/grey50]")
 
             elif choice == "b":
                 return None
             else:
-                console.print(f"  [grey50]Touche invalide.[/grey50]")
+                console.print("  [grey50]Touche invalide.[/grey50]")
                 _render_action_bar()
 
     # ── Panneaux détails ──────────────────────────────────────────────────────
@@ -513,7 +511,7 @@ class BaseMenu:
             lines.append("  Aucun prérequis particulier.\n", style="grey50")
         if tool:
             ok     = self._checker.check(tool)
-            status = Text(f"✔ installé" if ok else f"✘ manquant — {self._checker.install_hint(tool)}",
+            status = Text("✔ installé" if ok else f"✘ manquant — {self._checker.install_hint(tool)}",
                           style="bright_green" if ok else "bright_red")
             lines.append(f"\n  Outil requis : {tool}  ")
             lines.append_text(status)

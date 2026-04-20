@@ -49,9 +49,9 @@ class Exporter:
         path = self._path(f"report_{self._ts}.md")
         lines = [
             f"# {APP_NAME} — Catalogue de commandes",
-            f"",
+            "",
             f"> Généré le {datetime.now().strftime('%Y-%m-%d à %H:%M')} | Version {APP_VERSION}",
-            f"",
+            "",
         ]
         current_cat = None
         for cmd in self._cmds:
@@ -65,21 +65,21 @@ class Exporter:
             danger_badge = " ⚠️**DANGEREUX**" if cmd.get("dangerous") else ""
             lines += [
                 f"### `{cmd['id']}` — {cmd['name']}{sudo_badge}{danger_badge}",
-                f"",
+                "",
                 f"**Description :** {cmd.get('description', '')}",
-                f"",
-                f"```bash",
+                "",
+                "```bash",
                 f"{cmd['command']}",
-                f"```",
-                f"",
+                "```",
+                "",
                 f"**But :** {cmd.get('purpose', '')}",
-                f"",
+                "",
                 f"**Sortie attendue :** `{cmd.get('expected_output', '')}`",
-                f"",
+                "",
                 f"**Risques :** {cmd.get('risks', '')}",
-                f"",
+                "",
                 f"**Prérequis :** {', '.join(cmd.get('prerequisites', [])) or 'Aucun'}",
-                f"",
+                "",
                 "---",
                 "",
             ]

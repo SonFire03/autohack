@@ -1,6 +1,5 @@
 import json
 import pytest
-from pathlib import Path
 from core.catalog import CommandCatalog
 from core.exporter import Exporter
 

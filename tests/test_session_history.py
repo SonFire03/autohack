@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 from core.session_history import SessionHistory
 
 CMD = {"id": "sys_001", "name": "Test", "command": "echo hi", "category": "system"}

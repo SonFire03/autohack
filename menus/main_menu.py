@@ -4,9 +4,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 from rich.columns import Columns
-from rich.rule import Rule
 from rich.align import Align
-from rich import box
 from core.catalog import CommandCatalog
 from core.executor import CommandExecutor
 from core.checker import ToolChecker
@@ -15,9 +13,9 @@ from core.session_history import SessionHistory, HISTORY_PATH
 from core.favorites import Favorites, FAVORITES_PATH
 from core.palette import parse_palette_command
 from core.theme import (
-    render_banner, render_separator, pill,
-    C_ACCENT, C_DIM, C_OK, C_DANGER, C_WARN, BOX_TABLE, status_bar, help_footer,
-    metric_cards, legend_panel,
+    render_banner, pill,
+    C_ACCENT, status_bar, help_footer,
+    legend_panel,
 )
 from config.settings import APP_VERSION
 from menus.environment import EnvironmentMenu
@@ -440,5 +438,5 @@ class MainMenu:
                     raise SystemExit(0)
             else:
                 console.print(
-                    f"  [grey50]Choix invalide — entrez 1–20, un ID (ex: rec_001), ou q.[/grey50]"
+                    "  [grey50]Choix invalide — entrez 1–20, un ID (ex: rec_001), ou q.[/grey50]"
                 )

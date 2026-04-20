@@ -3,13 +3,11 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 from rich.console import Console
-from rich.panel import Panel
 from rich.table import Table
 from rich.progress import track
 from rich import box
 
 from menus.base import BaseMenu
-from core.exporter import Exporter
 from config.settings import EXPORTS_DIR as _DEFAULT_EXPORTS_DIR
 
 console = Console()
@@ -109,7 +107,6 @@ class RunAllChecksMenu(BaseMenu):
         if not Confirm.ask("\n[bold yellow]Sauvegarder ce rapport ?[/bold yellow]", default=True):
             return
 
-        from pathlib import Path
         configured = self._config.get("export_dir")
         export_dir = Path(configured) if configured else _DEFAULT_EXPORTS_DIR
         export_dir.mkdir(parents=True, exist_ok=True)
@@ -120,9 +117,9 @@ class RunAllChecksMenu(BaseMenu):
 
         lines = [
             f"# Rapport de vérifications — {ts}",
-            f"",
+            "",
             f"**Total :** {len(results)}  |  **✅ OK :** {ok}  |  **❌ Échec :** {fail}",
-            f"",
+            "",
             "| ID | Nom | Statut | Sortie |",
             "|---|---|---|---|",
         ]

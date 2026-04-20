@@ -5,6 +5,7 @@
 ![Status](https://img.shields.io/badge/Status-Active-success)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Tests](https://github.com/SonFire03/autohack/actions/workflows/tests.yml/badge.svg)
+![Lint](https://img.shields.io/badge/Lint-Ruff-46a2f1)
 
 AUTOHACK LAB COMMANDER is a terminal application for organizing, searching, documenting, and carefully running security lab commands from one place. It is built for students, CTF players, homelab users, and security practitioners who want a structured command catalog instead of scattered notes.
 
@@ -53,6 +54,7 @@ AUTOHACK is not:
 - Export support: `md`, `txt`, `json`, `html`
 - Shell completion generation for Bash and Zsh
 - Test suite covering catalog, CLI, executor, config, exports, and menus
+- CI with Ruff linting and coverage reporting
 
 ## Categories
 
@@ -156,6 +158,14 @@ Run tests:
 
 ```bash
 python3 -m pytest
+```
+
+Run lint and coverage locally:
+
+```bash
+pip install -e ".[dev]"
+python3 -m ruff check .
+python3 -m pytest --cov --cov-report=term-missing
 ```
 
 ## CLI Reference
@@ -322,7 +332,8 @@ python3 -m pytest tests/test_main_menu.py
 Before publishing changes, run:
 
 ```bash
-python3 -m pytest
+python3 -m ruff check .
+python3 -m pytest --cov --cov-report=term-missing
 python3 main.py --stats
 ```
 
@@ -347,11 +358,11 @@ For broad catalog additions, add tests in `tests/test_catalog.py` so the coverag
 - [x] GitHub Actions CI
 - [x] Modern packaging metadata with `pyproject.toml`
 - [x] Centralized app version
+- [x] Ruff linting in CI
+- [x] Coverage reporting in CI
 - [ ] Split `commands_catalog.json` by category and generate the merged catalog
 - [ ] Improve HTML export styling
 - [ ] Add demo/screenshot mode for repeatable screenshots
-- [ ] Add coverage reporting
-- [ ] Add linting with Ruff
 
 ## Future Catalog Refactor
 

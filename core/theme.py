@@ -43,7 +43,7 @@ AUTHOR_URL = "https://github.com/SonFire03"
 
 def render_banner() -> None:
     """Imprime la bannière ASCII avec dégradé bleu."""
-    for line, color in zip(BANNER_LINES, BANNER_COLORS):
+    for line, color in zip(BANNER_LINES, BANNER_COLORS, strict=True):
         console.print(Align.center(Text(line, style=f"bold {color}")))
     console.print(Align.center(Text(AUTHOR_URL, style="dim bright_cyan")))
 
@@ -100,7 +100,6 @@ def kbd(key: str, label: str, color: str = "bright_cyan") -> Text:
 
 def prompt(context: str = "") -> str:
     """Prompt unifié avec contexte optionnel."""
-    from rich.columns import Columns
     p = Text()
     p.append("\n  ", style="")
     if context:
@@ -114,7 +113,6 @@ def prompt(context: str = "") -> str:
 
 def action_bar(actions: list) -> None:
     """Barre d'actions : liste de (touche, label, couleur)."""
-    from rich.columns import Columns
     keys = [kbd(k, lbl, col) for k, lbl, col in actions]
     console.print()
     console.print(Align.left(Text("  ") + sum((t for t in keys), Text())))

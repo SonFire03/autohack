@@ -1,5 +1,4 @@
 from rich.console import Console
-from rich.panel import Panel
 from rich.table import Table
 from rich import box
 from menus.base import BaseMenu
@@ -65,7 +64,7 @@ class ConfigMenuScreen(BaseMenu):
 
         console.print()
         console.print(table)
-        console.print(f"  [dim]* = valeur modifiée (défaut souligné dans DEFAULTS)[/dim]")
+        console.print("  [dim]* = valeur modifiée (défaut souligné dans DEFAULTS)[/dim]")
 
     def _edit(self, key: str) -> None:
         label, accepted = SETTING_LABELS[key]
