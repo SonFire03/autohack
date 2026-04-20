@@ -62,7 +62,7 @@ MENU_CARD_WIDTH = 62
 
 # (key, icon, label, description, section)
 _ITEMS = [
-    # LAB
+    # LAB — 1-9
     ("1",  "🖥 ", "Environnement",    "Python · pip · système",        "lab"),
     ("2",  "🔍", "Dépendances",       "Vérifier les outils installés", "lab"),
     ("3",  "🌐", "Réseau local",      "Interfaces · ports · services", "lab"),
@@ -72,33 +72,33 @@ _ITEMS = [
     ("7",  "📦", "JSON / Export",     "Fichiers · archives",           "lab"),
     ("8",  "🔍", "Elastic / Logs",    "Elasticsearch · index",         "lab"),
     ("9",  "🔧", "Diagnostic",        "Debug · CPU · mémoire",         "lab"),
-    # KALI
-    ("16", "🔭", "Recon & Scan",      "nmap · masscan · OSINT",        "kali"),
-    ("17", "🕸 ", "Attaque Web",      "nikto · gobuster · sqlmap",     "kali"),
-    ("18", "🔑", "Cracking",          "hashcat · john · hydra",        "kali"),
-    ("19", "💀", "Post-Exploitation", "shells · pivot · privesc",      "kali"),
-    ("20", "⚡", "XSS Payloads",      "1013 payloads classifiés",      "kali"),
-    ("21", "☁️ ", "Cloud / K8s",       "trivy · kubectl · prowler",     "kali"),
-    ("22", "🧬", "Forensics / DFIR",  "volatility · yara · logs",      "kali"),
-    ("23", "🧩", "Binary / Reverse",  "gdb · checksec · ghidra",       "kali"),
-    # UTILS
-    ("24", "🌐", "Variables",         "$TARGET · $LHOST · $LPORT",     "utils"),
-    ("25", "🐚", "Rev Shells",        "Bash · Python · PS · Java",     "utils"),
-    ("26", "🔓", "Hash Identifier",   "MD5 · NTLM · bcrypt · SHA",     "utils"),
-    ("27", "💎", "Loot Vault",        "Credentials · flags · clés",    "utils"),
-    ("28", "🔤", "Encoder",           "Base64 · URL · Hex · NTLM",     "utils"),
-    ("29", "📚", "Wordlists",         "Parcourir les listes système",   "utils"),
-    ("30", "🔌", "Port Reference",    "85+ ports · pentest notes",     "utils"),
-    ("31", "🪙", "JWT Decoder",       "Header · payload · alg check",  "utils"),
-    ("32", "📐", "CIDR Calc",         "Subnet · broadcast · hosts",    "utils"),
-    ("33", "📝", "Report Generator",  "Markdown · session + loot",     "utils"),
-    ("34", "🧰", "Toolbox Installer", "Installer les profils outils",  "utils"),
-    # TOOLS
-    ("10", "📚", "Aide",              "Documentation pédagogique",     "tools"),
-    ("11", "💾", "Export catalogue",  "md · txt · json · html",        "tools"),
-    ("12", "🔎", "Recherche",         "Chercher une commande",         "tools"),
-    ("13", "🚦", "Vérifications",     "Lancer les checks safe",        "tools"),
-    ("14", "⚙️ ", "Configuration",    "Paramètres de l'appli",         "tools"),
+    # KALI — 10-17
+    ("10", "🔭", "Recon & Scan",      "nmap · masscan · OSINT",        "kali"),
+    ("11", "🕸 ", "Attaque Web",      "nikto · gobuster · sqlmap",     "kali"),
+    ("12", "🔑", "Cracking",          "hashcat · john · hydra",        "kali"),
+    ("13", "💀", "Post-Exploitation", "shells · pivot · privesc",      "kali"),
+    ("14", "⚡", "XSS Payloads",      "1013 payloads classifiés",      "kali"),
+    ("15", "☁️ ", "Cloud / K8s",       "trivy · kubectl · prowler",     "kali"),
+    ("16", "🧬", "Forensics / DFIR",  "volatility · yara · logs",      "kali"),
+    ("17", "🧩", "Binary / Reverse",  "gdb · checksec · ghidra",       "kali"),
+    # UTILS — 18-28
+    ("18", "🌐", "Variables",         "$TARGET · $LHOST · $LPORT",     "utils"),
+    ("19", "🐚", "Rev Shells",        "Bash · Python · PS · Java",     "utils"),
+    ("20", "🔓", "Hash Identifier",   "MD5 · NTLM · bcrypt · SHA",     "utils"),
+    ("21", "💎", "Loot Vault",        "Credentials · flags · clés",    "utils"),
+    ("22", "🔤", "Encoder",           "Base64 · URL · Hex · NTLM",     "utils"),
+    ("23", "📚", "Wordlists",         "Parcourir les listes système",   "utils"),
+    ("24", "🔌", "Port Reference",    "85+ ports · pentest notes",     "utils"),
+    ("25", "🪙", "JWT Decoder",       "Header · payload · alg check",  "utils"),
+    ("26", "📐", "CIDR Calc",         "Subnet · broadcast · hosts",    "utils"),
+    ("27", "📝", "Report Generator",  "Markdown · session + loot",     "utils"),
+    ("28", "🧰", "Toolbox Installer", "Installer les profils outils",  "utils"),
+    # OUTILS — 29-34
+    ("29", "📖", "Aide",              "Documentation pédagogique",     "tools"),
+    ("30", "💾", "Export catalogue",  "md · txt · json · html",        "tools"),
+    ("31", "🔎", "Recherche",         "Chercher une commande",         "tools"),
+    ("32", "🚦", "Vérifications",     "Lancer les checks safe",        "tools"),
+    ("33", "⚙️ ", "Configuration",    "Paramètres de l'appli",         "tools"),
 ]
 
 
@@ -164,6 +164,7 @@ class MainMenu:
             favorites=self._favorites,
         )
         self._menus = {
+            # LAB 1-9
             "1":  EnvironmentMenu(**kwargs),
             "2":  DependenciesMenu(**kwargs),
             "3":  NetworkMenu(**kwargs),
@@ -173,32 +174,34 @@ class MainMenu:
             "7":  JsonExportMenu(**kwargs),
             "8":  ElasticMenu(**kwargs),
             "9":  DiagnosticMenu(**kwargs),
-            "10": HelpMenu(**kwargs),
-            "11": ExportAllMenu(**kwargs),
-            "12": SearchMenu(**kwargs),
-            "13": RunAllChecksMenu(**kwargs),
-            "14": ConfigMenuScreen(**kwargs),
-            "15": FavoritesMenu(**kwargs),
-            "16": ReconMenu(**kwargs),
-            "17": WebAttackMenu(**kwargs),
-            "18": PasswordsMenu(**kwargs),
-            "19": PostExploitMenu(**kwargs),
-            "20": XssMenu(**kwargs),
-            "21": CloudMenu(**kwargs),
-            "22": ForensicsMenu(**kwargs),
-            "23": BinaryMenu(**kwargs),
-            # Utility menus
-            "24": VariablesMenu(store=self._var_store),
-            "25": RevShellMenu(store=self._var_store),
-            "26": HashIdMenu(),
-            "27": LootMenu(vault=self._loot_vault),
-            "28": EncoderMenu(),
-            "29": WordlistMenu(),
-            "30": PortRefMenu(),
-            "31": JwtMenu(),
-            "32": CidrMenu(),
-            "33": ReportMenu(history=self._history, vault=self._loot_vault),
-            "34": ToolboxMenu(),
+            # KALI 10-17
+            "10": ReconMenu(**kwargs),
+            "11": WebAttackMenu(**kwargs),
+            "12": PasswordsMenu(**kwargs),
+            "13": PostExploitMenu(**kwargs),
+            "14": XssMenu(**kwargs),
+            "15": CloudMenu(**kwargs),
+            "16": ForensicsMenu(**kwargs),
+            "17": BinaryMenu(**kwargs),
+            # UTILS 18-28
+            "18": VariablesMenu(store=self._var_store),
+            "19": RevShellMenu(store=self._var_store),
+            "20": HashIdMenu(),
+            "21": LootMenu(vault=self._loot_vault),
+            "22": EncoderMenu(),
+            "23": WordlistMenu(),
+            "24": PortRefMenu(),
+            "25": JwtMenu(),
+            "26": CidrMenu(),
+            "27": ReportMenu(history=self._history, vault=self._loot_vault),
+            "28": ToolboxMenu(),
+            # OUTILS 29-34
+            "29": HelpMenu(**kwargs),
+            "30": ExportAllMenu(**kwargs),
+            "31": SearchMenu(**kwargs),
+            "32": RunAllChecksMenu(**kwargs),
+            "33": ConfigMenuScreen(**kwargs),
+            "34": FavoritesMenu(**kwargs),
         }
 
     def _open_command(self, cmd_id: str) -> bool:
@@ -346,17 +349,17 @@ class MainMenu:
         var_count  = len(self._var_store)
         loot_count = len(self._loot_vault)
         for idx, item in enumerate(utils_items):
-            if item[0] == "24":
+            if item[0] == "18":
                 utils_items[idx] = (item[0], item[1], item[2],
                                     f"{var_count} variable(s) définies", item[4])
-            elif item[0] == "27":
+            elif item[0] == "21":
                 utils_items[idx] = (item[0], item[1], item[2],
                                     f"{loot_count} entrée(s) capturées", item[4])
 
         # Favoris dans la section tools
         fav_count = len(self._favorites)
         fav_desc  = f"{fav_count} enregistré(s)" if fav_count else "aucun pour l'instant"
-        tools_items.append(("15", "⭐", "Favoris", fav_desc, "tools"))
+        tools_items.append(("34", "⭐", "Favoris", fav_desc, "tools"))
         tools_items.append(("q",  "🚪", "Quitter", "", "tools"))
 
         col_lab   = _menu_section(lab_items,   "🛠  LAB",    self._checker, self._catalog)
@@ -451,11 +454,11 @@ class MainMenu:
             return True
 
         route = {
-            "search": "12",
-            "favorites": "15",
-            "config": "14",
-            "checks": "13",
-            "help": "10",
+            "search": "31",
+            "favorites": "34",
+            "config": "33",
+            "checks": "32",
+            "help": "29",
             "home": None,
         }.get(action, "")
         if route is None:
