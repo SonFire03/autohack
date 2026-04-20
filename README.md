@@ -82,6 +82,7 @@ Launch the interactive interface:
 ```bash
 python3 main.py
 ```
+<img width="1580" height="1309" alt="Menu_Principal" src="https://github.com/user-attachments/assets/3480b699-05d5-4f3a-8d50-9e2d8cf0fc45" />
 
 Search the catalog:
 
