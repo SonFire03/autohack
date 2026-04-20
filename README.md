@@ -114,7 +114,7 @@ Launch the interactive interface:
 python3 main.py
 ```
 
-<img width="1580" height="1309" alt="AUTOHACK main menu" src="https://github.com/user-attachments/assets/3480b699-05d5-4f3a-8d50-9e2d8cf0fc45" />
+<img width="1580" height="1309" alt="AUTOHACK main menu" src="docs/screenshots/main-menu.png" />
 
 Search the catalog:
 
@@ -123,7 +123,7 @@ python3 main.py --search tor
 python3 main.py --search "graphql introspection"
 ```
 
-<img width="1580" height="1309" alt="AUTOHACK search results for Tor commands" src="https://github.com/user-attachments/assets/4b1f30cf-12dd-4185-a299-da4b9cb33792" />
+<img width="1580" height="1309" alt="AUTOHACK search results for Tor commands" src="docs/screenshots/search-tor.png" />
 
 Show one category:
 
@@ -132,7 +132,7 @@ python3 main.py --category recon
 python3 main.py --category web_attack
 ```
 
-<img width="1580" height="1309" alt="AUTOHACK reconnaissance category view" src="https://github.com/user-attachments/assets/c071e8f4-486e-4d64-84ca-fe21a8f904ec" />
+<img width="1580" height="1309" alt="AUTOHACK reconnaissance category view" src="docs/screenshots/category-recon.png" />
 
 Preview a command without executing it:
 
@@ -252,6 +252,7 @@ autohack/
 ├── menus/                   # Rich terminal UI screens
 ├── tests/                   # Pytest suite
 ├── docs/examples/           # Example generated report
+├── docs/screenshots/         # README screenshots
 ├── logs/                    # Runtime logs, ignored except .gitkeep
 └── exports/                 # Generated exports, ignored except .gitkeep
 ```
