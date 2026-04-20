@@ -1,0 +1,10 @@
+- Nikto v2.1.5/2.1.5
++ Target Host: 151.101.65.195
++ Target Port: 80
++ GET /: Retrieved x-served-by header: cache-par-lfpb1150059-PAR
++ GET /: The anti-clickjacking X-Frame-Options header is not present.
++ GET /: Uncommon header 'x-cache' found, with contents: HIT
++ GET /: Uncommon header 'x-served-by' found, with contents: cache-par-lfpb1150059-PAR
++ GET /: Uncommon header 'x-cache-hits' found, with contents: 0
++ GET /: Uncommon header 'alt-svc' found, with contents: h3=":443";ma=86400,h3-29=":443";ma=86400,h3-27=":443";ma=86400
++ GET /: Uncommon header 'x-timer' found, with contents: S1776622891.779137,VS0,VE0
