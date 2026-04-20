@@ -171,6 +171,17 @@ MANUAL_TOOLS = {
 }
 
 
+def apt_package_available(package: str) -> bool:
+    if shutil.which("apt-cache") is None:
+        return True
+    result = subprocess.run(
+        ["apt-cache", "show", package],
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0 and bool(result.stdout.strip())
+
+
 @dataclass(frozen=True)
 class InstallPlan:
     profile: str
@@ -218,7 +229,10 @@ class ToolInstaller:
         if only_missing:
             selected = {tool for tool in selected if not self._is_present(tool)}
 
-        apt_packages = sorted({APT_PACKAGES[tool] for tool in selected if tool in APT_PACKAGES})
+        apt_tools = {tool: APT_PACKAGES[tool] for tool in selected if tool in APT_PACKAGES}
+        apt_packages = sorted(
+            {package for package in apt_tools.values() if apt_package_available(package)}
+        )
         pipx_packages = sorted({PIPX_PACKAGES[tool] for tool in selected if tool in PIPX_PACKAGES})
         go_packages = sorted({GO_PACKAGES[tool] for tool in selected if tool in GO_PACKAGES})
         automated = set(APT_PACKAGES) | set(PIPX_PACKAGES) | set(GO_PACKAGES)
@@ -226,6 +240,11 @@ class ToolInstaller:
             tool: MANUAL_TOOLS.get(tool, "No automatic installer is configured for this tool.")
             for tool in sorted(selected - automated)
         }
+        for tool, package in sorted(apt_tools.items()):
+            if package not in apt_packages:
+                manual[tool] = (
+                    f"APT package '{package}' is not available in the configured repositories."
+                )
         return InstallPlan(profile, apt_packages, pipx_packages, go_packages, manual)
 
     @staticmethod

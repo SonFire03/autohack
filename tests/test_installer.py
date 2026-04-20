@@ -1,3 +1,4 @@
+from core import installer as installer_module
 from core.installer import ToolInstaller
 
 
@@ -29,3 +30,12 @@ def test_pipx_commands_use_python_module():
     plan = installer.plan("all", only_missing=False)
     commands = plan.commands()
     assert ["python3", "-m", "pipx", "install", "netexec"] in commands
+
+
+def test_unavailable_apt_package_becomes_manual(monkeypatch):
+    monkeypatch.setattr(installer_module, "apt_package_available", lambda package: False)
+    installer = ToolInstaller(["nmap"])
+    plan = installer.plan("all", only_missing=False)
+    assert "nmap" not in plan.apt_packages
+    assert "nmap" in plan.manual
+    assert "not available" in plan.manual["nmap"]
