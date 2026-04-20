@@ -41,6 +41,19 @@ from menus.cloud import CloudMenu
 from menus.forensics import ForensicsMenu
 from menus.binary import BinaryMenu
 from menus.xss_menu import XssMenu
+from menus.variables_menu import VariablesMenu
+from menus.revshell_menu import RevShellMenu
+from menus.hash_id_menu import HashIdMenu
+from menus.loot_menu import LootMenu
+from menus.encoder_menu import EncoderMenu
+from menus.wordlist_menu import WordlistMenu
+from menus.port_ref_menu import PortRefMenu
+from menus.jwt_menu import JwtMenu
+from menus.cidr_menu import CidrMenu
+from menus.report_menu import ReportMenu
+from menus.toolbox_menu import ToolboxMenu
+from core.variables import VariableStore
+from core.loot import LootVault
 
 console = Console()
 
@@ -68,6 +81,18 @@ _ITEMS = [
     ("21", "☁️ ", "Cloud / K8s",       "trivy · kubectl · prowler",     "kali"),
     ("22", "🧬", "Forensics / DFIR",  "volatility · yara · logs",      "kali"),
     ("23", "🧩", "Binary / Reverse",  "gdb · checksec · ghidra",       "kali"),
+    # UTILS
+    ("24", "🌐", "Variables",         "$TARGET · $LHOST · $LPORT",     "utils"),
+    ("25", "🐚", "Rev Shells",        "Bash · Python · PS · Java",     "utils"),
+    ("26", "🔓", "Hash Identifier",   "MD5 · NTLM · bcrypt · SHA",     "utils"),
+    ("27", "💎", "Loot Vault",        "Credentials · flags · clés",    "utils"),
+    ("28", "🔤", "Encoder",           "Base64 · URL · Hex · NTLM",     "utils"),
+    ("29", "📚", "Wordlists",         "Parcourir les listes système",   "utils"),
+    ("30", "🔌", "Port Reference",    "85+ ports · pentest notes",     "utils"),
+    ("31", "🪙", "JWT Decoder",       "Header · payload · alg check",  "utils"),
+    ("32", "📐", "CIDR Calc",         "Subnet · broadcast · hosts",    "utils"),
+    ("33", "📝", "Report Generator",  "Markdown · session + loot",     "utils"),
+    ("34", "🧰", "Toolbox Installer", "Installer les profils outils",  "utils"),
     # TOOLS
     ("10", "📚", "Aide",              "Documentation pédagogique",     "tools"),
     ("11", "💾", "Export catalogue",  "md · txt · json · html",        "tools"),
@@ -99,6 +124,7 @@ def _menu_section(items, title: str, checker, catalog) -> Panel:
             "forensics",
             "binary",
         ],
+        "🔧  UTILS": [],
         "⚙  OUTILS": [],
     }
     cats = mapped.get(title, [])
@@ -117,11 +143,13 @@ def _menu_section(items, title: str, checker, catalog) -> Panel:
 
 class MainMenu:
     def __init__(self) -> None:
-        self._catalog  = CommandCatalog()
-        self._executor = CommandExecutor()
-        self._checker  = ToolChecker(self._catalog)
-        self._config   = ConfigManager()
-        self._history  = SessionHistory(
+        self._catalog    = CommandCatalog()
+        self._var_store  = VariableStore()
+        self._loot_vault = LootVault()
+        self._executor   = CommandExecutor(var_store=self._var_store)
+        self._checker    = ToolChecker(self._catalog)
+        self._config     = ConfigManager()
+        self._history    = SessionHistory(
             max_size=self._config.get("history_size"),
             persist_path=HISTORY_PATH,
         )
@@ -159,6 +187,18 @@ class MainMenu:
             "21": CloudMenu(**kwargs),
             "22": ForensicsMenu(**kwargs),
             "23": BinaryMenu(**kwargs),
+            # Utility menus
+            "24": VariablesMenu(store=self._var_store),
+            "25": RevShellMenu(store=self._var_store),
+            "26": HashIdMenu(),
+            "27": LootMenu(vault=self._loot_vault),
+            "28": EncoderMenu(),
+            "29": WordlistMenu(),
+            "30": PortRefMenu(),
+            "31": JwtMenu(),
+            "32": CidrMenu(),
+            "33": ReportMenu(history=self._history, vault=self._loot_vault),
+            "34": ToolboxMenu(),
         }
 
     def _open_command(self, cmd_id: str) -> bool:
@@ -296,10 +336,22 @@ class MainMenu:
             ("Historique", str(len(self._history)), "bold white"),
             ("Mode", "menu principal", "grey70"),
         ], center=True)
-        # ── Grille 3 colonnes : LAB | KALI | TOOLS ────────────────────────────
+        # ── Grille 4 colonnes : LAB | KALI | UTILS | TOOLS ──────────────────────
         lab_items   = [i for i in _ITEMS if i[4] == "lab"]
         kali_items  = [i for i in _ITEMS if i[4] == "kali"]
+        utils_items = [i for i in _ITEMS if i[4] == "utils"]
         tools_items = [i for i in _ITEMS if i[4] == "tools"]
+
+        # Status annotations for utils section
+        var_count  = len(self._var_store)
+        loot_count = len(self._loot_vault)
+        for idx, item in enumerate(utils_items):
+            if item[0] == "24":
+                utils_items[idx] = (item[0], item[1], item[2],
+                                    f"{var_count} variable(s) définies", item[4])
+            elif item[0] == "27":
+                utils_items[idx] = (item[0], item[1], item[2],
+                                    f"{loot_count} entrée(s) capturées", item[4])
 
         # Favoris dans la section tools
         fav_count = len(self._favorites)
@@ -307,12 +359,13 @@ class MainMenu:
         tools_items.append(("15", "⭐", "Favoris", fav_desc, "tools"))
         tools_items.append(("q",  "🚪", "Quitter", "", "tools"))
 
-        col_lab   = _menu_section(lab_items,   "🛠  LAB",   self._checker, self._catalog)
-        col_kali  = _menu_section(kali_items,  "🗡  KALI",  self._checker, self._catalog)
-        col_tools = _menu_section(tools_items, "⚙  OUTILS", self._checker, self._catalog)
+        col_lab   = _menu_section(lab_items,   "🛠  LAB",    self._checker, self._catalog)
+        col_kali  = _menu_section(kali_items,  "🗡  KALI",   self._checker, self._catalog)
+        col_utils = _menu_section(utils_items, "🔧  UTILS",  self._checker, self._catalog)
+        col_tools = _menu_section(tools_items, "⚙  OUTILS",  self._checker, self._catalog)
 
         menu_columns = Columns(
-            [col_lab, col_kali, col_tools],
+            [col_lab, col_kali, col_utils, col_tools],
             padding=(0, 1),
             equal=False,
             expand=False,
@@ -331,7 +384,7 @@ class MainMenu:
         ], title="Profils", width=dashboard_width)
 
         help_footer([
-            ("1-23", "ouvrir une section"),
+            ("1-34", "ouvrir une section"),
             ("q", "quitter"),
         ], title="Accès rapide", width=dashboard_width)
 
@@ -456,5 +509,5 @@ class MainMenu:
                     raise SystemExit(0)
             else:
                 console.print(
-                    "  [grey50]Choix invalide — entrez 1–23, un ID (ex: rec_001), ou q.[/grey50]"
+                    "  [grey50]Choix invalide — entrez 1–34, un ID (ex: rec_001), ou q.[/grey50]"
                 )

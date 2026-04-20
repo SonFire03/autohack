@@ -18,6 +18,16 @@ from core.logger import ActionLogger
 
 console = Console()
 
+# Lazy import to avoid circular deps — resolved at first use
+_VariableStore = None
+
+def _get_variable_store():
+    global _VariableStore
+    if _VariableStore is None:
+        from core.variables import VariableStore
+        _VariableStore = VariableStore
+    return _VariableStore
+
 # Opérateurs shell nécessitant shell=True
 _SHELL_OPERATORS = ("|", "&&", "||", ">>", "> ", "< ", ";", "$(", "`", "$HOME")
 
@@ -64,9 +74,11 @@ def _run_args(command_str: str) -> dict:
 class CommandExecutor:
     """Gère l'exécution, le dry-run, la copie et la capture des commandes shell."""
 
-    def __init__(self) -> None:
+    def __init__(self, var_store=None) -> None:
         # Valeurs saisies durant la session — réutilisées comme défaut
         self._var_cache: Dict[str, str] = {}
+        # Persistent variable store (VariableStore) — checked before prompting
+        self._var_store = var_store
 
     def show_warning(self, cmd: Dict[str, Any]) -> None:
         """Affiche un avertissement pédagogique avant toute exécution."""
@@ -161,9 +173,21 @@ class CommandExecutor:
         if not found:
             return command_str
 
+        # Pre-populate cache from VariableStore (persistent) then session cache
+        store_applied: list[str] = []
+        for var in found:
+            if var not in self._var_cache and self._var_store is not None:
+                stored = self._var_store.get(var)
+                if stored:
+                    self._var_cache[var] = stored
+                    store_applied.append(var)
+
         # Séparer les variables qui ont déjà une valeur en cache
         needs_input = [v for v in found if v not in self._var_cache]
         will_reuse  = [v for v in found if v in self._var_cache]
+
+        if store_applied:
+            console.print(f"[dim]Variables depuis le store : {', '.join(f'${v}={self._var_cache[v]}' for v in store_applied)}[/dim]")
 
         if needs_input:
             console.print()
@@ -174,7 +198,7 @@ class CommandExecutor:
             ))
 
         try:
-            for var in found:
+            for var in needs_input:
                 cached = self._var_cache.get(var, "")
                 hint   = _PLACEHOLDER_HINTS.get(var, "Valeur à saisir")
                 prompt = (
@@ -196,10 +220,10 @@ class CommandExecutor:
         for var in sorted(found, key=len, reverse=True):
             result = result.replace(f"${var}", self._var_cache[var])
 
-        if will_reuse and not needs_input:
-            # Tout venait du cache : juste une ligne discrète
+        if will_reuse and not needs_input and not store_applied:
+            # Tout venait du cache session : juste une ligne discrète
             console.print(f"[dim]Variables réutilisées : {', '.join(f'${v}={self._var_cache[v]}' for v in found)}[/dim]")
-        else:
+        elif not needs_input:
             console.print()
 
         return result
