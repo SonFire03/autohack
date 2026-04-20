@@ -118,7 +118,8 @@ Launch the interactive interface:
 python3 main.py
 ```
 
-<img width="1580" height="1309" alt="AUTOHACK main menu" src="docs/screenshots/main-menu.png" />
+<img width="1580" height="1309" alt="image" src="https://github.com/user-attachments/assets/7ea00c7b-4659-40cc-a624-2ca65e028bed" />
+
 
 Search the catalog:
 
