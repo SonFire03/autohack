@@ -37,6 +37,9 @@ from menus.recon import ReconMenu
 from menus.web_attack import WebAttackMenu
 from menus.passwords import PasswordsMenu
 from menus.post_exploit import PostExploitMenu
+from menus.cloud import CloudMenu
+from menus.forensics import ForensicsMenu
+from menus.binary import BinaryMenu
 from menus.xss_menu import XssMenu
 
 console = Console()
@@ -62,6 +65,9 @@ _ITEMS = [
     ("18", "🔑", "Cracking",          "hashcat · john · hydra",        "kali"),
     ("19", "💀", "Post-Exploitation", "shells · pivot · privesc",      "kali"),
     ("20", "⚡", "XSS Payloads",      "1013 payloads classifiés",      "kali"),
+    ("21", "☁️ ", "Cloud / K8s",       "trivy · kubectl · prowler",     "kali"),
+    ("22", "🧬", "Forensics / DFIR",  "volatility · yara · logs",      "kali"),
+    ("23", "🧩", "Binary / Reverse",  "gdb · checksec · ghidra",       "kali"),
     # TOOLS
     ("10", "📚", "Aide",              "Documentation pédagogique",     "tools"),
     ("11", "💾", "Export catalogue",  "md · txt · json · html",        "tools"),
@@ -83,7 +89,16 @@ def _menu_section(items, title: str, checker, catalog) -> Panel:
 
     mapped = {
         "🛠  LAB": ["system", "network", "tor", "privoxy", "scrapy", "json_export", "elastic", "diagnostic"],
-        "🗡  KALI": ["recon", "web_attack", "passwords", "post_exploit", "xss"],
+        "🗡  KALI": [
+            "recon",
+            "web_attack",
+            "passwords",
+            "post_exploit",
+            "xss",
+            "cloud",
+            "forensics",
+            "binary",
+        ],
         "⚙  OUTILS": [],
     }
     cats = mapped.get(title, [])
@@ -141,6 +156,9 @@ class MainMenu:
             "18": PasswordsMenu(**kwargs),
             "19": PostExploitMenu(**kwargs),
             "20": XssMenu(**kwargs),
+            "21": CloudMenu(**kwargs),
+            "22": ForensicsMenu(**kwargs),
+            "23": BinaryMenu(**kwargs),
         }
 
     def _open_command(self, cmd_id: str) -> bool:
@@ -313,7 +331,7 @@ class MainMenu:
         ], title="Profils", width=dashboard_width)
 
         help_footer([
-            ("1-20", "ouvrir une section"),
+            ("1-23", "ouvrir une section"),
             ("q", "quitter"),
         ], title="Accès rapide", width=dashboard_width)
 
@@ -438,5 +456,5 @@ class MainMenu:
                     raise SystemExit(0)
             else:
                 console.print(
-                    "  [grey50]Choix invalide — entrez 1–20, un ID (ex: rec_001), ou q.[/grey50]"
+                    "  [grey50]Choix invalide — entrez 1–23, un ID (ex: rec_001), ou q.[/grey50]"
                 )

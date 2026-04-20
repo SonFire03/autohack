@@ -1,4 +1,4 @@
-from menus.main_menu import MainMenu
+from menus.main_menu import MainMenu, _ITEMS
 
 
 class DummyChecker:
@@ -57,3 +57,12 @@ def test_quick_view_docker_collects_tool_and_tag_matches():
     menu = make_menu(commands)
     docker_ids = [cmd["id"] for cmd in menu._quick_view_commands("docker")]
     assert docker_ids == ["sys_029", "diag_018"]
+
+
+def test_main_menu_exposes_new_catalog_sections():
+    keys = {item[0] for item in _ITEMS}
+    assert {"21", "22", "23"} <= keys
+    labels = {item[2] for item in _ITEMS}
+    assert "Cloud / K8s" in labels
+    assert "Forensics / DFIR" in labels
+    assert "Binary / Reverse" in labels
