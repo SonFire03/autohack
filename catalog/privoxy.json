@@ -1,0 +1,251 @@
+{
+  "label": "Privoxy",
+  "icon": "🔀",
+  "commands": [
+    {
+      "id": "prx_001",
+      "name": "Version Privoxy",
+      "short_name": "privoxy --version",
+      "description": "Affiche la version de Privoxy installée",
+      "command": "privoxy --version",
+      "purpose": "Vérifier que Privoxy est installé. Privoxy est un proxy HTTP qui peut être chaîné avec Tor (HTTP→SOCKS5).",
+      "expected_output": "Privoxy version 3.0.x",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Privoxy doit être installé : sudo apt install privoxy"
+      ],
+      "tool_required": "privoxy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "privoxy",
+      "tags": [
+        "privoxy",
+        "version",
+        "check"
+      ]
+    },
+    {
+      "id": "prx_002",
+      "name": "Statut Privoxy",
+      "short_name": "systemctl status privoxy",
+      "description": "Affiche l'état du service Privoxy",
+      "command": "systemctl status privoxy",
+      "purpose": "Vérifier si Privoxy est actif et écoute sur le port 8118. Affiche les derniers logs.",
+      "expected_output": "● privoxy.service - Privacy enhancing HTTP Proxy... Active: active (running)",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Privoxy installé",
+        "systemd disponible"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "privoxy",
+      "tags": [
+        "privoxy",
+        "status",
+        "service",
+        "systemd"
+      ]
+    },
+    {
+      "id": "prx_003",
+      "name": "Démarrer Privoxy",
+      "short_name": "systemctl start privoxy",
+      "description": "Démarre le service Privoxy",
+      "command": "sudo systemctl start privoxy",
+      "purpose": "Lancer Privoxy. Une fois démarré, un proxy HTTP est disponible sur 127.0.0.1:8118.",
+      "expected_output": "Aucune sortie (succès silencieux)",
+      "risks": "Faible — démarre un proxy local",
+      "prerequisites": [
+        "Privoxy installé",
+        "Droits sudo"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "privoxy",
+      "tags": [
+        "privoxy",
+        "start",
+        "service"
+      ]
+    },
+    {
+      "id": "prx_004",
+      "name": "Arrêter Privoxy",
+      "short_name": "systemctl stop privoxy",
+      "description": "Arrête le service Privoxy",
+      "command": "sudo systemctl stop privoxy",
+      "purpose": "Stopper Privoxy et fermer le proxy HTTP sur port 8118.",
+      "expected_output": "Aucune sortie (succès silencieux)",
+      "risks": "Faible — coupe les connexions proxy en cours",
+      "prerequisites": [
+        "Privoxy installé",
+        "Droits sudo"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "privoxy",
+      "tags": [
+        "privoxy",
+        "stop",
+        "service"
+      ]
+    },
+    {
+      "id": "prx_005",
+      "name": "Redémarrer Privoxy",
+      "short_name": "systemctl restart privoxy",
+      "description": "Redémarre le service Privoxy",
+      "command": "sudo systemctl restart privoxy",
+      "purpose": "Redémarrer Privoxy après modification de sa configuration.",
+      "expected_output": "Aucune sortie — vérifier avec systemctl status privoxy",
+      "risks": "Faible — coupe brièvement le proxy",
+      "prerequisites": [
+        "Privoxy installé",
+        "Droits sudo"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "privoxy",
+      "tags": [
+        "privoxy",
+        "restart",
+        "service"
+      ]
+    },
+    {
+      "id": "prx_006",
+      "name": "Logs Privoxy",
+      "short_name": "journalctl -u privoxy",
+      "description": "Affiche les journaux du service Privoxy",
+      "command": "journalctl -u privoxy -n 50 --no-pager",
+      "purpose": "Consulter les logs de Privoxy pour diagnostiquer des problèmes de proxy ou de filtrage.",
+      "expected_output": "privoxy[PID]: Accepting connections on 127.0.0.1:8118",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "systemd-journald actif"
+      ],
+      "tool_required": "journalctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "privoxy",
+      "tags": [
+        "privoxy",
+        "logs",
+        "debug"
+      ]
+    },
+    {
+      "id": "prx_007",
+      "name": "Test port Privoxy",
+      "short_name": "nc -zv localhost 8118",
+      "description": "Vérifie que Privoxy écoute sur le port 8118",
+      "command": "nc -zv localhost 8118",
+      "purpose": "Confirmer que Privoxy est actif et accessible sur le port HTTP proxy 8118.",
+      "expected_output": "Connection to localhost 8118 port [tcp/*] succeeded!",
+      "risks": "Aucun risque — test local",
+      "prerequisites": [
+        "netcat installé",
+        "Privoxy démarré"
+      ],
+      "tool_required": "nc",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "privoxy",
+      "tags": [
+        "privoxy",
+        "port",
+        "test",
+        "8118"
+      ]
+    },
+    {
+      "id": "prx_008",
+      "name": "Config Privoxy",
+      "short_name": "cat /etc/privoxy/config",
+      "description": "Affiche la configuration de Privoxy",
+      "command": "grep -v '^#' /etc/privoxy/config | grep -v '^$'",
+      "purpose": "Voir la configuration active de Privoxy (sans les commentaires). Vérifier notamment forward-socks5 vers Tor.",
+      "expected_output": "listen-address 127.0.0.1:8118, forward-socks5 / 127.0.0.1:9050 .",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Privoxy installé",
+        "Droits lecture sur /etc/privoxy/config"
+      ],
+      "tool_required": "grep",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "privoxy",
+      "tags": [
+        "privoxy",
+        "config",
+        "forward",
+        "settings"
+      ]
+    },
+    {
+      "id": "prx_009",
+      "name": "Installer Privoxy",
+      "short_name": "apt install privoxy",
+      "description": "Installe Privoxy depuis les dépôts apt",
+      "command": "sudo apt-get update && sudo apt-get install -y privoxy",
+      "purpose": "Installer Privoxy sur Ubuntu/Debian pour créer un proxy HTTP pouvant être chaîné avec Tor.",
+      "expected_output": "Setting up privoxy (3.0.x) ...",
+      "risks": "Modéré — installe des paquets système",
+      "prerequisites": [
+        "Droits sudo",
+        "Connexion internet"
+      ],
+      "tool_required": "apt-get",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "privoxy",
+      "tags": [
+        "privoxy",
+        "install",
+        "apt",
+        "setup"
+      ]
+    },
+    {
+      "id": "prx_010",
+      "name": "Test proxy complet (Tor+Privoxy)",
+      "short_name": "curl via Privoxy→Tor",
+      "description": "Teste la chaîne proxy Privoxy→Tor sur localhost",
+      "command": "curl -x http://127.0.0.1:8118 -s -o /dev/null -w 'HTTP: %{http_code}\\n' http://127.0.0.1",
+      "purpose": "Vérifier que la chaîne Privoxy (HTTP proxy) → Tor (SOCKS5) fonctionne. Si configuré correctement, Privoxy forward vers Tor.",
+      "expected_output": "HTTP: 200 ou message Privoxy si cible inaccessible",
+      "risks": "Aucun risque — requête locale uniquement",
+      "prerequisites": [
+        "Privoxy actif sur 8118",
+        "Tor actif sur 9050",
+        "config forward-socks5 dans Privoxy"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "privoxy",
+      "tags": [
+        "privoxy",
+        "tor",
+        "chain",
+        "test",
+        "proxy"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,330 @@
+{
+  "label": "Elastic / Logs",
+  "icon": "🔍",
+  "commands": [
+    {
+      "id": "elk_001",
+      "name": "Vérifier installation Elastic",
+      "short_name": "which elasticsearch",
+      "description": "Vérifie si Elasticsearch est installé",
+      "command": "which elasticsearch || dpkg -l elasticsearch 2>/dev/null | tail -1",
+      "purpose": "Savoir si Elasticsearch est installé sur la machine avant de tenter de l'utiliser.",
+      "expected_output": "/usr/bin/elasticsearch ou ligne dpkg avec version",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "which",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "elastic",
+      "tags": [
+        "elasticsearch",
+        "check",
+        "install",
+        "which"
+      ]
+    },
+    {
+      "id": "elk_002",
+      "name": "Statut Elasticsearch",
+      "short_name": "systemctl status elasticsearch",
+      "description": "Affiche l'état du service Elasticsearch",
+      "command": "systemctl status elasticsearch 2>/dev/null || echo 'Service elasticsearch non trouvé'",
+      "purpose": "Vérifier si Elasticsearch est actif. Elasticsearch prend du temps à démarrer (30-60s normalement).",
+      "expected_output": "● elasticsearch.service ... Active: active (running)",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Elasticsearch installé",
+        "systemd disponible"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "elastic",
+      "tags": [
+        "elasticsearch",
+        "status",
+        "service",
+        "systemd"
+      ]
+    },
+    {
+      "id": "elk_003",
+      "name": "Test API Elasticsearch",
+      "short_name": "curl localhost:9200",
+      "description": "Vérifie que l'API REST Elasticsearch répond",
+      "command": "curl -s http://localhost:9200 | python3 -m json.tool 2>/dev/null || echo 'Elasticsearch non accessible sur port 9200'",
+      "purpose": "Confirmer qu'Elasticsearch est démarré et l'API REST répond. Affiche la version et l'état du cluster.",
+      "expected_output": "{\"name\": \"...\", \"version\": {\"number\": \"8.x.x\"}, \"tagline\": \"You Know, for Search\"}",
+      "risks": "Aucun risque — requête locale en lecture",
+      "prerequisites": [
+        "Elasticsearch démarré",
+        "curl installé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "elastic",
+      "tags": [
+        "elasticsearch",
+        "api",
+        "curl",
+        "test",
+        "9200"
+      ]
+    },
+    {
+      "id": "elk_004",
+      "name": "Santé du cluster",
+      "short_name": "curl /_cluster/health",
+      "description": "Affiche la santé du cluster Elasticsearch",
+      "command": "curl -s http://localhost:9200/_cluster/health | python3 -m json.tool 2>/dev/null || echo 'Elasticsearch non accessible'",
+      "purpose": "Vérifier l'état de santé : green (ok), yellow (réplicas manquants), red (données indisponibles).",
+      "expected_output": "{\"status\": \"green\", \"number_of_nodes\": 1, ...}",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Elasticsearch démarré"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "elastic",
+      "tags": [
+        "elasticsearch",
+        "cluster",
+        "health",
+        "status"
+      ]
+    },
+    {
+      "id": "elk_005",
+      "name": "Lister les index",
+      "short_name": "curl /_cat/indices",
+      "description": "Liste tous les index Elasticsearch",
+      "command": "curl -s http://localhost:9200/_cat/indices?v 2>/dev/null || echo 'Elasticsearch non accessible'",
+      "purpose": "Voir tous les index existants avec leur statut, nombre de documents et taille. Vue d'ensemble rapide de la base.",
+      "expected_output": "health status index uuid pri rep docs.count store.size",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Elasticsearch démarré"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "elastic",
+      "tags": [
+        "elasticsearch",
+        "index",
+        "list",
+        "cat"
+      ]
+    },
+    {
+      "id": "elk_006",
+      "name": "Créer index de démo",
+      "short_name": "curl PUT /lab-demo",
+      "description": "Crée un index de démonstration local",
+      "command": "curl -s -X PUT 'http://localhost:9200/lab-demo' -H 'Content-Type: application/json' | python3 -m json.tool 2>/dev/null",
+      "purpose": "Créer un index local nommé 'lab-demo' pour les tests. Un index Elasticsearch est comparable à une table SQL.",
+      "expected_output": "{\"acknowledged\": true, \"shards_acknowledged\": true, \"index\": \"lab-demo\"}",
+      "risks": "Faible — crée un index local dans Elasticsearch",
+      "prerequisites": [
+        "Elasticsearch démarré"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "elastic",
+      "tags": [
+        "elasticsearch",
+        "index",
+        "create",
+        "demo"
+      ]
+    },
+    {
+      "id": "elk_007",
+      "name": "Indexer document JSON",
+      "short_name": "curl POST document",
+      "description": "Envoie un document JSON de démo dans Elasticsearch",
+      "command": "curl -s -X POST 'http://localhost:9200/lab-demo/_doc' -H 'Content-Type: application/json' -d '{\"titre\":\"Test lab\",\"date\":\"2026-04-19\",\"valeur\":42}' | python3 -m json.tool",
+      "purpose": "Insérer un document dans un index Elasticsearch. Chaque document a un _id unique auto-généré.",
+      "expected_output": "{\"_index\": \"lab-demo\", \"_id\": \"...\", \"result\": \"created\"}",
+      "risks": "Faible — écrit un document de test dans Elasticsearch local",
+      "prerequisites": [
+        "Elasticsearch démarré",
+        "Index lab-demo créé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "elastic",
+      "tags": [
+        "elasticsearch",
+        "index",
+        "document",
+        "insert",
+        "post"
+      ]
+    },
+    {
+      "id": "elk_008",
+      "name": "Recherche dans index",
+      "short_name": "curl GET /_search",
+      "description": "Effectue une recherche dans l'index de démo",
+      "command": "curl -s 'http://localhost:9200/lab-demo/_search?pretty' | python3 -m json.tool 2>/dev/null",
+      "purpose": "Rechercher des documents dans un index. Sans query, retourne tous les documents (max 10 par défaut).",
+      "expected_output": "{\"hits\": {\"total\": {\"value\": N}, \"hits\": [...]}}",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Elasticsearch démarré",
+        "Index avec documents"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "elastic",
+      "tags": [
+        "elasticsearch",
+        "search",
+        "query",
+        "read"
+      ]
+    },
+    {
+      "id": "elk_009",
+      "name": "Logs Elasticsearch",
+      "short_name": "journalctl -u elasticsearch",
+      "description": "Affiche les logs du service Elasticsearch",
+      "command": "journalctl -u elasticsearch -n 50 --no-pager 2>/dev/null || echo 'Service elasticsearch non trouvé dans journald'",
+      "purpose": "Consulter les logs d'Elasticsearch pour diagnostiquer les problèmes de démarrage ou de performance.",
+      "expected_output": "Lignes de logs incluant 'started' si démarré correctement",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Elasticsearch installé",
+        "systemd-journald actif"
+      ],
+      "tool_required": "journalctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "elastic",
+      "tags": [
+        "elasticsearch",
+        "logs",
+        "journal",
+        "debug"
+      ]
+    },
+    {
+      "id": "elk_010",
+      "name": "Installer Elasticsearch",
+      "short_name": "apt install elasticsearch",
+      "description": "Installe Elasticsearch via apt (nécessite repo)",
+      "command": "echo 'Ajout du repo Elastic requis. Voir: https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html'",
+      "purpose": "Elasticsearch nécessite l'ajout du dépôt Elastic avant installation. Cette commande affiche les instructions.",
+      "expected_output": "Instructions d'installation",
+      "risks": "Modéré — installation de service système lourd (RAM)",
+      "prerequisites": [
+        "Droits sudo",
+        "Connexion internet",
+        "Minimum 2GB RAM disponible"
+      ],
+      "tool_required": "echo",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "elastic",
+      "tags": [
+        "elasticsearch",
+        "install",
+        "setup",
+        "apt"
+      ]
+    },
+    {
+      "id": "elk_011",
+      "name": "Mapping d'un index ES",
+      "short_name": "es mapping",
+      "description": "Affiche le mapping (schéma) d'un index Elasticsearch",
+      "command": "curl -s http://localhost:9200/scrapy_results/_mapping | python3 -m json.tool",
+      "purpose": "Voir le type de chaque champ d'un index (keyword, text, date, long…). Indispensable avant d'écrire des requêtes — un champ 'text' ne supporte pas le tri, un 'keyword' ne supporte pas la recherche full-text.",
+      "expected_output": "JSON du mapping avec les types de champs",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Elasticsearch démarré",
+        "Index scrapy_results existant"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "elasticsearch",
+        "mapping",
+        "schema",
+        "index",
+        "fields",
+        "types"
+      ]
+    },
+    {
+      "id": "elk_012",
+      "name": "Recherche full-text ES",
+      "short_name": "es match query",
+      "description": "Effectue une recherche full-text sur un champ texte d'un index",
+      "command": "curl -s -X GET 'http://localhost:9200/scrapy_results/_search' -H 'Content-Type: application/json' -d '{\"query\":{\"match\":{\"content\":\"tor\"}},\"size\":5}' | python3 -m json.tool",
+      "purpose": "Chercher les documents contenant un mot dans un champ texte. La query 'match' analyse le texte avec l'analyzer configuré (tokenisation, stemming). Différent de 'term' qui cherche un keyword exact.",
+      "expected_output": "JSON avec hits.total.value et les 5 premiers documents",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Elasticsearch démarré",
+        "Index scrapy_results avec données"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "elasticsearch",
+        "search",
+        "fulltext",
+        "match",
+        "query"
+      ]
+    },
+    {
+      "id": "elk_013",
+      "name": "Agrégation ES par catégorie (terms)",
+      "short_name": "es aggregation terms",
+      "description": "Compte les documents groupés par valeur d'un champ keyword",
+      "command": "curl -s -X GET 'http://localhost:9200/scrapy_results/_search' -H 'Content-Type: application/json' -d '{\"size\":0,\"aggs\":{\"par_categorie\":{\"terms\":{\"field\":\"category.keyword\",\"size\":10}}}}' | python3 -m json.tool",
+      "purpose": "Obtenir la distribution des valeurs d'un champ (équivalent SQL GROUP BY + COUNT). Le 'size':0 évite de retourner des documents, on veut seulement l'agrégation. Utile pour analyser la répartition des données scrapées.",
+      "expected_output": "JSON avec buckets: [{key: 'tech', doc_count: 42}, ...]",
+      "risks": "Aucun risque — lecture seule. Peut être lent sur un gros index sans index de tri.",
+      "prerequisites": [
+        "Elasticsearch démarré",
+        "Index avec champ category.keyword"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "elasticsearch",
+        "aggregation",
+        "terms",
+        "groupby",
+        "analytics",
+        "count"
+      ]
+    }
+  ]
+}

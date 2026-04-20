@@ -1,0 +1,441 @@
+{
+  "label": "Diagnostic / Debug",
+  "icon": "🔧",
+  "commands": [
+    {
+      "id": "diag_001",
+      "name": "Vérifier outil disponible",
+      "short_name": "which <outil>",
+      "description": "Vérifie si un outil/commande est disponible dans le PATH",
+      "command": "which tor privoxy scrapy curl jq nc 2>/dev/null; echo '---'; for t in tor privoxy scrapy curl jq nc; do command -v $t >/dev/null && echo \"✅ $t\" || echo \"❌ $t\"; done",
+      "purpose": "Vérifier d'un coup quels outils essentiels du lab sont installés. Identifie ce qui manque avant de commencer.",
+      "expected_output": "✅ ou ❌ pour chaque outil",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "which",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "diagnostic",
+      "tags": [
+        "diagnostic",
+        "check",
+        "tools",
+        "which",
+        "availability"
+      ]
+    },
+    {
+      "id": "diag_002",
+      "name": "Vérifier permissions fichier",
+      "short_name": "stat fichier",
+      "description": "Affiche les permissions détaillées d'un fichier",
+      "command": "stat /etc/tor/torrc 2>/dev/null || echo 'Fichier non trouvé'",
+      "purpose": "Voir les permissions exactes (octal et symbolique), propriétaire, groupe et dates d'un fichier. Utile pour diagnostiquer les problèmes d'accès.",
+      "expected_output": "File: /etc/tor/torrc, Size: ..., Access: (0640/-rw-r-----), Uid: (0/root), Gid: ...",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "stat",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "diagnostic",
+      "tags": [
+        "diagnostic",
+        "permissions",
+        "stat",
+        "file"
+      ]
+    },
+    {
+      "id": "diag_003",
+      "name": "Ports locaux ouverts",
+      "short_name": "ss -tlnp",
+      "description": "Liste tous les ports TCP en écoute",
+      "command": "ss -tlnp",
+      "purpose": "Vue rapide de tous les services qui écoutent. Utile pour vérifier qu'aucun port inattendu n'est exposé.",
+      "expected_output": "LISTEN 0 128 127.0.0.1:9050 *:* ... tor",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "iproute2 installé"
+      ],
+      "tool_required": "ss",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "diagnostic",
+      "tags": [
+        "ports",
+        "listen",
+        "diagnostic",
+        "network"
+      ]
+    },
+    {
+      "id": "diag_004",
+      "name": "Services systemd actifs",
+      "short_name": "systemctl list-units --state=running",
+      "description": "Liste tous les services systemd en cours d'exécution",
+      "command": "systemctl list-units --type=service --state=running --no-pager",
+      "purpose": "Voir tous les services actifs. Permet de confirmer que tor, privoxy, elasticsearch sont dans la liste.",
+      "expected_output": "tor.service, privoxy.service, etc. avec état 'running'",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "systemd disponible"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "diagnostic",
+      "tags": [
+        "systemd",
+        "services",
+        "running",
+        "list"
+      ]
+    },
+    {
+      "id": "diag_005",
+      "name": "Dernières erreurs système",
+      "short_name": "journalctl -p err",
+      "description": "Affiche les erreurs récentes dans les journaux système",
+      "command": "journalctl -p err -n 20 --no-pager",
+      "purpose": "Voir les erreurs et alertes récentes dans les logs système. Priorité err = erreurs seulement (sans info/debug).",
+      "expected_output": "Lignes avec niveau ERROR des dernières heures",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "systemd-journald actif"
+      ],
+      "tool_required": "journalctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "diagnostic",
+      "tags": [
+        "diagnostic",
+        "errors",
+        "journal",
+        "debug",
+        "logs"
+      ]
+    },
+    {
+      "id": "diag_006",
+      "name": "Utilisation CPU",
+      "short_name": "top -bn1",
+      "description": "Snapshot de l'utilisation CPU et mémoire",
+      "command": "top -bn1 | head -20",
+      "purpose": "Voir rapidement la charge CPU et les processus les plus gourmands. Utile pour diagnostiquer des ralentissements.",
+      "expected_output": "Header avec CPU %, puis liste des processus par consommation",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "top",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "diagnostic",
+      "tags": [
+        "cpu",
+        "performance",
+        "top",
+        "process"
+      ]
+    },
+    {
+      "id": "diag_007",
+      "name": "Tester connectivité DNS",
+      "short_name": "nslookup localhost",
+      "description": "Teste la résolution DNS locale",
+      "command": "nslookup localhost 2>/dev/null || host localhost",
+      "purpose": "Vérifier que la résolution DNS locale fonctionne. Un problème DNS peut empêcher Tor de se connecter aux guards.",
+      "expected_output": "Server: ..., Address: ... Name: localhost, Address: 127.0.0.1",
+      "risks": "Aucun risque — requête DNS locale",
+      "prerequisites": [
+        "nslookup ou host installé"
+      ],
+      "tool_required": "nslookup",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "diagnostic",
+      "tags": [
+        "dns",
+        "diagnostic",
+        "nslookup",
+        "network"
+      ]
+    },
+    {
+      "id": "diag_008",
+      "name": "Vérifier Python path",
+      "short_name": "python3 -c sys.path",
+      "description": "Affiche le PYTHONPATH et les chemins d'import",
+      "command": "python3 -c \"import sys; [print(p) for p in sys.path]\"",
+      "purpose": "Voir où Python cherche les modules. Utile pour diagnostiquer des 'ModuleNotFoundError' ou des conflits de versions.",
+      "expected_output": "Liste de chemins : /usr/lib/python3, site-packages, etc.",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Python 3 installé"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "diagnostic",
+      "tags": [
+        "python",
+        "path",
+        "diagnostic",
+        "import",
+        "modules"
+      ]
+    },
+    {
+      "id": "diag_009",
+      "name": "Paquets Python installés",
+      "short_name": "pip list",
+      "description": "Liste tous les paquets Python installés",
+      "command": "pip list 2>/dev/null | grep -iE 'scrapy|twisted|elastic|requests|rich'",
+      "purpose": "Voir les paquets Python pertinents pour le lab (scrapy, elasticsearch-py, rich, etc.) et leurs versions.",
+      "expected_output": "Scrapy 2.x.x, Twisted X.X.X, rich X.X.X",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "pip installé"
+      ],
+      "tool_required": "pip",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "diagnostic",
+      "tags": [
+        "pip",
+        "packages",
+        "python",
+        "list",
+        "versions"
+      ]
+    },
+    {
+      "id": "diag_010",
+      "name": "Rapport système complet",
+      "short_name": "diagnostic global",
+      "description": "Lance tous les diagnostics essentiels en séquence",
+      "command": "echo '=== SYSTÈME ===' && uname -a && echo '=== RÉSEAU ===' && ip a | grep 'inet ' && echo '=== PORTS ===' && ss -tlnp | head -10 && echo '=== OUTILS ===' && for t in python3 pip tor privoxy scrapy curl jq nc elasticsearch; do command -v $t >/dev/null && echo \"✅ $t\" || echo \"❌ $t\"; done",
+      "purpose": "Snapshot complet de l'état du lab en une seule commande : système, réseau, ports ouverts, outils disponibles.",
+      "expected_output": "Rapport multi-section avec infos système, réseau, ports et disponibilité des outils",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "bash",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "diagnostic",
+      "tags": [
+        "diagnostic",
+        "full",
+        "report",
+        "system",
+        "check"
+      ]
+    },
+    {
+      "id": "diag_011",
+      "name": "Espace disque (df)",
+      "short_name": "df -h",
+      "description": "Affiche l'espace disque utilisé et disponible sur tous les systèmes de fichiers",
+      "command": "df -h --output=source,fstype,size,used,avail,pcent,target | head -20",
+      "purpose": "Vérifier qu'il reste assez d'espace pour les exports, logs et index Elasticsearch. ES écrit un watermark de 85% par défaut au-delà duquel il refuse d'indexer.",
+      "expected_output": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda1       50G   20G   28G  42% /",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "df",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "disk",
+        "space",
+        "df",
+        "filesystem",
+        "storage",
+        "diagnostic"
+      ]
+    },
+    {
+      "id": "diag_012",
+      "name": "Mémoire RAM disponible (free)",
+      "short_name": "free -h",
+      "description": "Affiche la mémoire RAM et swap utilisée/disponible",
+      "command": "free -h",
+      "purpose": "Vérifier la RAM disponible avant de lancer Elasticsearch (qui requiert minimum 1-2 GB) ou un crawl Scrapy intensif. La colonne 'available' est la plus pertinente.",
+      "expected_output": "Mem:  7.8G  3.2G  4.6G  ...\nSwap: 2.0G  0B    2.0G",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "free",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "memory",
+        "ram",
+        "free",
+        "swap",
+        "diagnostic",
+        "resources"
+      ]
+    },
+    {
+      "id": "diag_013",
+      "name": "Processus triés par CPU",
+      "short_name": "ps cpu top",
+      "description": "Liste les 15 processus consommant le plus de CPU",
+      "command": "ps aux --sort=-%cpu | head -16",
+      "purpose": "Identifier les processus qui monopolisent le CPU. Utile pour diagnostiquer pourquoi Elasticsearch ou Scrapy ralentit la machine. Les colonnes clés : %CPU, %MEM, COMMAND.",
+      "expected_output": "USER  PID  %CPU  %MEM  COMMAND\nroot  1234  45.2  ...",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "ps",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "ps",
+        "cpu",
+        "process",
+        "performance",
+        "diagnostic",
+        "top"
+      ]
+    },
+    {
+      "id": "diag_014",
+      "name": "Logs système récents (journalctl)",
+      "short_name": "journalctl -n 50",
+      "description": "Affiche les 50 derniers messages du journal système",
+      "command": "journalctl -n 50 --no-pager",
+      "purpose": "Lire les derniers événements système sans pager. Utile pour trouver des erreurs récentes de Tor, Privoxy ou Elasticsearch après un démarrage raté.",
+      "expected_output": "Apr 19 10:23:01 hostname systemd[1]: Started tor.service",
+      "risks": "Aucun risque — lecture seule des journaux",
+      "prerequisites": [
+        "systemd disponible"
+      ],
+      "tool_required": "journalctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "journalctl",
+        "logs",
+        "systemd",
+        "diagnostic",
+        "events"
+      ]
+    },
+    {
+      "id": "diag_015",
+      "name": "PCI — périphériques détectés",
+      "short_name": "lspci",
+      "description": "Liste les périphériques PCI/PCIe visibles sur la machine",
+      "command": "lspci",
+      "purpose": "Inventorier rapidement cartes réseau, GPU, contrôleurs SATA/NVMe et autres périphériques PCI.",
+      "expected_output": "Ethernet controller, VGA compatible controller, SATA controller...",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "pciutils installé"
+      ],
+      "tool_required": "lspci",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "diagnostic",
+      "tags": [
+        "pci",
+        "hardware",
+        "lspci",
+        "inventory",
+        "devices"
+      ]
+    },
+    {
+      "id": "diag_016",
+      "name": "USB — périphériques détectés",
+      "short_name": "lsusb",
+      "description": "Liste les périphériques USB connectés",
+      "command": "lsusb",
+      "purpose": "Voir rapidement les adaptateurs Wi‑Fi, stockages externes, hubs et autres périphériques USB présents.",
+      "expected_output": "Bus 001 Device ... ID vendor:product description",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "usbutils installé"
+      ],
+      "tool_required": "lsusb",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "diagnostic",
+      "tags": [
+        "usb",
+        "hardware",
+        "lsusb",
+        "inventory",
+        "devices"
+      ]
+    },
+    {
+      "id": "diag_017",
+      "name": "Capteurs matériels",
+      "short_name": "sensors",
+      "description": "Affiche les températures et tensions si disponibles",
+      "command": "sensors",
+      "purpose": "Diagnostiquer une machine qui chauffe ou vérifier l'état thermique avant une charge prolongée.",
+      "expected_output": "temp1, Core 0, fan, voltages selon le matériel détecté",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "lm-sensors installé",
+        "Capteurs détectés avec sensors-detect si nécessaire"
+      ],
+      "tool_required": "sensors",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "diagnostic",
+      "tags": [
+        "sensors",
+        "temperature",
+        "hardware",
+        "cooling",
+        "diagnostic"
+      ]
+    },
+    {
+      "id": "diag_018",
+      "name": "Services systemd en échec",
+      "short_name": "systemctl --failed",
+      "description": "Liste les unités systemd actuellement en échec",
+      "command": "systemctl --failed --no-pager",
+      "purpose": "Identifier immédiatement les services cassés ou non démarrés au boot.",
+      "expected_output": "UNIT LOAD ACTIVE SUB DESCRIPTION pour les services en échec",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "systemd disponible"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "diagnostic",
+      "tags": [
+        "systemctl",
+        "failed",
+        "services",
+        "diagnostic",
+        "systemd"
+      ]
+    }
+  ]
+}

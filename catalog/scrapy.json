@@ -1,0 +1,379 @@
+{
+  "label": "Scrapy",
+  "icon": "🕷",
+  "commands": [
+    {
+      "id": "scr_001",
+      "name": "Version Scrapy",
+      "short_name": "scrapy version",
+      "description": "Affiche la version de Scrapy installée",
+      "command": "scrapy version",
+      "purpose": "Vérifier que Scrapy est installé et connaître sa version. Scrapy 2.x est requis pour les fonctionnalités modernes.",
+      "expected_output": "Scrapy 2.x.x",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Scrapy doit être installé : pip install scrapy"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "version",
+        "check"
+      ]
+    },
+    {
+      "id": "scr_002",
+      "name": "Créer projet Scrapy",
+      "short_name": "scrapy startproject",
+      "description": "Crée un nouveau projet Scrapy dans ~/lab/",
+      "command": "scrapy startproject demo_lab ~/lab/scrapy_demo",
+      "purpose": "Initialiser la structure d'un projet Scrapy : spiders/, items.py, pipelines.py, middlewares.py, settings.py.",
+      "expected_output": "New Scrapy project 'demo_lab' created in .../scrapy_demo",
+      "risks": "Faible — crée des fichiers dans ~/lab/",
+      "prerequisites": [
+        "Scrapy installé",
+        "~/lab/ accessible en écriture"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "project",
+        "create",
+        "init"
+      ]
+    },
+    {
+      "id": "scr_003",
+      "name": "Générer spider",
+      "short_name": "scrapy genspider",
+      "description": "Génère un spider de démonstration",
+      "command": "cd ~/lab/scrapy_demo && scrapy genspider demo_spider example.com",
+      "purpose": "Créer un spider de base dans spiders/. Un spider définit comment naviguer un site et extraire des données.",
+      "expected_output": "Created spider 'demo_spider' using template 'basic'",
+      "risks": "Faible — crée un fichier Python dans le projet",
+      "prerequisites": [
+        "Scrapy installé",
+        "Projet Scrapy créé"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "spider",
+        "generate",
+        "template"
+      ]
+    },
+    {
+      "id": "scr_004",
+      "name": "Lister les spiders",
+      "short_name": "scrapy list",
+      "description": "Liste tous les spiders disponibles dans le projet",
+      "command": "cd ~/lab/scrapy_demo && scrapy list",
+      "purpose": "Voir tous les spiders définis dans le projet courant. Utile pour confirmer qu'un spider a été correctement créé.",
+      "expected_output": "demo_spider",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Projet Scrapy initialisé"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "list",
+        "spider"
+      ]
+    },
+    {
+      "id": "scr_005",
+      "name": "Vérifier spider",
+      "short_name": "scrapy check",
+      "description": "Vérifie les contrats du spider sans le lancer",
+      "command": "cd ~/lab/scrapy_demo && scrapy check",
+      "purpose": "Valider les contrats de tests du spider (annotations @url, @returns). Utile pour s'assurer de la qualité du spider sans exécuter de requêtes.",
+      "expected_output": "... ran N items in N.Xs — OK",
+      "risks": "Aucun risque — validation statique uniquement",
+      "prerequisites": [
+        "Scrapy installé",
+        "Projet avec spiders"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "check",
+        "validate",
+        "contract"
+      ]
+    },
+    {
+      "id": "scr_006",
+      "name": "Shell Scrapy",
+      "short_name": "scrapy shell",
+      "description": "Lance le shell interactif Scrapy sur un fichier local",
+      "command": "scrapy shell file:///etc/os-release",
+      "purpose": "Explorer interactivement la structure d'une page et tester des sélecteurs CSS/XPath. Ici sur un fichier local pour rester dans le lab.",
+      "expected_output": "Shell interactif avec accès à response, response.css(), response.xpath()",
+      "risks": "Faible — lecture d'un fichier local uniquement",
+      "prerequisites": [
+        "Scrapy installé"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "shell",
+        "interactive",
+        "debug"
+      ]
+    },
+    {
+      "id": "scr_007",
+      "name": "Export JSON local",
+      "short_name": "scrapy crawl -o output.json",
+      "description": "Lance un spider et exporte les résultats en JSON",
+      "command": "cd ~/lab/scrapy_demo && scrapy crawl demo_spider -o ~/lab/output.json",
+      "purpose": "Exécuter un spider et sauvegarder les items extraits dans un fichier JSON. L'option -o spécifie le fichier de sortie.",
+      "expected_output": "Fichier ~/lab/output.json créé avec les items extraits",
+      "risks": "Modéré — exécute le spider, faire des requêtes réseau si non limité à local",
+      "prerequisites": [
+        "Scrapy installé",
+        "Spider configuré",
+        "Cible accessible"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "crawl",
+        "json",
+        "export",
+        "output"
+      ]
+    },
+    {
+      "id": "scr_008",
+      "name": "Version Scrapy détaillée",
+      "short_name": "scrapy version -v",
+      "description": "Affiche Scrapy et ses dépendances (Twisted, Python, etc.)",
+      "command": "scrapy version -v",
+      "purpose": "Voir toutes les dépendances de Scrapy : Twisted (moteur async), lxml (parsing HTML), cssselect, etc.",
+      "expected_output": "Scrapy X.X.X, Twisted X.X.X, Python X.X.X, ...",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Scrapy installé"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "version",
+        "dependencies",
+        "info"
+      ]
+    },
+    {
+      "id": "scr_009",
+      "name": "Installer Scrapy",
+      "short_name": "pip install scrapy",
+      "description": "Installe Scrapy via pip",
+      "command": "pip install scrapy",
+      "purpose": "Installer Scrapy dans l'environnement Python courant. Recommandé dans un virtualenv pour isoler les dépendances.",
+      "expected_output": "Successfully installed scrapy-2.x.x ...",
+      "risks": "Faible — installe des paquets Python dans l'environnement courant",
+      "prerequisites": [
+        "pip installé",
+        "Python 3.8+"
+      ],
+      "tool_required": "pip",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "install",
+        "pip",
+        "setup"
+      ]
+    },
+    {
+      "id": "scr_010",
+      "name": "Benchmarks Scrapy",
+      "short_name": "scrapy bench",
+      "description": "Lance un benchmark de performance Scrapy",
+      "command": "scrapy bench",
+      "purpose": "Mesurer les performances du moteur Scrapy sur la machine locale. Donne une idée du nombre de pages/seconde atteignable.",
+      "expected_output": "2016-xx-xx ... INFO: Crawled X pages (at X pages/min)",
+      "risks": "Faible — benchmark local, consomme du CPU momentanément",
+      "prerequisites": [
+        "Scrapy installé"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "benchmark",
+        "performance",
+        "test"
+      ]
+    },
+    {
+      "id": "scr_011",
+      "name": "Settings Scrapy",
+      "short_name": "scrapy settings",
+      "description": "Affiche la valeur d'un paramètre de configuration Scrapy",
+      "command": "cd ~/lab/scrapy_demo && scrapy settings --get DOWNLOAD_DELAY",
+      "purpose": "Consulter les paramètres de configuration du projet Scrapy. DOWNLOAD_DELAY est crucial pour ne pas surcharger les serveurs cibles.",
+      "expected_output": "0 (délai par défaut, modifier dans settings.py)",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Scrapy installé",
+        "Projet Scrapy initialisé"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "settings",
+        "config",
+        "delay"
+      ]
+    },
+    {
+      "id": "scr_012",
+      "name": "Contrats spider",
+      "short_name": "scrapy parse",
+      "description": "Analyse la réponse d'une URL avec un spider spécifique",
+      "command": "cd ~/lab/scrapy_demo && scrapy parse file:///etc/os-release --spider demo_spider",
+      "purpose": "Tester le parsing d'une URL par un spider sans lancer un crawl complet. Utile pour déboguer les extracteurs.",
+      "expected_output": "Affiche les items et requests générés par le spider",
+      "risks": "Faible — un seul fichier local parsé",
+      "prerequisites": [
+        "Scrapy installé",
+        "Spider créé"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "scrapy",
+      "tags": [
+        "scrapy",
+        "parse",
+        "debug",
+        "spider"
+      ]
+    },
+    {
+      "id": "scr_013",
+      "name": "Scrapy shell interactif",
+      "short_name": "scrapy shell",
+      "description": "Ouvre un shell interactif Scrapy pour explorer une URL en direct",
+      "command": "cd ~/lab/scrapy_demo && scrapy shell 'file:///etc/os-release'",
+      "purpose": "Tester les sélecteurs CSS/XPath sur une vraie page sans écrire de spider. response.css('p::text').getall() retourne le texte des balises p. Indispensable pour le développement rapide.",
+      "expected_output": "Shell interactif avec objet 'response' disponible",
+      "risks": "Faible — fichier local. Si une URL web est utilisée, trafic réseau sortant.",
+      "prerequisites": [
+        "Scrapy installé",
+        "Projet scrapy_demo créé"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "scrapy",
+        "shell",
+        "debug",
+        "interactive",
+        "css",
+        "xpath"
+      ]
+    },
+    {
+      "id": "scr_014",
+      "name": "Export Scrapy en CSV",
+      "short_name": "scrapy crawl -o csv",
+      "description": "Lance un spider et exporte les items en CSV",
+      "command": "cd ~/lab/scrapy_demo && scrapy crawl demo_spider -o results.csv -t csv",
+      "purpose": "Exporter directement les données collectées en CSV. Le flag -t spécifie le format (csv, json, jsonlines, xml). CSV est pratique pour ouvrir dans Excel ou pandas.",
+      "expected_output": "Fichier results.csv créé avec les items du spider",
+      "risks": "Faible — crawl local. Les items sont écrits dans le répertoire courant.",
+      "prerequisites": [
+        "Scrapy installé",
+        "Spider demo_spider créé"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "scrapy",
+        "export",
+        "csv",
+        "crawl",
+        "output"
+      ]
+    },
+    {
+      "id": "scr_015",
+      "name": "Scrapy via proxy Tor (HTTP)",
+      "short_name": "scrapy tor proxy",
+      "description": "Configure Scrapy pour router les requêtes via Privoxy/Tor",
+      "command": "cd ~/lab/scrapy_demo && SCRAPY_SETTINGS_MODULE=scrapy_demo.settings scrapy crawl demo_spider -s HTTP_PROXY=http://127.0.0.1:8118",
+      "purpose": "Faire passer le trafic Scrapy par la chaîne Tor→Privoxy. Le proxy HTTP (port 8118) est Privoxy, qui forward vers Tor SOCKS5. Utile pour anonymiser le scraping.",
+      "expected_output": "Crawl identique mais trafic routé via Tor",
+      "risks": "Modéré — trafic sortant via Tor. Scrapy peut faire beaucoup de requêtes rapidement, respecter DOWNLOAD_DELAY.",
+      "prerequisites": [
+        "Tor démarré (port 9050)",
+        "Privoxy démarré (port 8118)",
+        "Privoxy configuré pour forward vers Tor"
+      ],
+      "tool_required": "scrapy",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "scrapy",
+        "tor",
+        "proxy",
+        "anonymity",
+        "privoxy",
+        "http_proxy"
+      ]
+    }
+  ]
+}

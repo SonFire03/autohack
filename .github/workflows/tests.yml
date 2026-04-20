@@ -32,6 +32,10 @@ jobs:
         run: |
           python -m ruff check .
 
+      - name: Check generated catalog
+        run: |
+          python scripts/build_catalog.py --check
+
       - name: Run tests
         run: |
           python -m pytest --cov --cov-report=term-missing

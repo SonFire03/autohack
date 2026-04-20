@@ -247,9 +247,11 @@ autohack/
 ├── requirements.txt         # Python dependencies
 ├── pyproject.toml           # Packaging metadata and console script
 ├── .github/workflows/       # GitHub Actions test workflow
+├── catalog/                  # Source catalog split by category
 ├── config/                  # App settings and category labels
 ├── core/                    # Catalog, executor, checker, exports, theme, config
 ├── menus/                   # Rich terminal UI screens
+├── scripts/                 # Maintenance scripts
 ├── tests/                   # Pytest suite
 ├── docs/examples/           # Example generated report
 ├── docs/screenshots/         # README screenshots
@@ -259,7 +261,21 @@ autohack/
 
 ## How The Catalog Works
 
-The source of truth is `commands_catalog.json`. Commands are grouped by category and include metadata used by both the TUI and CLI.
+The source catalog is split by category in `catalog/*.json`. The runtime file `commands_catalog.json` is generated from those files so the application can keep loading one fast, simple JSON document.
+
+Regenerate the merged catalog after editing category files:
+
+```bash
+python3 scripts/build_catalog.py
+```
+
+Check that the generated file is up to date:
+
+```bash
+python3 scripts/build_catalog.py --check
+```
+
+Commands are grouped by category and include metadata used by both the TUI and CLI.
 
 Minimal command shape:
 
@@ -334,6 +350,7 @@ Before publishing changes, run:
 
 ```bash
 python3 -m ruff check .
+python3 scripts/build_catalog.py --check
 python3 -m pytest --cov --cov-report=term-missing
 python3 main.py --stats
 ```
@@ -344,13 +361,14 @@ For contribution rules, setup notes, and catalog guidelines, see `CONTRIBUTING.m
 
 To add a command:
 
-1. Edit `commands_catalog.json`.
+1. Edit the matching file in `catalog/`.
 2. Pick a unique ID that matches the category prefix.
 3. Fill in `name`, `command`, `risks`, and `safe_to_run`.
 4. Add tags and prerequisites when useful.
 5. Mark risky commands with `dangerous: true`.
 6. Use `dry_run_only` or `lab_only` for commands that should not be executed casually.
-7. Run the tests.
+7. Regenerate `commands_catalog.json` with `python3 scripts/build_catalog.py`.
+8. Run the tests.
 
 For broad catalog additions, add tests in `tests/test_catalog.py` so the coverage cannot disappear silently later.
 
@@ -361,26 +379,9 @@ For broad catalog additions, add tests in `tests/test_catalog.py` so the coverag
 - [x] Centralized app version
 - [x] Ruff linting in CI
 - [x] Coverage reporting in CI
-- [ ] Split `commands_catalog.json` by category and generate the merged catalog
+- [x] Split `commands_catalog.json` by category and generate the merged catalog
 - [ ] Improve HTML export styling
 - [ ] Add demo/screenshot mode for repeatable screenshots
-
-## Future Catalog Refactor
-
-The current catalog is intentionally stored in one JSON file for simple loading and deployment. As it grows, a cleaner structure would be:
-
-```text
-catalog/
-├── system.json
-├── network.json
-├── recon.json
-├── web_attack.json
-├── passwords.json
-├── post_exploit.json
-└── xss.json
-```
-
-A small build script could merge those files into `commands_catalog.json`. That would make Git diffs smaller, reviews easier, and category contributions less error-prone.
 
 ## Legal Notice
 

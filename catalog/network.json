@@ -1,0 +1,438 @@
+{
+  "label": "Réseau Local de Lab",
+  "icon": "🌐",
+  "commands": [
+    {
+      "id": "net_001",
+      "name": "Ping localhost",
+      "short_name": "ping localhost",
+      "description": "Vérifie la connectivité avec la boucle locale",
+      "command": "ping -c 4 localhost",
+      "purpose": "Tester que la pile réseau locale fonctionne. Si ce ping échoue, il y a un problème réseau fondamental sur la machine.",
+      "expected_output": "4 paquets transmis, 4 reçus, 0% perte, temps ~0ms",
+      "risks": "Aucun risque — trafic uniquement local",
+      "prerequisites": [],
+      "tool_required": "ping",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "network",
+      "tags": [
+        "ping",
+        "localhost",
+        "connectivity",
+        "test"
+      ]
+    },
+    {
+      "id": "net_002",
+      "name": "Test HTTP local",
+      "short_name": "curl http://127.0.0.1",
+      "description": "Envoie une requête HTTP GET à localhost",
+      "command": "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1",
+      "purpose": "Tester si un serveur HTTP tourne sur localhost port 80. Affiche le code HTTP (200=OK, 000=pas de serveur).",
+      "expected_output": "200 (si serveur actif) ou 000/Connection refused (si absent)",
+      "risks": "Aucun risque — requête locale uniquement",
+      "prerequisites": [
+        "curl doit être installé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "network",
+      "tags": [
+        "curl",
+        "http",
+        "localhost",
+        "test"
+      ]
+    },
+    {
+      "id": "net_003",
+      "name": "Ports ouverts détaillés",
+      "short_name": "ss -tulpn",
+      "description": "Liste tous les ports TCP/UDP ouverts avec les processus associés",
+      "command": "ss -tulpn",
+      "purpose": "Vue complète des ports en écoute. Permet de vérifier en un coup d'œil quels services sont actifs (SSH:22, Tor:9050, Privoxy:8118, Elastic:9200).",
+      "expected_output": "LISTEN 0 128 127.0.0.1:9050 ... tor",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "iproute2 doit être installé"
+      ],
+      "tool_required": "ss",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "network",
+      "tags": [
+        "ports",
+        "socket",
+        "listen",
+        "services"
+      ]
+    },
+    {
+      "id": "net_004",
+      "name": "Processus sur port",
+      "short_name": "lsof -i :PORT",
+      "description": "Identifie quel processus utilise un port spécifique",
+      "command": "lsof -i :9050",
+      "purpose": "Savoir quel processus occupe un port précis. Ici port 9050 (Tor SOCKS). Utile pour diagnostiquer les conflits de ports.",
+      "expected_output": "COMMAND PID USER ... TCP localhost:9050 (LISTEN)",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "lsof doit être installé"
+      ],
+      "tool_required": "lsof",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "network",
+      "tags": [
+        "lsof",
+        "port",
+        "process",
+        "network"
+      ]
+    },
+    {
+      "id": "net_005",
+      "name": "Test port local (nc)",
+      "short_name": "nc -zv localhost PORT",
+      "description": "Teste si un port local est accessible",
+      "command": "nc -zv localhost 9050",
+      "purpose": "Vérifier rapidement si un port est ouvert et accessible. Utile pour tester le port SOCKS de Tor ou le port HTTP de Privoxy.",
+      "expected_output": "Connection to localhost 9050 port [tcp/*] succeeded!",
+      "risks": "Aucun risque — test en lecture seule sur localhost",
+      "prerequisites": [
+        "netcat (nc) doit être installé"
+      ],
+      "tool_required": "nc",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "network",
+      "tags": [
+        "netcat",
+        "port",
+        "test",
+        "connectivity"
+      ]
+    },
+    {
+      "id": "net_006",
+      "name": "Test proxy Privoxy",
+      "short_name": "curl via proxy local",
+      "description": "Teste le proxy Privoxy local avec curl",
+      "command": "curl -x http://127.0.0.1:8118 -s -o /dev/null -w '%{http_code}' http://127.0.0.1",
+      "purpose": "Vérifier que Privoxy est actif et accepte les connexions proxy sur le port 8118. La requête cible localhost pour rester local.",
+      "expected_output": "200 ou 503 (si Privoxy actif mais cible inaccessible)",
+      "risks": "Aucun risque — requête locale via proxy local uniquement",
+      "prerequisites": [
+        "curl installé",
+        "Privoxy démarré sur port 8118"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "network",
+      "tags": [
+        "proxy",
+        "privoxy",
+        "curl",
+        "test"
+      ]
+    },
+    {
+      "id": "net_007",
+      "name": "Test SOCKS Tor",
+      "short_name": "curl via SOCKS5 Tor",
+      "description": "Teste le proxy SOCKS5 de Tor",
+      "command": "curl --socks5 127.0.0.1:9050 -s -o /dev/null -w '%{http_code}' http://127.0.0.1",
+      "purpose": "Vérifier que Tor est actif et son proxy SOCKS5 répond sur le port 9050. La requête cible localhost pour rester en local.",
+      "expected_output": "Code HTTP ou erreur de connexion",
+      "risks": "Aucun risque — requête locale via SOCKS5 local uniquement",
+      "prerequisites": [
+        "curl avec support SOCKS5",
+        "Tor démarré"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "network",
+      "tags": [
+        "tor",
+        "socks5",
+        "curl",
+        "test",
+        "proxy"
+      ]
+    },
+    {
+      "id": "net_008",
+      "name": "Table de routage",
+      "short_name": "ip route",
+      "description": "Affiche la table de routage réseau",
+      "command": "ip route",
+      "purpose": "Voir comment le trafic réseau est routé : quelle interface par défaut, quels sous-réseaux sont accessibles directement.",
+      "expected_output": "default via 192.168.1.1 dev eth0, 192.168.1.0/24 dev eth0 ...",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "iproute2 installé"
+      ],
+      "tool_required": "ip",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "network",
+      "tags": [
+        "routing",
+        "network",
+        "ip",
+        "gateway"
+      ]
+    },
+    {
+      "id": "net_009",
+      "name": "DNS local",
+      "short_name": "cat /etc/resolv.conf",
+      "description": "Affiche la configuration DNS du système",
+      "command": "cat /etc/resolv.conf",
+      "purpose": "Voir quels serveurs DNS sont configurés. Important pour comprendre si les requêtes DNS passent par Tor ou non.",
+      "expected_output": "nameserver 127.0.0.53 (systemd-resolved) ou 8.8.8.8",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "cat",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "network",
+      "tags": [
+        "dns",
+        "resolv",
+        "network",
+        "config"
+      ]
+    },
+    {
+      "id": "net_010",
+      "name": "Connexions actives",
+      "short_name": "ss -tnp",
+      "description": "Affiche les connexions TCP établies avec processus",
+      "command": "ss -tnp",
+      "purpose": "Voir les connexions réseau actuellement établies. Utile pour vérifier qu'une connexion Tor est active ou diagnostiquer des connexions inattendues.",
+      "expected_output": "ESTAB 0 0 IP:PORT PEER_IP:PORT ... pid=X,fd=X",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "iproute2 installé"
+      ],
+      "tool_required": "ss",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "network",
+      "tags": [
+        "connections",
+        "tcp",
+        "established",
+        "network"
+      ]
+    },
+    {
+      "id": "net_011",
+      "name": "Scan ports TCP (nmap)",
+      "short_name": "nmap -sT",
+      "description": "Scan TCP connect sur les 1000 ports les plus courants",
+      "command": "nmap -sT -T4 127.0.0.1",
+      "purpose": "Découvrir les ports ouverts en local sans privilèges root. Le scan TCP connect établit une vraie connexion, plus lent qu'un SYN scan mais ne requiert pas de sudo.",
+      "expected_output": "PORT     STATE SERVICE\n22/tcp   open  ssh\n...",
+      "risks": "Faible — scan local uniquement. Peut être détecté par un IDS.",
+      "prerequisites": [
+        "nmap installé (sudo apt install nmap)"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "nmap",
+        "port",
+        "scan",
+        "tcp",
+        "network"
+      ]
+    },
+    {
+      "id": "net_012",
+      "name": "Détection services et versions (nmap -sV)",
+      "short_name": "nmap -sV",
+      "description": "Identifie les services et leurs versions sur les ports ouverts",
+      "command": "nmap -sV -T4 --open 127.0.0.1",
+      "purpose": "Connaître précisément les services qui tournent (ex. OpenSSH 8.9, nginx 1.22). Indispensable pour un audit ou pour adapter les outils de test.",
+      "expected_output": "22/tcp open ssh OpenSSH 8.9p1 Ubuntu",
+      "risks": "Faible — scan local. Le flag -sV génère plus de trafic qu'un scan standard.",
+      "prerequisites": [
+        "nmap installé"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "nmap",
+        "service",
+        "version",
+        "detection",
+        "fingerprint"
+      ]
+    },
+    {
+      "id": "net_013",
+      "name": "Test connexion TCP (netcat)",
+      "short_name": "nc -zv",
+      "description": "Vérifie si un port TCP est ouvert et accepte les connexions",
+      "command": "nc -zv 127.0.0.1 9050",
+      "purpose": "Tester rapidement si Tor écoute sur le port SOCKS5 (9050). Plus léger que nmap pour un test ponctuel port par port.",
+      "expected_output": "Connection to 127.0.0.1 9050 port [tcp/*] succeeded!",
+      "risks": "Aucun risque — connexion et fermeture immédiate",
+      "prerequisites": [
+        "netcat installé (sudo apt install netcat)"
+      ],
+      "tool_required": "nc",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "nc",
+        "netcat",
+        "port",
+        "tcp",
+        "test",
+        "connectivity"
+      ]
+    },
+    {
+      "id": "net_014",
+      "name": "Traceroute réseau",
+      "short_name": "traceroute",
+      "description": "Trace le chemin des paquets vers une destination",
+      "command": "traceroute -n -m 15 8.8.8.8",
+      "purpose": "Visualiser les sauts réseau entre la machine et une destination. Utile pour comprendre le routage et diagnostiquer les latences. Le -n évite la résolution DNS (plus rapide).",
+      "expected_output": "1  192.168.1.1  1.2ms\n2  ...",
+      "risks": "Faible — génère des paquets UDP/ICMP sortants",
+      "prerequisites": [
+        "traceroute installé (sudo apt install traceroute)"
+      ],
+      "tool_required": "traceroute",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "traceroute",
+        "routing",
+        "hops",
+        "network",
+        "latency"
+      ]
+    },
+    {
+      "id": "net_015",
+      "name": "Interfaces réseau actives",
+      "short_name": "ip addr show",
+      "description": "Liste toutes les interfaces réseau et leurs adresses IP",
+      "command": "ip -br addr show",
+      "purpose": "Voir d'un coup d'œil toutes les interfaces (lo, eth0, wlan0, tun0 pour VPN…) et leurs IP. Le flag -br (brief) donne une sortie compacte lisible.",
+      "expected_output": "lo    UNKNOWN  127.0.0.1/8\neth0  UP       192.168.1.x/24",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "ip",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "ip",
+        "interface",
+        "network",
+        "address",
+        "ipaddr"
+      ]
+    },
+    {
+      "id": "net_016",
+      "name": "Sockets en écoute",
+      "short_name": "ss -lntup",
+      "description": "Liste les ports TCP/UDP en écoute avec les processus associés",
+      "command": "ss -lntup",
+      "purpose": "Voir rapidement quels services écoutent localement et sur quels ports.",
+      "expected_output": "Netid State Local Address:Port Process",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "ss",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "network",
+      "tags": [
+        "ss",
+        "ports",
+        "listening",
+        "services",
+        "network"
+      ]
+    },
+    {
+      "id": "net_017",
+      "name": "Routes réseau",
+      "short_name": "ip route",
+      "description": "Affiche la table de routage active",
+      "command": "ip route show",
+      "purpose": "Comprendre les passerelles, routes par défaut et réseaux atteignables depuis la machine.",
+      "expected_output": "default via ..., 192.168.1.0/24 dev ...",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "ip",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "network",
+      "tags": [
+        "routes",
+        "gateway",
+        "ip",
+        "network",
+        "routing"
+      ]
+    },
+    {
+      "id": "net_018",
+      "name": "DNS résolveurs actifs",
+      "short_name": "resolvectl status",
+      "description": "Affiche les serveurs DNS utilisés par interface",
+      "command": "resolvectl status | sed -n '1,80p'",
+      "purpose": "Vérifier rapidement quels résolveurs DNS sont actifs et comment la résolution est configurée.",
+      "expected_output": "Link, Current DNS Server, DNS Servers, DNSSEC setting",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "systemd-resolved ou resolvectl disponible"
+      ],
+      "tool_required": "resolvectl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "network",
+      "tags": [
+        "dns",
+        "resolver",
+        "resolvectl",
+        "network",
+        "systemd"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,734 @@
+{
+  "label": "Système / Environnement",
+  "icon": "🖥",
+  "commands": [
+    {
+      "id": "sys_001",
+      "name": "Version Python",
+      "short_name": "python3 --version",
+      "description": "Affiche la version Python 3 installée",
+      "command": "python3 --version",
+      "purpose": "Vérifier que Python 3 est installé et connaître sa version exacte. Utile pour s'assurer de la compatibilité des scripts.",
+      "expected_output": "Python 3.10.x ou supérieur",
+      "risks": "Aucun risque — commande de lecture seule",
+      "prerequisites": [
+        "Python 3 doit être installé"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "python",
+        "version",
+        "check"
+      ]
+    },
+    {
+      "id": "sys_002",
+      "name": "Version pip",
+      "short_name": "pip --version",
+      "description": "Affiche la version de pip installée",
+      "command": "pip --version",
+      "purpose": "Vérifier que pip est disponible et connaître sa version pour la gestion des paquets Python.",
+      "expected_output": "pip 22.x.x from /usr/lib/python3/dist-packages/pip (python 3.x)",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "pip doit être installé"
+      ],
+      "tool_required": "pip",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "pip",
+        "version",
+        "check"
+      ]
+    },
+    {
+      "id": "sys_003",
+      "name": "Chemin Python",
+      "short_name": "which python3",
+      "description": "Affiche le chemin absolu de l'exécutable python3",
+      "command": "which python3",
+      "purpose": "Identifier quel Python sera utilisé quand on tape 'python3', utile en cas de multiple installations ou virtualenvs.",
+      "expected_output": "/usr/bin/python3 ou /usr/local/bin/python3",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "which",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "python",
+        "path",
+        "which"
+      ]
+    },
+    {
+      "id": "sys_004",
+      "name": "Chemin pip",
+      "short_name": "which pip",
+      "description": "Affiche le chemin absolu de pip",
+      "command": "which pip",
+      "purpose": "Identifier quel pip sera utilisé, pour s'assurer d'installer les paquets dans le bon environnement.",
+      "expected_output": "/usr/bin/pip ou /home/user/.local/bin/pip",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "which",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "pip",
+        "path",
+        "which"
+      ]
+    },
+    {
+      "id": "sys_005",
+      "name": "Info noyau Linux",
+      "short_name": "uname -a",
+      "description": "Affiche les informations complètes sur le noyau Linux",
+      "command": "uname -a",
+      "purpose": "Identifier la version du noyau, l'architecture (x86_64, arm64) et le système d'exploitation. Utile pour le diagnostic et la compatibilité.",
+      "expected_output": "Linux hostname 5.15.x-generic #x-Ubuntu SMP x86_64 GNU/Linux",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "uname",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "kernel",
+        "info",
+        "system",
+        "uname"
+      ]
+    },
+    {
+      "id": "sys_006",
+      "name": "Info hôte système",
+      "short_name": "hostnamectl",
+      "description": "Affiche le nom d'hôte, l'OS, le noyau et l'architecture",
+      "command": "hostnamectl",
+      "purpose": "Vue d'ensemble complète du système : OS, hostname, version noyau, architecture machine et virtualisation.",
+      "expected_output": "Static hostname, Operating System, Kernel, Architecture",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "systemd doit être installé"
+      ],
+      "tool_required": "hostnamectl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "hostname",
+        "os",
+        "info",
+        "systemd"
+      ]
+    },
+    {
+      "id": "sys_007",
+      "name": "Interfaces réseau",
+      "short_name": "ip a",
+      "description": "Affiche toutes les interfaces réseau et leurs adresses IP",
+      "command": "ip a",
+      "purpose": "Lister toutes les interfaces réseau (eth0, lo, wlan0, etc.) avec leurs adresses IPv4/IPv6. Essentiel pour identifier l'IP locale et vérifier la connectivité.",
+      "expected_output": "lo: 127.0.0.1/8, eth0: 192.168.x.x/24, etc.",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "iproute2 doit être installé"
+      ],
+      "tool_required": "ip",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "network",
+        "ip",
+        "interface",
+        "address"
+      ]
+    },
+    {
+      "id": "sys_008",
+      "name": "Ports en écoute",
+      "short_name": "ss -tulpn",
+      "description": "Affiche tous les ports TCP/UDP en écoute avec les processus",
+      "command": "ss -tulpn",
+      "purpose": "Voir quels services écoutent sur quels ports. Indispensable pour vérifier que Tor (9050), Privoxy (8118), Elastic (9200) sont bien démarrés.",
+      "expected_output": "LISTEN 0 128 0.0.0.0:22 ... sshd",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "iproute2 doit être installé"
+      ],
+      "tool_required": "ss",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "ports",
+        "socket",
+        "listen",
+        "network"
+      ]
+    },
+    {
+      "id": "sys_009",
+      "name": "Statut systemd",
+      "short_name": "systemctl status",
+      "description": "Affiche l'état général de systemd et des unités en échec",
+      "command": "systemctl status",
+      "purpose": "Vue d'ensemble de l'état du système systemd : services actifs, en échec, utilisation mémoire du manager.",
+      "expected_output": "State: running, N jobs, N loaded units",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "systemd doit être le gestionnaire de services"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "systemd",
+        "services",
+        "status"
+      ]
+    },
+    {
+      "id": "sys_010",
+      "name": "Journaux système récents",
+      "short_name": "journalctl -xe",
+      "description": "Affiche les derniers journaux système avec contexte",
+      "command": "journalctl -xe --no-pager | tail -50",
+      "purpose": "Consulter les événements système récents, particulièrement utile pour diagnostiquer pourquoi un service a échoué.",
+      "expected_output": "Lignes de logs avec timestamps, priorités et messages",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "systemd-journald doit être actif"
+      ],
+      "tool_required": "journalctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "logs",
+        "journal",
+        "systemd",
+        "debug"
+      ]
+    },
+    {
+      "id": "sys_011",
+      "name": "Créer répertoire",
+      "short_name": "mkdir -p",
+      "description": "Crée un répertoire et ses parents si nécessaire",
+      "command": "mkdir -p ~/lab/test_dir",
+      "purpose": "Créer une arborescence de répertoires sans erreur si les parents n'existent pas. L'option -p évite l'erreur si le dossier existe déjà.",
+      "expected_output": "Aucune sortie (succès silencieux)",
+      "risks": "Faible — crée des répertoires dans votre home",
+      "prerequisites": [],
+      "tool_required": "mkdir",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "filesystem",
+        "directory",
+        "create"
+      ]
+    },
+    {
+      "id": "sys_012",
+      "name": "Lister fichiers",
+      "short_name": "ls -la",
+      "description": "Liste tous les fichiers avec détails et fichiers cachés",
+      "command": "ls -la",
+      "purpose": "Voir tous les fichiers (y compris cachés avec .) avec permissions, propriétaire, taille et date de modification.",
+      "expected_output": "drwxr-xr-x 2 user group 4096 Apr 19 ... nom_fichier",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "ls",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "filesystem",
+        "list",
+        "files"
+      ]
+    },
+    {
+      "id": "sys_013",
+      "name": "Répertoire courant",
+      "short_name": "pwd",
+      "description": "Affiche le chemin absolu du répertoire courant",
+      "command": "pwd",
+      "purpose": "Connaître sa position dans l'arborescence. Utile pour s'assurer qu'on exécute les commandes au bon endroit.",
+      "expected_output": "/home/user/projects/autohack",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "pwd",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "filesystem",
+        "path",
+        "location"
+      ]
+    },
+    {
+      "id": "sys_014",
+      "name": "Lire un fichier",
+      "short_name": "cat",
+      "description": "Affiche le contenu d'un fichier texte",
+      "command": "cat /etc/os-release",
+      "purpose": "Lire le contenu d'un fichier directement dans le terminal. Ici appliqué à /etc/os-release pour identifier la distribution Linux.",
+      "expected_output": "NAME=Ubuntu, VERSION=22.04, etc.",
+      "risks": "Aucun risque si fichier est lisible — lecture seule",
+      "prerequisites": [],
+      "tool_required": "cat",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "filesystem",
+        "read",
+        "file",
+        "content"
+      ]
+    },
+    {
+      "id": "sys_015",
+      "name": "Rechercher dans fichiers",
+      "short_name": "grep",
+      "description": "Recherche un motif dans les fichiers ou l'entrée standard",
+      "command": "grep -r 'localhost' /etc/ 2>/dev/null | head -20",
+      "purpose": "Trouver des occurrences d'un texte dans des fichiers. Ici pour trouver les configs référençant localhost.",
+      "expected_output": "Lignes contenant 'localhost' avec chemin de fichier",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "grep",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "search",
+        "text",
+        "pattern",
+        "find"
+      ]
+    },
+    {
+      "id": "sys_016",
+      "name": "Chercher fichiers",
+      "short_name": "find",
+      "description": "Cherche des fichiers selon des critères",
+      "command": "find /etc -name '*.conf' -type f 2>/dev/null | head -20",
+      "purpose": "Localiser des fichiers par nom, type, taille, date. Utile pour trouver des fichiers de configuration.",
+      "expected_output": "Liste de chemins de fichiers .conf",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "find",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "filesystem",
+        "search",
+        "find"
+      ]
+    },
+    {
+      "id": "sys_017",
+      "name": "Modifier permissions",
+      "short_name": "chmod",
+      "description": "Modifie les permissions d'accès d'un fichier",
+      "command": "chmod 755 ~/lab/test_script.sh",
+      "purpose": "Définir qui peut lire (r), écrire (w) ou exécuter (x) un fichier. 755 = propriétaire tout, groupe+autres lecture+exécution.",
+      "expected_output": "Aucune sortie (succès silencieux)",
+      "risks": "Modéré — mauvaises permissions peuvent bloquer l'accès ou créer des failles de sécurité",
+      "prerequisites": [
+        "Être propriétaire du fichier"
+      ],
+      "tool_required": "chmod",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "permissions",
+        "security",
+        "filesystem"
+      ]
+    },
+    {
+      "id": "sys_018",
+      "name": "Modifier propriétaire",
+      "short_name": "chown",
+      "description": "Change le propriétaire et/ou groupe d'un fichier",
+      "command": "chown $USER:$USER ~/lab/test_file.txt",
+      "purpose": "Attribuer la propriété d'un fichier à un utilisateur/groupe. Utile après des copies avec sudo ou des opérations qui changent le propriétaire.",
+      "expected_output": "Aucune sortie (succès silencieux)",
+      "risks": "Modéré — utiliser avec précaution, surtout avec sudo",
+      "prerequisites": [
+        "Être propriétaire du fichier ou root"
+      ],
+      "tool_required": "chown",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "permissions",
+        "owner",
+        "filesystem"
+      ]
+    },
+    {
+      "id": "sys_019",
+      "name": "Copier fichier",
+      "short_name": "cp",
+      "description": "Copie un fichier ou répertoire",
+      "command": "cp /etc/tor/torrc ~/lab/torrc.backup",
+      "purpose": "Créer une copie d'un fichier. Essentiel avant toute modification de fichier de configuration (backup).",
+      "expected_output": "Aucune sortie (succès silencieux)",
+      "risks": "Faible — peut écraser un fichier existant sans avertissement",
+      "prerequisites": [
+        "Droits de lecture sur la source",
+        "Droits d'écriture sur la destination"
+      ],
+      "tool_required": "cp",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "filesystem",
+        "copy",
+        "backup"
+      ]
+    },
+    {
+      "id": "sys_020",
+      "name": "Déplacer / renommer",
+      "short_name": "mv",
+      "description": "Déplace ou renomme un fichier ou répertoire",
+      "command": "mv ~/lab/ancien_nom.txt ~/lab/nouveau_nom.txt",
+      "purpose": "Renommer ou déplacer des fichiers. Contrairement à cp, mv supprime la source après la copie.",
+      "expected_output": "Aucune sortie (succès silencieux)",
+      "risks": "Modéré — déplace définitivement, peut écraser si destination existe",
+      "prerequisites": [
+        "Droits sur source et destination"
+      ],
+      "tool_required": "mv",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "filesystem",
+        "move",
+        "rename"
+      ]
+    },
+    {
+      "id": "sys_021",
+      "name": "Supprimer fichier",
+      "short_name": "rm",
+      "description": "Supprime un fichier (IRRÉVERSIBLE sans backup)",
+      "command": "rm ~/lab/test_file.txt",
+      "purpose": "Supprimer un fichier. Attention : Linux n'a pas de corbeille pour rm — la suppression est définitive.",
+      "expected_output": "Aucune sortie (succès silencieux)",
+      "risks": "DANGEREUX — suppression irréversible. Toujours vérifier le chemin avant exécution.",
+      "prerequisites": [
+        "Droits d'écriture sur le fichier"
+      ],
+      "tool_required": "rm",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "filesystem",
+        "delete",
+        "dangerous"
+      ]
+    },
+    {
+      "id": "sys_022",
+      "name": "Tee — écrire et afficher",
+      "short_name": "tee",
+      "description": "Lit stdin et écrit simultanément dans stdout ET un fichier",
+      "command": "echo 'test log' | tee ~/lab/output.log",
+      "purpose": "Capturer la sortie d'une commande dans un fichier tout en l'affichant dans le terminal. Très utile pour logger les résultats de commandes.",
+      "expected_output": "test log (affiché ET écrit dans output.log)",
+      "risks": "Faible — écrase le fichier si existant (utiliser tee -a pour append)",
+      "prerequisites": [],
+      "tool_required": "tee",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "output",
+        "log",
+        "redirect",
+        "tee"
+      ]
+    },
+    {
+      "id": "sys_023",
+      "name": "Variables d'environnement",
+      "short_name": "env",
+      "description": "Affiche toutes les variables d'environnement",
+      "command": "env | sort",
+      "purpose": "Voir toutes les variables d'environnement actives : PATH, HOME, USER, proxy settings, etc. Utile pour diagnostiquer des problèmes de configuration.",
+      "expected_output": "HOME=/home/user, PATH=/usr/bin:..., USER=user, etc.",
+      "risks": "Aucun risque — lecture seule. Note : peut afficher des informations sensibles",
+      "prerequisites": [],
+      "tool_required": "env",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "environment",
+        "variables",
+        "config"
+      ]
+    },
+    {
+      "id": "sys_024",
+      "name": "Espace disque",
+      "short_name": "df -h",
+      "description": "Affiche l'utilisation des disques en format lisible",
+      "command": "df -h",
+      "purpose": "Vérifier l'espace disponible sur chaque partition. Utile avant de lancer des opérations qui génèrent des données (scrapy, elastic).",
+      "expected_output": "Filesystem, Size, Used, Avail, Use%, Mounted on",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "df",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "disk",
+        "storage",
+        "space",
+        "filesystem"
+      ]
+    },
+    {
+      "id": "sys_025",
+      "name": "Mémoire RAM",
+      "short_name": "free -h",
+      "description": "Affiche l'utilisation de la mémoire RAM et swap",
+      "command": "free -h",
+      "purpose": "Vérifier la mémoire disponible. Elasticsearch nécessite au minimum 1-2 GB de RAM pour fonctionner correctement.",
+      "expected_output": "total, used, free, shared, buff/cache, available",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "free",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "memory",
+        "ram",
+        "system",
+        "performance"
+      ]
+    },
+    {
+      "id": "sys_026",
+      "name": "Temps d'activité",
+      "short_name": "uptime",
+      "description": "Affiche depuis combien de temps le système tourne",
+      "command": "uptime",
+      "purpose": "Connaître la durée de fonctionnement du système et la charge moyenne CPU. Utile pour évaluer la stabilité.",
+      "expected_output": "hh:mm up X days, X:XX, N users, load average: 0.x, 0.x, 0.x",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "uptime",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "system",
+        "uptime",
+        "load",
+        "performance"
+      ]
+    },
+    {
+      "id": "sys_027",
+      "name": "Utilisateur courant",
+      "short_name": "whoami",
+      "description": "Affiche le nom de l'utilisateur courant",
+      "command": "whoami",
+      "purpose": "Confirmer sous quel utilisateur on est connecté. Important avant d'exécuter des commandes qui nécessitent ou refusent root.",
+      "expected_output": "user (ou root si élevé)",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "whoami",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "user",
+        "identity",
+        "security"
+      ]
+    },
+    {
+      "id": "sys_028",
+      "name": "Processus actifs",
+      "short_name": "ps aux",
+      "description": "Affiche tous les processus en cours d'exécution",
+      "command": "ps aux | head -30",
+      "purpose": "Lister les processus actifs avec leur PID, utilisation CPU/mémoire. Utile pour vérifier si tor, privoxy, elasticsearch sont en cours d'exécution.",
+      "expected_output": "USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "ps",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "system",
+      "tags": [
+        "process",
+        "pid",
+        "system",
+        "monitor"
+      ]
+    },
+    {
+      "id": "sys_029",
+      "name": "Docker — conteneurs en cours",
+      "short_name": "docker ps",
+      "description": "Affiche les conteneurs Docker actuellement démarrés",
+      "command": "docker ps --format 'table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.Ports}}'",
+      "purpose": "Voir rapidement quels services tournent dans Docker, leurs images et les ports exposés.",
+      "expected_output": "NAMES IMAGE STATUS PORTS",
+      "risks": "Aucun risque — lecture seule sur le daemon Docker",
+      "prerequisites": [
+        "Docker installé",
+        "Accès au socket Docker"
+      ],
+      "tool_required": "docker",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "system",
+      "tags": [
+        "docker",
+        "containers",
+        "ops",
+        "services",
+        "runtime"
+      ]
+    },
+    {
+      "id": "sys_030",
+      "name": "Docker — images locales",
+      "short_name": "docker images",
+      "description": "Liste les images Docker présentes localement",
+      "command": "docker images --format 'table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}\\t{{.CreatedSince}}'",
+      "purpose": "Inventorier les images disponibles localement pour savoir ce qui peut être lancé ou nettoyé.",
+      "expected_output": "REPOSITORY TAG SIZE CREATED",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Docker installé"
+      ],
+      "tool_required": "docker",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "system",
+      "tags": [
+        "docker",
+        "images",
+        "inventory",
+        "ops",
+        "local"
+      ]
+    },
+    {
+      "id": "sys_031",
+      "name": "CPU — informations détaillées",
+      "short_name": "lscpu",
+      "description": "Affiche l'architecture CPU, le nombre de cœurs, threads et flags",
+      "command": "lscpu",
+      "purpose": "Comprendre rapidement les capacités matérielles de la machine avant d'exécuter des tâches CPU-intensives.",
+      "expected_output": "Architecture, CPU(s), Thread(s) per core, Model name, Virtualization...",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "util-linux installé"
+      ],
+      "tool_required": "lscpu",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "system",
+      "tags": [
+        "cpu",
+        "hardware",
+        "lscpu",
+        "system",
+        "inventory"
+      ]
+    },
+    {
+      "id": "sys_032",
+      "name": "Stockage — vue blocs et partitions",
+      "short_name": "lsblk",
+      "description": "Affiche les disques, partitions, tailles et points de montage",
+      "command": "lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS,MODEL",
+      "purpose": "Voir rapidement la topologie de stockage: disques, partitions, systèmes de fichiers et montages.",
+      "expected_output": "NAME SIZE TYPE FSTYPE MOUNTPOINTS MODEL",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "lsblk",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "system",
+      "tags": [
+        "storage",
+        "disks",
+        "lsblk",
+        "mounts",
+        "hardware"
+      ]
+    }
+  ]
+}

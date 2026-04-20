@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Split source catalog into `catalog/*.json` with `scripts/build_catalog.py` generating `commands_catalog.json`.
+
 ## 0.1.0
 
 - Initial public release.

@@ -24,12 +24,14 @@ python3 -m pytest
 
 ```bash
 python3 -m ruff check .
+python3 scripts/build_catalog.py --check
 python3 -m pytest --cov --cov-report=term-missing
 ```
 
 ## Guidelines
 
 - Keep command metadata consistent.
+- Edit category files in `catalog/`, then run `python3 scripts/build_catalog.py`.
 - Add tests for new behavior.
 - Add catalog coverage tests for broad command additions.
 - Do not add commands intended for unauthorized use.

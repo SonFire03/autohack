@@ -1,0 +1,385 @@
+{
+  "label": "Tor",
+  "icon": "🧅",
+  "commands": [
+    {
+      "id": "tor_001",
+      "name": "Version Tor",
+      "short_name": "tor --version",
+      "description": "Affiche la version de Tor installée",
+      "command": "tor --version",
+      "purpose": "Vérifier que Tor est installé et connaître sa version. Tor 0.4.x et supérieur est recommandé.",
+      "expected_output": "Tor version 0.4.x.x.",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Tor doit être installé : sudo apt install tor"
+      ],
+      "tool_required": "tor",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "version",
+        "check"
+      ]
+    },
+    {
+      "id": "tor_002",
+      "name": "Statut service Tor",
+      "short_name": "systemctl status tor",
+      "description": "Affiche l'état du service systemd Tor",
+      "command": "systemctl status tor",
+      "purpose": "Voir si Tor est actif (active/running), inactif, ou en erreur. Affiche les dernières lignes de logs.",
+      "expected_output": "● tor.service - Anonymizing overlay network for TCP... Active: active (running)",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Tor installé",
+        "systemd disponible"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "service",
+        "status",
+        "systemd"
+      ]
+    },
+    {
+      "id": "tor_003",
+      "name": "Démarrer Tor",
+      "short_name": "systemctl start tor",
+      "description": "Démarre le service Tor",
+      "command": "sudo systemctl start tor",
+      "purpose": "Lancer le daemon Tor. Une fois démarré, un proxy SOCKS5 sera disponible sur 127.0.0.1:9050.",
+      "expected_output": "Aucune sortie (succès silencieux) — vérifier avec systemctl status tor",
+      "risks": "Faible — démarre un service local. Ne crée pas de connexion sortante immédiate.",
+      "prerequisites": [
+        "Tor installé",
+        "Droits sudo"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "start",
+        "service",
+        "systemd"
+      ]
+    },
+    {
+      "id": "tor_004",
+      "name": "Arrêter Tor",
+      "short_name": "systemctl stop tor",
+      "description": "Arrête le service Tor",
+      "command": "sudo systemctl stop tor",
+      "purpose": "Stopper le daemon Tor et fermer le proxy SOCKS5. Utile pour libérer des ressources ou tester l'absence de Tor.",
+      "expected_output": "Aucune sortie (succès silencieux)",
+      "risks": "Faible — coupe les connexions Tor en cours",
+      "prerequisites": [
+        "Tor installé",
+        "Droits sudo"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "stop",
+        "service",
+        "systemd"
+      ]
+    },
+    {
+      "id": "tor_005",
+      "name": "Redémarrer Tor",
+      "short_name": "systemctl restart tor",
+      "description": "Redémarre le service Tor (nouveau circuit)",
+      "command": "sudo systemctl restart tor",
+      "purpose": "Redémarrer Tor pour obtenir un nouveau circuit et une nouvelle identité réseau. Utile après modification de torrc.",
+      "expected_output": "Aucune sortie — vérifier avec systemctl status tor",
+      "risks": "Faible — coupe brièvement les connexions Tor",
+      "prerequisites": [
+        "Tor installé",
+        "Droits sudo"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "restart",
+        "service",
+        "circuit"
+      ]
+    },
+    {
+      "id": "tor_006",
+      "name": "Logs Tor",
+      "short_name": "journalctl -u tor",
+      "description": "Affiche les journaux du service Tor",
+      "command": "journalctl -u tor -n 50 --no-pager",
+      "purpose": "Consulter les logs de Tor pour diagnostiquer des problèmes de démarrage, de circuit ou de connexion.",
+      "expected_output": "Bootstrapped 100% (done): Done — indique que Tor est connecté",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "systemd-journald actif",
+        "Tor installé"
+      ],
+      "tool_required": "journalctl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "logs",
+        "journal",
+        "debug"
+      ]
+    },
+    {
+      "id": "tor_007",
+      "name": "Test port SOCKS Tor",
+      "short_name": "nc -zv localhost 9050",
+      "description": "Vérifie que le port SOCKS5 de Tor est ouvert",
+      "command": "nc -zv localhost 9050",
+      "purpose": "Confirmer que Tor écoute bien sur le port 9050 (SOCKS5 par défaut). Si fermé, Tor n'est pas démarré ou a changé de port.",
+      "expected_output": "Connection to localhost 9050 port [tcp/*] succeeded!",
+      "risks": "Aucun risque — test local uniquement",
+      "prerequisites": [
+        "netcat installé",
+        "Tor démarré"
+      ],
+      "tool_required": "nc",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "socks",
+        "port",
+        "test",
+        "9050"
+      ]
+    },
+    {
+      "id": "tor_008",
+      "name": "Fichier torrc",
+      "short_name": "cat /etc/tor/torrc",
+      "description": "Affiche le fichier de configuration de Tor",
+      "command": "cat /etc/tor/torrc",
+      "purpose": "Lire la configuration actuelle de Tor : port SOCKS, ExitNodes, HiddenServices, etc. Nécessite parfois sudo.",
+      "expected_output": "# This file was generated by Tor... SocksPort 9050",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Tor installé",
+        "Droits de lecture sur /etc/tor/torrc"
+      ],
+      "tool_required": "cat",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "config",
+        "torrc",
+        "settings"
+      ]
+    },
+    {
+      "id": "tor_009",
+      "name": "Vérifier torrc (syntaxe)",
+      "short_name": "tor --verify-config",
+      "description": "Vérifie la syntaxe du fichier torrc sans lancer Tor",
+      "command": "tor --verify-config",
+      "purpose": "Valider la configuration torrc avant de (re)démarrer Tor. Évite de casser le service par une erreur de syntaxe.",
+      "expected_output": "Configuration was valid",
+      "risks": "Aucun risque — ne démarre pas Tor, validation uniquement",
+      "prerequisites": [
+        "Tor installé",
+        "Droits de lecture sur torrc"
+      ],
+      "tool_required": "tor",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "config",
+        "verify",
+        "validate"
+      ]
+    },
+    {
+      "id": "tor_010",
+      "name": "Activer Tor au démarrage",
+      "short_name": "systemctl enable tor",
+      "description": "Active le démarrage automatique de Tor au boot",
+      "command": "sudo systemctl enable tor",
+      "purpose": "Configurer Tor pour démarrer automatiquement à chaque redémarrage du système.",
+      "expected_output": "Created symlink /etc/systemd/system/... → /lib/systemd/system/tor.service",
+      "risks": "Faible — Tor démarrera automatiquement à chaque boot",
+      "prerequisites": [
+        "Tor installé",
+        "Droits sudo"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "enable",
+        "boot",
+        "systemd"
+      ]
+    },
+    {
+      "id": "tor_011",
+      "name": "Désactiver Tor au démarrage",
+      "short_name": "systemctl disable tor",
+      "description": "Désactive le démarrage automatique de Tor",
+      "command": "sudo systemctl disable tor",
+      "purpose": "Empêcher Tor de démarrer automatiquement au boot, tout en gardant la possibilité de le lancer manuellement.",
+      "expected_output": "Removed /etc/systemd/system/multi-user.target.wants/tor.service",
+      "risks": "Faible — Tor ne démarrera plus automatiquement",
+      "prerequisites": [
+        "Tor installé",
+        "Droits sudo"
+      ],
+      "tool_required": "systemctl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "disable",
+        "boot",
+        "systemd"
+      ]
+    },
+    {
+      "id": "tor_012",
+      "name": "Installer Tor",
+      "short_name": "apt install tor",
+      "description": "Installe Tor depuis les dépôts apt",
+      "command": "sudo apt-get update && sudo apt-get install -y tor",
+      "purpose": "Installer Tor sur Ubuntu/Debian. L'option -y confirme automatiquement l'installation.",
+      "expected_output": "Setting up tor (0.4.x.x) ...",
+      "risks": "Modéré — installe des paquets système, nécessite connexion internet",
+      "prerequisites": [
+        "Droits sudo",
+        "Connexion internet",
+        "apt disponible"
+      ],
+      "tool_required": "apt-get",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "tor",
+      "tags": [
+        "tor",
+        "install",
+        "apt",
+        "setup"
+      ]
+    },
+    {
+      "id": "tor_013",
+      "name": "Vérifier IP de sortie Tor (curl SOCKS5)",
+      "short_name": "curl socks5 tor ip",
+      "description": "Affiche l'adresse IP publique vue depuis le nœud de sortie Tor",
+      "command": "curl --socks5-hostname 127.0.0.1:9050 -s https://api.ipify.org",
+      "purpose": "Confirmer que le trafic passe bien par Tor en vérifiant que l'IP de sortie est différente de l'IP réelle. L'option --socks5-hostname résout aussi le DNS via Tor (pas de fuite DNS).",
+      "expected_output": "185.x.x.x  (IP d'un nœud de sortie Tor, différente de votre IP réelle)",
+      "risks": "Requête vers un service externe (api.ipify.org). Ne pas utiliser en réseau restreint.",
+      "prerequisites": [
+        "Tor démarré (port 9050)",
+        "curl installé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "tor",
+        "ip",
+        "exit",
+        "socks5",
+        "curl",
+        "verify",
+        "anonymity"
+      ]
+    },
+    {
+      "id": "tor_014",
+      "name": "Forcer nouveau circuit Tor (NEWNYM)",
+      "short_name": "tor newnym",
+      "description": "Demande à Tor de construire un nouveau circuit (nouvelle IP de sortie)",
+      "command": "echo -e 'AUTHENTICATE \"\"\\nSIGNAL NEWNYM\\nQUIT' | nc 127.0.0.1 9051",
+      "purpose": "Changer de circuit Tor sans redémarrer le service. Utile pour obtenir une nouvelle IP de sortie entre deux requêtes. Nécessite le ControlPort 9051 activé dans torrc.",
+      "expected_output": "250 OK\n250 OK\n250 closing connection",
+      "risks": "Faible — commande de contrôle locale. Le ControlPort doit être activé dans /etc/tor/torrc.",
+      "prerequisites": [
+        "Tor démarré",
+        "ControlPort 9051 activé dans /etc/tor/torrc",
+        "HashedControlPassword ou CookieAuthentication configuré"
+      ],
+      "tool_required": "nc",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "tor",
+        "circuit",
+        "newnym",
+        "rotate",
+        "ip",
+        "control"
+      ]
+    },
+    {
+      "id": "tor_015",
+      "name": "Lister nœuds Tor actifs (cached-consensus)",
+      "short_name": "tor nodes count",
+      "description": "Compte les nœuds actifs dans le consensus Tor mis en cache localement",
+      "command": "grep -c '^r ' /var/lib/tor/cached-consensus 2>/dev/null || echo 'Fichier non trouvé (Tor non démarré ?)'",
+      "purpose": "Connaître le nombre de relais Tor actuellement connus par votre client. Un consensus sain contient ~7000 relais. Utile pour diagnostiquer les problèmes de bootstrap.",
+      "expected_output": "7000 (nombre de lignes 'r' dans le consensus)",
+      "risks": "Aucun risque — lecture fichier local",
+      "prerequisites": [
+        "Tor démarré au moins une fois"
+      ],
+      "tool_required": "grep",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "tor",
+        "nodes",
+        "relays",
+        "consensus",
+        "bootstrap",
+        "diagnostic"
+      ]
+    }
+  ]
+}

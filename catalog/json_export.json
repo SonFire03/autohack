@@ -1,0 +1,238 @@
+{
+  "label": "JSON / Export",
+  "icon": "📦",
+  "commands": [
+    {
+      "id": "jex_001",
+      "name": "Rediriger stdout vers fichier",
+      "short_name": "commande > fichier.txt",
+      "description": "Redirige la sortie d'une commande vers un fichier",
+      "command": "python3 --version > ~/lab/python_version.txt && cat ~/lab/python_version.txt",
+      "purpose": "Capturer la sortie d'une commande dans un fichier. L'opérateur > crée ou écrase le fichier. >> pour ajouter.",
+      "expected_output": "Python 3.x.x (écrit dans le fichier ET affiché via cat)",
+      "risks": "Faible — crée un fichier dans ~/lab/",
+      "prerequisites": [],
+      "tool_required": "bash",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "json_export",
+      "tags": [
+        "redirect",
+        "output",
+        "file",
+        "stdout"
+      ]
+    },
+    {
+      "id": "jex_002",
+      "name": "Tee — double sortie",
+      "short_name": "commande | tee fichier.log",
+      "description": "Affiche ET sauvegarde la sortie simultanément",
+      "command": "ls -la /etc/ | tee ~/lab/ls_etc.log | head -5",
+      "purpose": "tee permet de voir la sortie en temps réel ET de la sauvegarder. Idéal pour les longues commandes dont on veut garder trace.",
+      "expected_output": "5 premières lignes affichées, toutes les lignes dans ls_etc.log",
+      "risks": "Faible — crée un fichier log",
+      "prerequisites": [],
+      "tool_required": "tee",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "json_export",
+      "tags": [
+        "tee",
+        "output",
+        "log",
+        "dual"
+      ]
+    },
+    {
+      "id": "jex_003",
+      "name": "Formater JSON (Python)",
+      "short_name": "python3 -m json.tool",
+      "description": "Formate et valide du JSON depuis stdin",
+      "command": "echo '{\"nom\":\"test\",\"valeur\":42}' | python3 -m json.tool",
+      "purpose": "Valider et formater du JSON avec indentation. Détecte les erreurs de syntaxe JSON.",
+      "expected_output": "JSON indenté et coloré (si terminal le supporte)",
+      "risks": "Aucun risque — lecture/validation uniquement",
+      "prerequisites": [
+        "Python 3 installé"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "json_export",
+      "tags": [
+        "json",
+        "format",
+        "validate",
+        "python"
+      ]
+    },
+    {
+      "id": "jex_004",
+      "name": "Formater JSON (jq)",
+      "short_name": "jq '.' fichier.json",
+      "description": "Formate, filtre et transforme du JSON avec jq",
+      "command": "echo '[{\"id\":1,\"nom\":\"test\"}]' | jq '.[0].nom'",
+      "purpose": "jq est l'outil de référence pour manipuler du JSON en ligne de commande. Filtrage, transformation, extraction.",
+      "expected_output": "\"test\"",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "jq doit être installé : sudo apt install jq"
+      ],
+      "tool_required": "jq",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "json_export",
+      "tags": [
+        "jq",
+        "json",
+        "filter",
+        "transform"
+      ]
+    },
+    {
+      "id": "jex_005",
+      "name": "Valider JSON Python",
+      "short_name": "python3 -c json.loads",
+      "description": "Valide un fichier JSON avec Python",
+      "command": "python3 -c \"import json,sys; json.load(open(sys.argv[1])); print('JSON valide')\" ~/lab/output.json",
+      "purpose": "Vérifier qu'un fichier JSON est syntaxiquement correct. Affiche une erreur précise en cas de problème.",
+      "expected_output": "JSON valide (ou SyntaxError avec la position de l'erreur)",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Python 3 installé",
+        "Fichier JSON à valider"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "json_export",
+      "tags": [
+        "json",
+        "validate",
+        "python",
+        "check"
+      ]
+    },
+    {
+      "id": "jex_006",
+      "name": "Afficher JSON formaté",
+      "short_name": "python3 -m json.tool fichier",
+      "description": "Affiche un fichier JSON avec indentation lisible",
+      "command": "cat ~/lab/output.json | python3 -m json.tool 2>/dev/null || echo 'Fichier non trouvé ou JSON invalide'",
+      "purpose": "Lire un fichier JSON avec une indentation claire. Utile pour inspecter les sorties de Scrapy ou Elasticsearch.",
+      "expected_output": "JSON indenté sur plusieurs lignes",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [
+        "Python 3 installé",
+        "Fichier JSON existant"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "json_export",
+      "tags": [
+        "json",
+        "display",
+        "format",
+        "read"
+      ]
+    },
+    {
+      "id": "jex_007",
+      "name": "Compter lignes fichier",
+      "short_name": "wc -l fichier",
+      "description": "Compte le nombre de lignes dans un fichier",
+      "command": "wc -l ~/lab/output.json",
+      "purpose": "Connaître rapidement la taille d'un fichier en lignes. Utile pour savoir combien d'items Scrapy a exportés.",
+      "expected_output": "42 /home/user/lab/output.json",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "wc",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "json_export",
+      "tags": [
+        "wc",
+        "count",
+        "lines",
+        "file"
+      ]
+    },
+    {
+      "id": "jex_008",
+      "name": "Taille fichier",
+      "short_name": "du -sh fichier",
+      "description": "Affiche la taille d'un fichier ou répertoire",
+      "command": "du -sh ~/lab/ 2>/dev/null",
+      "purpose": "Voir l'espace occupé par les fichiers de lab. Utile pour surveiller la croissance des exports JSON.",
+      "expected_output": "4,5M    /home/user/lab/",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "du",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "json_export",
+      "tags": [
+        "du",
+        "size",
+        "disk",
+        "file"
+      ]
+    },
+    {
+      "id": "jex_009",
+      "name": "Compresser archive",
+      "short_name": "tar -czf archive.tar.gz",
+      "description": "Crée une archive compressée gzip d'un répertoire",
+      "command": "tar -czf ~/lab/backup_$(date +%Y%m%d).tar.gz ~/lab/",
+      "purpose": "Archiver et compresser les résultats de lab. Le nom inclut la date pour faciliter l'organisation.",
+      "expected_output": "Fichier .tar.gz créé dans ~/lab/",
+      "risks": "Faible — crée un fichier, peut écraser si même nom",
+      "prerequisites": [
+        "tar installé"
+      ],
+      "tool_required": "tar",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "json_export",
+      "tags": [
+        "tar",
+        "archive",
+        "compress",
+        "backup"
+      ]
+    },
+    {
+      "id": "jex_010",
+      "name": "Lister fichiers exports",
+      "short_name": "ls -lh exports/",
+      "description": "Liste les fichiers dans le dossier exports avec tailles",
+      "command": "ls -lh ~/lab/ 2>/dev/null | grep -E '\\.(json|txt|md|log)$'",
+      "purpose": "Voir rapidement tous les fichiers d'export disponibles avec leurs tailles en format lisible.",
+      "expected_output": "-rw-r--r-- 1 user user 42K Apr 19 output.json",
+      "risks": "Aucun risque — lecture seule",
+      "prerequisites": [],
+      "tool_required": "ls",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "json_export",
+      "tags": [
+        "ls",
+        "exports",
+        "files",
+        "list"
+      ]
+    }
+  ]
+}

