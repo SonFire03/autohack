@@ -1178,6 +1178,484 @@
         "recon"
       ],
       "execution_policy": "normal"
+    },
+    {
+      "name": "Amass — énumération sous-domaines",
+      "short_name": "amass enum -d",
+      "description": "Énumération passive et active des sous-domaines via DNS, certificats TLS et OSINT",
+      "command": "amass enum -d $TARGET -o /tmp/amass_$TARGET.txt",
+      "purpose": "Cartographier la surface d'attaque en découvrant tous les sous-domaines d'un domaine cible.",
+      "expected_output": "sous-domaine1.target.com [FQDN], api.target.com [FQDN]",
+      "risks": "Génère du trafic DNS visible — utiliser en lab ou avec autorisation explicite.",
+      "prerequisites": [
+        "amass installé (apt install amass)",
+        "$TARGET = domaine cible"
+      ],
+      "tool_required": "amass",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "subdomain",
+        "osint",
+        "dns",
+        "amass"
+      ],
+      "id": "rec_047",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "Subfinder — sous-domaines passifs",
+      "short_name": "subfinder -d",
+      "description": "Découverte passive de sous-domaines via CertSH, VirusTotal, Shodan sans contacter la cible",
+      "command": "subfinder -d $TARGET -o /tmp/subfinder_$TARGET.txt -v",
+      "purpose": "Trouver des sous-domaines sans envoyer de requêtes directes — passif et discret.",
+      "expected_output": "api.target.com, dev.target.com, mail.target.com",
+      "risks": "Passif — interroge des APIs tierces. Nécessite clés API pour sources premium.",
+      "prerequisites": [
+        "subfinder installé (go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest)"
+      ],
+      "tool_required": "subfinder",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "subdomain",
+        "passive",
+        "osint",
+        "subfinder"
+      ],
+      "id": "rec_048",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "httpx — probing HTTP/HTTPS massif",
+      "short_name": "httpx -l hosts.txt",
+      "description": "Sonde une liste d'hôtes pour identifier ceux qui répondent HTTP/S, titre, code et technos",
+      "command": "httpx -l /tmp/subfinder_$TARGET.txt -title -tech-detect -status-code -o /tmp/httpx_$TARGET.txt",
+      "purpose": "Filtrer les sous-domaines actifs et identifier leur stack technologique en masse.",
+      "expected_output": "https://api.target.com [200] [nginx] [React] [API v2]",
+      "risks": "Envoie des requêtes HTTP — visible dans les logs des serveurs cibles.",
+      "prerequisites": [
+        "httpx installé (go install github.com/projectdiscovery/httpx/cmd/httpx@latest)"
+      ],
+      "tool_required": "httpx",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "http",
+        "probing",
+        "tech-detect",
+        "httpx"
+      ],
+      "id": "rec_049",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "theHarvester — email et OSINT domaine",
+      "short_name": "theHarvester -d -b",
+      "description": "Collecte emails, sous-domaines, IPs via moteurs de recherche et sources OSINT publiques",
+      "command": "theHarvester -d $TARGET -b google,bing,linkedin,crtsh -l 500 -f /tmp/harvest_$TARGET",
+      "purpose": "Cartographier ressources exposées et adresses email pour recon et phishing ciblé.",
+      "expected_output": "Emails: john.doe@target.com; Hosts: mail.target.com [93.184.x.x]",
+      "risks": "Interroge moteurs — peut déclencher CAPTCHAs. Résultats peuvent contenir données personnelles.",
+      "prerequisites": [
+        "theHarvester installé (apt install theharvester)"
+      ],
+      "tool_required": "theHarvester",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "osint",
+        "email",
+        "subdomain",
+        "harvester"
+      ],
+      "id": "rec_050",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "Shodan CLI — recherche hôtes exposés",
+      "short_name": "shodan search",
+      "description": "Requête Shodan pour trouver des hôtes exposant un service ou banner particulier",
+      "command": "shodan search --fields ip_str,port,org,hostnames 'title:\"Apache\" country:FR'",
+      "purpose": "Identifier des cibles exposant des services vulnérables sans les contacter directement.",
+      "expected_output": "93.184.x.x  80  OVH SAS  target.com",
+      "risks": "Nécessite compte Shodan. Les requêtes sont loggées par Shodan.",
+      "prerequisites": [
+        "shodan CLI (pip install shodan)",
+        "shodan init <API_KEY>"
+      ],
+      "tool_required": "shodan",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "shodan",
+        "osint",
+        "exposed",
+        "iot"
+      ],
+      "id": "rec_051",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "Feroxbuster — découverte contenu web récursif",
+      "short_name": "feroxbuster -u -w",
+      "description": "Fuzzer de répertoires/fichiers web rapide et récursif avec filtres avancés",
+      "command": "feroxbuster -u http://$TARGET -w /usr/share/wordlists/dirb/common.txt -x php,html,txt,bak -t 50 -o /tmp/ferox_$TARGET.txt",
+      "purpose": "Découvrir chemins cachés, panneaux admin, backups et fichiers sensibles.",
+      "expected_output": "200 GET /admin/login.php, 403 GET /.git/, 200 GET /backup.zip",
+      "risks": "Génère de nombreuses requêtes — déclenche WAF/IDS. Lab uniquement.",
+      "prerequisites": [
+        "feroxbuster installé (apt install feroxbuster)",
+        "wordlist disponible"
+      ],
+      "tool_required": "feroxbuster",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "web",
+        "fuzzing",
+        "directory",
+        "feroxbuster"
+      ],
+      "id": "rec_052",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "Trufflehog — secrets dans dépôts Git",
+      "short_name": "trufflehog git",
+      "description": "Scan de l'historique Git pour trouver clés API, tokens et mots de passe commités",
+      "command": "trufflehog git https://github.com/$TARGET --only-verified --json | tee /tmp/trufflehog_$TARGET.json",
+      "purpose": "Extraire des credentials exposés dans l'historique Git (clés AWS, tokens GitHub, DB passwords).",
+      "expected_output": "JSON avec détecteur, secret, fichier source, commit hash",
+      "risks": "Résultats peuvent contenir des secrets actifs — manipuler avec précaution.",
+      "prerequisites": [
+        "trufflehog installé (pip install trufflehog)"
+      ],
+      "tool_required": "trufflehog",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "secrets",
+        "git",
+        "api-keys",
+        "trufflehog"
+      ],
+      "id": "rec_053",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "DNS — transfert de zone (AXFR)",
+      "short_name": "dig axfr @nameserver",
+      "description": "Tentative de transfert de zone DNS — révèle toute l'infrastructure interne si mal configuré",
+      "command": "dig axfr $TARGET @$(dig NS $TARGET +short | head -1)",
+      "purpose": "Un serveur DNS mal configuré peut révéler tous les sous-domaines, IPs internes et serveurs de mail.",
+      "expected_output": "Liste complète des enregistrements DNS du domaine si AXFR autorisé",
+      "risks": "Certains IDS alertent sur les AXFR. Révèle architecture interne.",
+      "prerequisites": [
+        "dig installé (apt install dnsutils)"
+      ],
+      "tool_required": "dig",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "dns",
+        "axfr",
+        "zone-transfer",
+        "infrastructure"
+      ],
+      "id": "rec_054",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "Nmap — détection EternalBlue MS17-010",
+      "short_name": "nmap smb-vuln-ms17-010",
+      "description": "Détecte si la cible est vulnérable à EternalBlue (WannaCry, CVE-2017-0143)",
+      "command": "nmap -p 445 --script smb-vuln-ms17-010 $TARGET",
+      "purpose": "Identifier des machines Windows non patchées vulnérables à l'exploit EternalBlue de la NSA.",
+      "expected_output": "VULNERABLE: Remote Code Execution vulnerability in Microsoft SMBv1",
+      "risks": "Peut crasher des systèmes Windows anciens. Lab contrôlé uniquement.",
+      "prerequisites": [
+        "nmap avec scripts NSE",
+        "Port 445 accessible"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "windows",
+        "smb",
+        "eternalblue",
+        "cve-2017-0143",
+        "nmap"
+      ],
+      "id": "rec_055",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "Nmap — détection MS-SQL exposé",
+      "short_name": "nmap ms-sql-info",
+      "description": "Détecte et interroge les instances Microsoft SQL Server exposées sur le réseau",
+      "command": "nmap -p 1433 --script ms-sql-info,ms-sql-empty-password,ms-sql-config $TARGET",
+      "purpose": "Trouver des serveurs SQL exposés, leur version, et tester l'authentification vide.",
+      "expected_output": "SQL Server 2019 — Version: 15.00.2000 — empty-password: true",
+      "risks": "Les scripts ms-sql-* peuvent tenter des authentifications — visible dans les logs MSSQL.",
+      "prerequisites": [
+        "nmap avec scripts NSE"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "mssql",
+        "database",
+        "windows",
+        "nmap"
+      ],
+      "id": "rec_056",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "Nmap — corrélation CVE avec vulners NSE",
+      "short_name": "nmap --script vulners",
+      "description": "Corrèle les versions de services détectées avec la base de données CVE Vulners",
+      "command": "nmap -sV --script vulners --script-args mincvss=7.0 -p- -T4 $TARGET -oN /tmp/vulners_$TARGET.txt",
+      "purpose": "Identifier automatiquement les CVE exploitables basées sur les versions de services.",
+      "expected_output": "CVE-2021-41773 9.8 Apache 2.4.49 RCE, CVE-2022-22965 Spring4Shell 9.8",
+      "risks": "Scan complet lent et très bruyant — déclenche IDS/IPS. Ne pas utiliser sur production.",
+      "prerequisites": [
+        "nmap + script vulners (git clone https://github.com/vulnersCom/nmap-vulners ~/.nmap/scripts/)"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "cve",
+        "vulnerability",
+        "vulners",
+        "nmap"
+      ],
+      "id": "rec_057",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "SNMP Walk — énumération communauté public",
+      "short_name": "snmpwalk -c public -v2c",
+      "description": "Parcourt l'arbre MIB SNMP avec communauté 'public' pour extraire informations système",
+      "command": "snmpwalk -c public -v2c $TARGET 1.3.6.1.2.1 2>/dev/null | tee /tmp/snmp_$TARGET.txt",
+      "purpose": "Les équipements réseau mal configurés exposent utilisateurs, interfaces et routing tables via SNMP.",
+      "expected_output": "sysDescr: Linux router 5.4.0, ifDescr: eth0, hrSWRunName: python3",
+      "risks": "Passif si SNMP v1/v2. Peut révéler configuration réseau complète et processus actifs.",
+      "prerequisites": [
+        "snmpwalk installé (apt install snmp)",
+        "UDP 161 accessible"
+      ],
+      "tool_required": "snmpwalk",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "snmp",
+        "network",
+        "iot",
+        "enumeration"
+      ],
+      "id": "rec_058",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "Waybackurls — URLs archivées Wayback Machine",
+      "short_name": "echo domain | waybackurls",
+      "description": "Extrait toutes les URLs historiques d'un domaine depuis l'Internet Archive",
+      "command": "echo $TARGET | waybackurls | tee /tmp/wayback_$TARGET.txt | grep -E '\\.(php|asp|aspx|json|xml|env|bak|sql)'",
+      "purpose": "Découvrir des endpoints supprimés, fichiers de config exposés ou paramètres vulnérables dans l'historique.",
+      "expected_output": "https://target.com/admin/config.php?id=1, https://target.com/.env.backup",
+      "risks": "Passif — aucun contact avec la cible. Mais résultats peuvent pointer vers ressources sensibles.",
+      "prerequisites": [
+        "waybackurls installé (go install github.com/tomnomnom/waybackurls@latest)"
+      ],
+      "tool_required": "waybackurls",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "passive",
+        "wayback",
+        "urls",
+        "history",
+        "osint"
+      ],
+      "id": "rec_059",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "Masscan — scan complet 65535 ports",
+      "short_name": "masscan -p0-65535 --rate",
+      "description": "Scan de tous les ports TCP d'une cible à très haute vitesse (100K+ paquets/sec)",
+      "command": "masscan $TARGET -p0-65535 --rate=50000 --wait=3 -oG /tmp/masscan_$TARGET.txt",
+      "purpose": "Découvrir tous les ports ouverts rapidement avant un scan nmap approfondi.",
+      "expected_output": "Discovered open port 8080/tcp on 10.0.0.1",
+      "risks": "TRÈS BRUYANT — sature les liens réseau, déclenche tous les IDS. Limiter le rate en lab.",
+      "prerequisites": [
+        "masscan installé (apt install masscan)",
+        "Root requis pour raw sockets"
+      ],
+      "tool_required": "masscan",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "portscan",
+        "masscan",
+        "fast",
+        "network"
+      ],
+      "id": "rec_060",
+      "category": "recon"
+    },
+    {
+      "name": "EyeWitness — screenshots web automatiques",
+      "short_name": "eyewitness --web",
+      "description": "Prend des captures d'écran de toutes les URLs web découvertes pour triage visuel rapide",
+      "command": "eyewitness --web -f /tmp/httpx_$TARGET.txt -d /tmp/eyewitness_$TARGET/ --timeout 10",
+      "purpose": "Triage visuel de centaines d'interfaces — identifier panneaux admin, apps oubliées rapidement.",
+      "expected_output": "Rapport HTML avec screenshots, titre, code HTTP et headers de chaque URL",
+      "risks": "Envoie des requêtes HTTP à chaque URL — visible dans logs serveurs cibles.",
+      "prerequisites": [
+        "eyewitness installé (apt install eyewitness)"
+      ],
+      "tool_required": "eyewitness",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "web",
+        "screenshot",
+        "visual",
+        "eyewitness"
+      ],
+      "id": "rec_061",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "GAU — toutes URLs connues d'un domaine",
+      "short_name": "gau --providers",
+      "description": "Agrège URLs depuis Wayback Machine, OTX, URLScan et CommonCrawl",
+      "command": "gau --providers wayback,otx,urlscan,commoncrawl $TARGET | tee /tmp/gau_$TARGET.txt",
+      "purpose": "Vue exhaustive des endpoints historiques pour découvrir des surfaces d'attaque oubliées.",
+      "expected_output": "https://target.com/api/v1/users?id=1, https://target.com/phpmyadmin/",
+      "risks": "Passif — ne contacte pas la cible. Résultats potentiellement très volumineux.",
+      "prerequisites": [
+        "gau installé (go install github.com/lc/gau/v2/cmd/gau@latest)"
+      ],
+      "tool_required": "gau",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "urls",
+        "passive",
+        "wayback",
+        "gau",
+        "osint"
+      ],
+      "id": "rec_062",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "Nuclei — scan CVE et misconfigurations",
+      "short_name": "nuclei -t cves/ -t misconfiguration/",
+      "description": "Lance des milliers de templates CVE et misconfigs sur une cible",
+      "command": "nuclei -u http://$TARGET -t cves/ -t exposures/ -t misconfiguration/ -severity critical,high -o /tmp/nuclei_$TARGET.txt",
+      "purpose": "Détection automatisée de CVE et mauvaises configurations via templates YAML communautaires.",
+      "expected_output": "[critical] [CVE-2021-44228] http://target.com/ — Log4Shell détecté",
+      "risks": "Lance des payloads réels — peut déclencher des alertes ou impacter l'application.",
+      "prerequisites": [
+        "nuclei installé (go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest)",
+        "nuclei -update-templates"
+      ],
+      "tool_required": "nuclei",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "cve",
+        "nuclei",
+        "templates",
+        "vulnerability-scan"
+      ],
+      "id": "rec_063",
+      "category": "recon",
+      "requires_sudo": false
+    },
+    {
+      "name": "Nmap — découverte hôtes réseau /24",
+      "short_name": "nmap -sn /24 ping sweep",
+      "description": "Découverte de tous les hôtes actifs sur un réseau /24 avec ping sweep",
+      "command": "nmap -sn $TARGET/24 --open -oG /tmp/hosts_$TARGET.txt && grep 'Up' /tmp/hosts_$TARGET.txt | awk '{print $2}' > /tmp/live_hosts.txt",
+      "purpose": "Cartographier rapidement tous les hôtes actifs d'un segment réseau.",
+      "expected_output": "Nmap scan report for 192.168.1.1 (router), 192.168.1.105 ...",
+      "risks": "Pings ICMP détectés par IDS. Nécessite être sur le même réseau ou avoir routage.",
+      "prerequisites": [
+        "nmap installé"
+      ],
+      "tool_required": "nmap",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "recon",
+        "network",
+        "host-discovery",
+        "nmap",
+        "ping-sweep"
+      ],
+      "id": "rec_064",
+      "category": "recon",
+      "requires_sudo": false
     }
   ]
 }

