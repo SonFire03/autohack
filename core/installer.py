@@ -68,6 +68,24 @@ APT_PACKAGES = {
     "wafw00f": "wafw00f",
     "wfuzz": "wfuzz",
     "wpscan": "wpscan",
+    "yara": "yara",
+    "exiftool": "libimage-exiftool-perl",
+    "binwalk": "binwalk",
+    "foremost": "foremost",
+    "bulk_extractor": "bulk-extractor",
+    "strings": "binutils",
+    "hashdeep": "hashdeep",
+    "clamscan": "clamav",
+    "file": "file",
+    "checksec": "checksec",
+    "readelf": "binutils",
+    "objdump": "binutils",
+    "ltrace": "ltrace",
+    "strace": "strace",
+    "gdb": "gdb",
+    "r2": "radare2",
+    "kubectl": "kubectl",
+    "aws": "awscli",
 }
 
 PIPX_PACKAGES = {
@@ -81,6 +99,13 @@ PIPX_PACKAGES = {
     "dirsearch": "dirsearch",
     "paramspider": "paramspider",
     "bloodhound-python": "bloodhound",
+    "prowler": "prowler",
+    "scout": "scoutsuite",
+    "pacu": "pacu",
+    "newman": "newman",
+    "vol": "volatility3",
+    "ROPgadget": "ropgadget",
+    "one_gadget": "one_gadget",
 }
 
 GO_PACKAGES = {
@@ -92,6 +117,9 @@ GO_PACKAGES = {
     "dnsx": "github.com/projectdiscovery/dnsx/cmd/dnsx@latest",
     "naabu": "github.com/projectdiscovery/naabu/v2/cmd/naabu@latest",
     "gau": "github.com/lc/gau/v2/cmd/gau@latest",
+    "trivy": "github.com/aquasecurity/trivy/cmd/trivy@latest",
+    "syft": "github.com/anchore/syft/cmd/syft@latest",
+    "grype": "github.com/anchore/grype/cmd/grype@latest",
 }
 
 BASIC_TOOLS = {
@@ -168,6 +196,17 @@ MANUAL_TOOLS = {
     "reg": "Windows built-in command. No Linux installation needed.",
     "schtasks": "Windows built-in command. No Linux installation needed.",
     "wevtutil": "Windows built-in command. No Linux installation needed.",
+    "docker": "Install Docker Engine from the official Docker repository for your distribution.",
+    "kube-bench": "Install kube-bench from the official Aqua Security releases.",
+    "kube-hunter": "Install kube-hunter manually or in a dedicated Python environment.",
+    "gcloud": "Install Google Cloud CLI from the official Google Cloud packages.",
+    "az": "Install Azure CLI from the official Microsoft packages.",
+    "kr": "Install Kiterunner from the official Assetnote release.",
+    "jwt_tool": "Clone jwt_tool manually and run it from its project directory.",
+    "corsy": "Clone Corsy manually and run it from its project directory.",
+    "loki": "Clone Loki manually and run it from its project directory.",
+    "cutter": "Install Cutter from the official release package.",
+    "ghidraRun": "Install Ghidra manually from the official release package.",
 }
 
 

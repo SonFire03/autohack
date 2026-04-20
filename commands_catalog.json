@@ -5762,6 +5762,215 @@
             "audit"
           ],
           "execution_policy": "normal"
+        },
+        {
+          "id": "web_054",
+          "name": "Kiterunner — API route discovery",
+          "short_name": "kiterunner",
+          "description": "Bruteforce intelligent de routes API",
+          "command": "kr scan http://$TARGET -w routes.kite -A=apiroutes-210228",
+          "purpose": "Découvrir routes API cachées à partir de wordlists kiterunner.",
+          "expected_output": "Routes API valides avec status et longueur",
+          "risks": "Fuzzing actif potentiellement bruyant.",
+          "prerequisites": [
+            "kiterunner installé",
+            "Wordlist routes.kite disponible"
+          ],
+          "tool_required": "kr",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "web_attack",
+          "tags": [
+            "api",
+            "kiterunner",
+            "routes",
+            "web"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "web_055",
+          "name": "Newman — replay collection Postman",
+          "short_name": "newman",
+          "description": "Exécute une collection Postman",
+          "command": "newman run $COLLECTION -e $ENVIRONMENT --reporters cli,json",
+          "purpose": "Rejouer des tests API documentés pour vérifier sécurité/régression.",
+          "expected_output": "Résultats assertions et rapport JSON",
+          "risks": "Peut modifier des données si la collection contient POST/PUT/DELETE.",
+          "prerequisites": [
+            "newman installé",
+            "Collection autorisée"
+          ],
+          "tool_required": "newman",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "web_attack",
+          "tags": [
+            "api",
+            "postman",
+            "newman",
+            "testing"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "web_056",
+          "name": "OpenAPI — endpoints exposés",
+          "short_name": "curl swagger",
+          "description": "Télécharge une spécification OpenAPI exposée",
+          "command": "curl -s http://$TARGET/swagger.json | jq '.paths | keys'",
+          "purpose": "Lister les endpoints depuis Swagger/OpenAPI public.",
+          "expected_output": "Liste des chemins API",
+          "risks": "Lecture HTTP; révèle surface API.",
+          "prerequisites": [
+            "curl installé",
+            "jq installé"
+          ],
+          "tool_required": "curl",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "web_attack",
+          "tags": [
+            "api",
+            "openapi",
+            "swagger",
+            "recon"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "web_057",
+          "name": "JWT Tool — audit token",
+          "short_name": "jwt_tool audit",
+          "description": "Analyse et teste un JWT",
+          "command": "python3 jwt_tool.py $TOKEN -M at",
+          "purpose": "Tester algorithmes, claims et mauvaises configs JWT.",
+          "expected_output": "Résultats modules JWT Tool",
+          "risks": "Peut tenter des attaques actives selon modules.",
+          "prerequisites": [
+            "jwt_tool disponible",
+            "Token autorisé"
+          ],
+          "tool_required": "python3",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "web_attack",
+          "tags": [
+            "api",
+            "jwt",
+            "token",
+            "auth"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "web_058",
+          "name": "FFUF — fuzz JSON API",
+          "short_name": "ffuf json",
+          "description": "Fuzz un paramètre JSON avec ffuf",
+          "command": "ffuf -w /usr/share/seclists/Discovery/Web-Content/api/actions.txt -u http://$TARGET/api -X POST -H 'Content-Type: application/json' -d '{\"action\":\"FUZZ\"}' -mc all",
+          "purpose": "Découvrir actions/valeurs cachées dans une API JSON.",
+          "expected_output": "Réponses différenciées par status/size/words",
+          "risks": "Fuzzing actif bruyant, peut déclencher des actions si endpoint sensible.",
+          "prerequisites": [
+            "ffuf installé",
+            "API autorisée",
+            "Wordlist disponible"
+          ],
+          "tool_required": "ffuf",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "web_attack",
+          "tags": [
+            "api",
+            "ffuf",
+            "json",
+            "fuzzing"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "web_059",
+          "name": "Nuclei — API exposures",
+          "short_name": "nuclei api",
+          "description": "Lance templates nuclei orientés API/exposures",
+          "command": "nuclei -u http://$TARGET -tags exposure,api,swagger,graphql",
+          "purpose": "Détecter endpoints API exposés, Swagger, GraphQL et configs faibles.",
+          "expected_output": "Findings nuclei filtrés par tags",
+          "risks": "Scan actif avec templates variés.",
+          "prerequisites": [
+            "nuclei installé",
+            "templates à jour"
+          ],
+          "tool_required": "nuclei",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "web_attack",
+          "tags": [
+            "api",
+            "nuclei",
+            "swagger",
+            "graphql"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "web_060",
+          "name": "GraphQL — introspection full",
+          "short_name": "graphql introspection",
+          "description": "Récupère le schéma GraphQL complet",
+          "command": "curl -s -X POST http://$TARGET/graphql -H 'Content-Type: application/json' --data '{\"query\":\"query IntrospectionQuery { __schema { types { name fields { name } } } }\"}' | jq",
+          "purpose": "Extraire types et champs GraphQL si introspection activée.",
+          "expected_output": "Schéma GraphQL JSON",
+          "risks": "Peut révéler toute la surface API.",
+          "prerequisites": [
+            "curl installé",
+            "jq installé",
+            "Endpoint GraphQL autorisé"
+          ],
+          "tool_required": "curl",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "web_attack",
+          "tags": [
+            "api",
+            "graphql",
+            "introspection"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "web_061",
+          "name": "Corsy — audit CORS",
+          "short_name": "corsy",
+          "description": "Teste les mauvaises configurations CORS",
+          "command": "python3 corsy.py -u http://$TARGET",
+          "purpose": "Identifier CORS permissif exploitable.",
+          "expected_output": "Origines acceptées, credentials, verdict",
+          "risks": "Requêtes HTTP actives mais faibles.",
+          "prerequisites": [
+            "Corsy disponible",
+            "Application autorisée"
+          ],
+          "tool_required": "python3",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "web_attack",
+          "tags": [
+            "api",
+            "cors",
+            "web",
+            "misconfig"
+          ],
+          "execution_policy": "normal"
         }
       ]
     },
@@ -8771,6 +8980,1219 @@
             "privesc",
             "system",
             "potato"
+          ],
+          "execution_policy": "normal"
+        }
+      ]
+    },
+    "cloud": {
+      "label": "Cloud / Kubernetes",
+      "icon": "☁️",
+      "commands": [
+        {
+          "id": "cloud_001",
+          "name": "Trivy — scan image container",
+          "short_name": "trivy image",
+          "description": "Scanne une image Docker/OCI pour CVE et secrets",
+          "command": "trivy image --severity HIGH,CRITICAL $IMAGE",
+          "purpose": "Identifier les vulnérabilités critiques dans une image avant déploiement.",
+          "expected_output": "Liste de CVE par paquet, sévérité et version corrigée",
+          "risks": "Télécharge des bases de vulnérabilités et analyse une image locale ou distante.",
+          "prerequisites": [
+            "trivy installé",
+            "Image autorisée"
+          ],
+          "tool_required": "trivy",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "cloud",
+            "container",
+            "docker",
+            "cve",
+            "trivy"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_002",
+          "name": "Trivy — scan filesystem",
+          "short_name": "trivy fs",
+          "description": "Scanne un répertoire pour CVE, secrets et IaC",
+          "command": "trivy fs --scanners vuln,secret,misconfig .",
+          "purpose": "Auditer un projet local pour dépendances vulnérables, secrets et erreurs IaC.",
+          "expected_output": "Findings par fichier, paquet ou secret potentiel",
+          "risks": "Peut afficher des secrets présents localement dans la sortie.",
+          "prerequisites": [
+            "trivy installé",
+            "Projet local à auditer"
+          ],
+          "tool_required": "trivy",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "trivy",
+            "filesystem",
+            "secrets",
+            "iac",
+            "cloud"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_003",
+          "name": "Syft — générer SBOM",
+          "short_name": "syft",
+          "description": "Génère une Software Bill of Materials pour image ou dossier",
+          "command": "syft $IMAGE -o table",
+          "purpose": "Lister les composants logiciels d'une image ou application.",
+          "expected_output": "SBOM avec paquets, versions et types",
+          "risks": "Lecture locale ou image distante. Pas destructif.",
+          "prerequisites": [
+            "syft installé",
+            "Image ou chemin disponible"
+          ],
+          "tool_required": "syft",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "sbom",
+            "syft",
+            "container",
+            "supply-chain"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_004",
+          "name": "Grype — scan vuln depuis SBOM/image",
+          "short_name": "grype",
+          "description": "Scanne une image ou SBOM contre une base CVE",
+          "command": "grype $IMAGE --fail-on high",
+          "purpose": "Détecter les vulnérabilités exploitables dans les composants logiciels.",
+          "expected_output": "CVE, sévérité, paquet affecté, version fix",
+          "risks": "Peut échouer volontairement si vulnérabilités high détectées.",
+          "prerequisites": [
+            "grype installé",
+            "Image ou SBOM autorisé"
+          ],
+          "tool_required": "grype",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "grype",
+            "cve",
+            "sbom",
+            "container"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_005",
+          "name": "Docker Bench — audit host Docker",
+          "short_name": "docker-bench-security",
+          "description": "Lance Docker Bench for Security sur l'hôte",
+          "command": "sudo docker run --rm --net host --pid host --userns host --cap-add audit_control -v /etc:/etc:ro -v /usr/bin/containerd:/usr/bin/containerd:ro -v /usr/bin/runc:/usr/bin/runc:ro -v /usr/lib/systemd:/usr/lib/systemd:ro -v /var/lib:/var/lib:ro -v /var/run/docker.sock:/var/run/docker.sock:ro docker/docker-bench-security",
+          "purpose": "Contrôler la configuration sécurité Docker selon CIS benchmark.",
+          "expected_output": "Liste de PASS/WARN/INFO sur la configuration Docker",
+          "risks": "Accès privilégié au socket Docker et à des chemins système.",
+          "prerequisites": [
+            "Docker installé",
+            "Droits sudo",
+            "Hôte Docker autorisé"
+          ],
+          "tool_required": "docker",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": true,
+          "category": "cloud",
+          "tags": [
+            "docker",
+            "cis",
+            "audit",
+            "container"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_006",
+          "name": "Kubectl — contexte courant",
+          "short_name": "kubectl config",
+          "description": "Affiche le contexte Kubernetes actif",
+          "command": "kubectl config current-context",
+          "purpose": "Vérifier le cluster Kubernetes ciblé avant toute commande.",
+          "expected_output": "Nom du contexte courant",
+          "risks": "Faible risque, lecture de configuration locale.",
+          "prerequisites": [
+            "kubectl installé",
+            "kubeconfig configuré"
+          ],
+          "tool_required": "kubectl",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "kubernetes",
+            "kubectl",
+            "context"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_007",
+          "name": "Kubectl — droits can-i all",
+          "short_name": "kubectl auth can-i",
+          "description": "Vérifie les droits Kubernetes du compte courant",
+          "command": "kubectl auth can-i --list",
+          "purpose": "Lister les permissions RBAC du contexte courant.",
+          "expected_output": "Table des verbes/ressources autorisés",
+          "risks": "Peut révéler des permissions sensibles dans la sortie.",
+          "prerequisites": [
+            "kubectl installé",
+            "Accès cluster autorisé"
+          ],
+          "tool_required": "kubectl",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "kubernetes",
+            "rbac",
+            "auth",
+            "can-i"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_008",
+          "name": "Kubectl — enum secrets",
+          "short_name": "kubectl secrets",
+          "description": "Liste les secrets Kubernetes accessibles",
+          "command": "kubectl get secrets -A",
+          "purpose": "Identifier les namespaces avec secrets exposés au compte courant.",
+          "expected_output": "Secrets par namespace, type et âge",
+          "risks": "Affiche des noms de secrets sensibles; ne dump pas les valeurs.",
+          "prerequisites": [
+            "kubectl installé",
+            "Accès cluster autorisé"
+          ],
+          "tool_required": "kubectl",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "kubernetes",
+            "secrets",
+            "enum"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_009",
+          "name": "Kubectl — dump secret ciblé",
+          "short_name": "kubectl secret decode",
+          "description": "Décode un secret Kubernetes spécifique",
+          "command": "kubectl get secret $SECRET -n $NAMESPACE -o jsonpath='{.data}' | jq 'map_values(@base64d)'",
+          "purpose": "Lire les valeurs d'un secret accessible via RBAC.",
+          "expected_output": "Données du secret décodées",
+          "risks": "Expose directement des secrets. À utiliser uniquement avec autorisation.",
+          "prerequisites": [
+            "kubectl installé",
+            "jq installé",
+            "Droit de lecture sur le secret"
+          ],
+          "tool_required": "kubectl",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "kubernetes",
+            "secret",
+            "credentials",
+            "rbac"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_010",
+          "name": "Kube-bench — benchmark CIS",
+          "short_name": "kube-bench",
+          "description": "Exécute les contrôles CIS Kubernetes",
+          "command": "kube-bench run --targets node,policies,managedservices",
+          "purpose": "Auditer la configuration Kubernetes selon CIS.",
+          "expected_output": "PASS/FAIL/WARN par contrôle CIS",
+          "risks": "Lecture de configuration; peut nécessiter privilèges selon environnement.",
+          "prerequisites": [
+            "kube-bench installé",
+            "Cluster/noeud autorisé"
+          ],
+          "tool_required": "kube-bench",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "kubernetes",
+            "cis",
+            "audit"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_011",
+          "name": "Kube-hunter — scan cluster",
+          "short_name": "kube-hunter",
+          "description": "Scanne un cluster Kubernetes pour expositions connues",
+          "command": "kube-hunter --remote $TARGET",
+          "purpose": "Identifier services Kubernetes exposés et mauvaises configurations.",
+          "expected_output": "Findings kube-hunter avec sévérité",
+          "risks": "Scan actif réseau. Peut déclencher alertes.",
+          "prerequisites": [
+            "kube-hunter installé",
+            "Cible Kubernetes autorisée"
+          ],
+          "tool_required": "kube-hunter",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "kubernetes",
+            "scan",
+            "exposure"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_012",
+          "name": "Prowler — audit AWS",
+          "short_name": "prowler aws",
+          "description": "Lance un audit AWS sécurité/compliance",
+          "command": "prowler aws --profile $AWS_PROFILE --output-formats csv json html",
+          "purpose": "Auditer IAM, S3, CloudTrail, GuardDuty et services AWS.",
+          "expected_output": "Rapports CSV/JSON/HTML avec findings par contrôle",
+          "risks": "Nécessite credentials AWS; peut lister beaucoup de ressources sensibles.",
+          "prerequisites": [
+            "prowler installé",
+            "Profil AWS autorisé"
+          ],
+          "tool_required": "prowler",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "aws",
+            "cloud",
+            "audit",
+            "prowler"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_013",
+          "name": "ScoutSuite — audit multi-cloud AWS",
+          "short_name": "scoutsuite aws",
+          "description": "Génère un rapport ScoutSuite AWS",
+          "command": "scout aws --profile $AWS_PROFILE --report-dir scoutsuite-report",
+          "purpose": "Cartographier les risques de configuration AWS.",
+          "expected_output": "Rapport HTML ScoutSuite",
+          "risks": "Lecture de ressources cloud sensibles via credentials.",
+          "prerequisites": [
+            "ScoutSuite installé",
+            "Profil AWS autorisé"
+          ],
+          "tool_required": "scout",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "aws",
+            "scoutsuite",
+            "cloud",
+            "audit"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_014",
+          "name": "Pacu — console offensive AWS lab",
+          "short_name": "pacu",
+          "description": "Lance Pacu pour tests AWS autorisés",
+          "command": "pacu",
+          "purpose": "Démarrer un environnement modulaire de tests AWS offensifs en lab.",
+          "expected_output": "Console Pacu interactive",
+          "risks": "Peut exécuter des modules intrusifs selon actions utilisateur.",
+          "prerequisites": [
+            "pacu installé",
+            "Compte AWS lab autorisé"
+          ],
+          "tool_required": "pacu",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "aws",
+            "pacu",
+            "cloud",
+            "offensive"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_015",
+          "name": "AWS CLI — enum identité",
+          "short_name": "aws sts",
+          "description": "Affiche l'identité AWS courante",
+          "command": "aws sts get-caller-identity --profile $AWS_PROFILE",
+          "purpose": "Confirmer le compte, l'ARN et l'utilisateur/role avant audit.",
+          "expected_output": "Account, Arn, UserId",
+          "risks": "Lecture simple; révèle l'identité du compte.",
+          "prerequisites": [
+            "awscli installé",
+            "Profil AWS configuré"
+          ],
+          "tool_required": "aws",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "aws",
+            "iam",
+            "sts",
+            "identity"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_016",
+          "name": "AWS CLI — buckets S3",
+          "short_name": "aws s3 ls",
+          "description": "Liste les buckets S3 accessibles",
+          "command": "aws s3 ls --profile $AWS_PROFILE",
+          "purpose": "Identifier les buckets accessibles au profil courant.",
+          "expected_output": "Liste de buckets et dates",
+          "risks": "Peut révéler des noms de ressources sensibles.",
+          "prerequisites": [
+            "awscli installé",
+            "Profil AWS autorisé"
+          ],
+          "tool_required": "aws",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "aws",
+            "s3",
+            "enum",
+            "cloud"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_017",
+          "name": "GCP — identité active",
+          "short_name": "gcloud auth list",
+          "description": "Liste les comptes gcloud actifs",
+          "command": "gcloud auth list",
+          "purpose": "Vérifier quel compte GCP est utilisé avant audit.",
+          "expected_output": "Comptes gcloud et compte actif",
+          "risks": "Lecture locale de config gcloud.",
+          "prerequisites": [
+            "gcloud installé"
+          ],
+          "tool_required": "gcloud",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "gcp",
+            "cloud",
+            "identity"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "cloud_018",
+          "name": "Azure — compte courant",
+          "short_name": "az account show",
+          "description": "Affiche le tenant/subscription Azure actif",
+          "command": "az account show",
+          "purpose": "Confirmer subscription et tenant Azure avant audit.",
+          "expected_output": "JSON tenantId, subscriptionId, user",
+          "risks": "Révèle des informations de tenant/subscription.",
+          "prerequisites": [
+            "Azure CLI installé",
+            "Connexion az active"
+          ],
+          "tool_required": "az",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "cloud",
+          "tags": [
+            "azure",
+            "cloud",
+            "identity"
+          ],
+          "execution_policy": "normal"
+        }
+      ]
+    },
+    "forensics": {
+      "label": "Forensics / DFIR",
+      "icon": "🧬",
+      "commands": [
+        {
+          "id": "dfir_001",
+          "name": "Volatility3 — info mémoire",
+          "short_name": "volatility3 windows.info",
+          "description": "Identifie le profil et les infos OS d'une image mémoire",
+          "command": "vol -f $MEMORY_IMAGE windows.info",
+          "purpose": "Démarrer l'analyse mémoire avec les métadonnées OS.",
+          "expected_output": "Kernel base, DTB, version Windows/Linux",
+          "risks": "Analyse locale d'un dump potentiellement sensible.",
+          "prerequisites": [
+            "volatility3 installé",
+            "Image mémoire autorisée"
+          ],
+          "tool_required": "vol",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "memory",
+            "volatility"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_002",
+          "name": "Volatility3 — processus",
+          "short_name": "volatility3 pslist",
+          "description": "Liste les processus depuis un dump mémoire",
+          "command": "vol -f $MEMORY_IMAGE windows.pslist",
+          "purpose": "Identifier processus suspects dans une image mémoire.",
+          "expected_output": "PID, PPID, image, offsets",
+          "risks": "Peut exposer noms/processus sensibles.",
+          "prerequisites": [
+            "volatility3 installé",
+            "Image mémoire"
+          ],
+          "tool_required": "vol",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "memory",
+            "process"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_003",
+          "name": "Volatility3 — connexions réseau",
+          "short_name": "volatility3 netscan",
+          "description": "Liste les connexions réseau dans un dump Windows",
+          "command": "vol -f $MEMORY_IMAGE windows.netscan",
+          "purpose": "Identifier connexions réseau suspectes au moment de la capture.",
+          "expected_output": "IP, ports, PID, états réseau",
+          "risks": "Analyse de données sensibles.",
+          "prerequisites": [
+            "volatility3 installé",
+            "Dump Windows"
+          ],
+          "tool_required": "vol",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "network",
+            "memory"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_004",
+          "name": "YARA — scan dossier",
+          "short_name": "yara recursive",
+          "description": "Scanne récursivement avec règles YARA",
+          "command": "yara -r $RULES_DIR $TARGET_DIR",
+          "purpose": "Détecter IoC/malware patterns dans fichiers d'un dossier.",
+          "expected_output": "Matches règle/fichier",
+          "risks": "Peut lire beaucoup de fichiers sensibles.",
+          "prerequisites": [
+            "yara installé",
+            "Règles YARA disponibles"
+          ],
+          "tool_required": "yara",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "yara",
+            "ioc"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_005",
+          "name": "ExifTool — métadonnées fichier",
+          "short_name": "exiftool",
+          "description": "Extrait les métadonnées d'un fichier",
+          "command": "exiftool $FILE",
+          "purpose": "Analyser métadonnées, timestamps, auteurs et informations embarquées.",
+          "expected_output": "Métadonnées structurées du fichier",
+          "risks": "Peut afficher données personnelles embarquées.",
+          "prerequisites": [
+            "exiftool installé",
+            "Fichier autorisé"
+          ],
+          "tool_required": "exiftool",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "metadata",
+            "exif"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_006",
+          "name": "Binwalk — analyse firmware",
+          "short_name": "binwalk",
+          "description": "Analyse signatures et systèmes embarqués",
+          "command": "binwalk -e $FIRMWARE",
+          "purpose": "Extraire partitions, fichiers et blobs depuis firmware.",
+          "expected_output": "Offsets, signatures, extraction _firmware.extracted",
+          "risks": "Extraction de contenu potentiellement sensible.",
+          "prerequisites": [
+            "binwalk installé",
+            "Firmware autorisé"
+          ],
+          "tool_required": "binwalk",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "firmware",
+            "embedded"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_007",
+          "name": "Foremost — file carving",
+          "short_name": "foremost",
+          "description": "Récupère fichiers depuis image disque",
+          "command": "foremost -i $IMAGE -o foremost_out",
+          "purpose": "Carver des fichiers supprimés ou non référencés.",
+          "expected_output": "Dossiers par type de fichier récupéré",
+          "risks": "Peut extraire données personnelles/sensibles.",
+          "prerequisites": [
+            "foremost installé",
+            "Image disque autorisée"
+          ],
+          "tool_required": "foremost",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "carving",
+            "disk"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_008",
+          "name": "Bulk Extractor — artefacts",
+          "short_name": "bulk_extractor",
+          "description": "Extrait emails, URLs, numéros et artefacts",
+          "command": "bulk_extractor -o bulk_out $IMAGE",
+          "purpose": "Extraire artefacts d'une image disque/mémoire.",
+          "expected_output": "Fichiers de features dans bulk_out",
+          "risks": "Peut extraire données personnelles massivement.",
+          "prerequisites": [
+            "bulk_extractor installé",
+            "Image autorisée"
+          ],
+          "tool_required": "bulk_extractor",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "artifacts",
+            "disk"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_009",
+          "name": "Strings — extraction ASCII/Unicode",
+          "short_name": "strings",
+          "description": "Extrait chaînes lisibles d'un binaire/image",
+          "command": "strings -a -n 8 $FILE | less",
+          "purpose": "Trouver URLs, chemins, clés ou IoC dans un fichier.",
+          "expected_output": "Chaînes lisibles filtrées",
+          "risks": "Peut afficher secrets présents dans le fichier.",
+          "prerequisites": [
+            "strings installé",
+            "Fichier autorisé"
+          ],
+          "tool_required": "strings",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "strings",
+            "ioc"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_010",
+          "name": "Hashdeep — hash récursif",
+          "short_name": "hashdeep",
+          "description": "Calcule les empreintes récursives",
+          "command": "hashdeep -rl $TARGET_DIR > hashes.txt",
+          "purpose": "Créer un inventaire d'intégrité pour comparaison.",
+          "expected_output": "Liste hashes et chemins",
+          "risks": "Lecture récursive d'un dossier sensible.",
+          "prerequisites": [
+            "hashdeep installé",
+            "Dossier autorisé"
+          ],
+          "tool_required": "hashdeep",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "hash",
+            "integrity"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_011",
+          "name": "ClamAV — scan dossier",
+          "short_name": "clamscan",
+          "description": "Scanne un dossier avec ClamAV",
+          "command": "clamscan -r --bell -i $TARGET_DIR",
+          "purpose": "Détecter malwares connus dans un dossier.",
+          "expected_output": "Fichiers infectés listés si trouvés",
+          "risks": "Lecture récursive de fichiers; faux positifs possibles.",
+          "prerequisites": [
+            "clamav installé",
+            "Signatures à jour"
+          ],
+          "tool_required": "clamscan",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "malware",
+            "antivirus"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_012",
+          "name": "Journalctl — erreurs récentes",
+          "short_name": "journalctl errors",
+          "description": "Extrait erreurs système récentes",
+          "command": "journalctl -p err..alert --since '24 hours ago'",
+          "purpose": "Trier rapidement les erreurs système post-incident.",
+          "expected_output": "Logs err/alert des dernières 24h",
+          "risks": "Peut afficher logs sensibles.",
+          "prerequisites": [
+            "systemd/journalctl disponible"
+          ],
+          "tool_required": "journalctl",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "logs",
+            "linux"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_013",
+          "name": "Auth logs — connexions SSH",
+          "short_name": "grep auth ssh",
+          "description": "Filtre les logs auth pour SSH",
+          "command": "sudo grep -Ei 'sshd|failed|accepted|invalid' /var/log/auth.log | tail -100",
+          "purpose": "Identifier tentatives SSH, succès, échecs et utilisateurs invalides.",
+          "expected_output": "100 dernières lignes auth liées SSH",
+          "risks": "Lecture de logs système sensibles.",
+          "prerequisites": [
+            "Accès sudo",
+            "/var/log/auth.log présent"
+          ],
+          "tool_required": "grep",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": true,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "ssh",
+            "logs",
+            "linux"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "dfir_014",
+          "name": "Loki — IoC scanner",
+          "short_name": "loki",
+          "description": "Scanne un dossier avec règles Loki",
+          "command": "python3 loki.py -p $TARGET_DIR",
+          "purpose": "Détecter IoC connus via signatures Loki/YARA.",
+          "expected_output": "Findings Loki avec sévérité",
+          "risks": "Lecture récursive; dépend de règles à jour.",
+          "prerequisites": [
+            "Loki disponible",
+            "Dossier autorisé"
+          ],
+          "tool_required": "python3",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "forensics",
+          "tags": [
+            "forensics",
+            "ioc",
+            "yara",
+            "loki"
+          ],
+          "execution_policy": "normal"
+        }
+      ]
+    },
+    "binary": {
+      "label": "Binary / Reverse",
+      "icon": "🧩",
+      "commands": [
+        {
+          "id": "bin_001",
+          "name": "File — type binaire",
+          "short_name": "file",
+          "description": "Identifie le type d'un fichier",
+          "command": "file $BINARY",
+          "purpose": "Obtenir format, architecture et informations de base.",
+          "expected_output": "Type ELF/PE/script, arch, linking",
+          "risks": "Lecture locale sans modification.",
+          "prerequisites": [
+            "file installé",
+            "Binaire autorisé"
+          ],
+          "tool_required": "file",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "triage",
+            "file"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_002",
+          "name": "Checksec — protections ELF",
+          "short_name": "checksec",
+          "description": "Affiche NX/PIE/RELRO/Canary",
+          "command": "checksec --file=$BINARY",
+          "purpose": "Identifier les protections exploit mitigation d'un binaire ELF.",
+          "expected_output": "RELRO, Canary, NX, PIE, RPATH",
+          "risks": "Lecture locale.",
+          "prerequisites": [
+            "checksec installé",
+            "Binaire ELF"
+          ],
+          "tool_required": "checksec",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "pwn",
+            "elf",
+            "mitigations"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_003",
+          "name": "Readelf — headers ELF",
+          "short_name": "readelf -h",
+          "description": "Affiche les headers ELF",
+          "command": "readelf -h $BINARY",
+          "purpose": "Lire architecture, entrypoint, type et ABI.",
+          "expected_output": "ELF header détaillé",
+          "risks": "Lecture locale.",
+          "prerequisites": [
+            "readelf installé",
+            "Binaire ELF"
+          ],
+          "tool_required": "readelf",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "elf",
+            "headers"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_004",
+          "name": "Objdump — désassemblage rapide",
+          "short_name": "objdump -d",
+          "description": "Désassemble les sections exécutables",
+          "command": "objdump -d $BINARY | less",
+          "purpose": "Inspecter fonctions, appels et instructions.",
+          "expected_output": "Désassemblage assembleur",
+          "risks": "Lecture locale.",
+          "prerequisites": [
+            "objdump installé",
+            "Binaire autorisé"
+          ],
+          "tool_required": "objdump",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "reverse",
+            "assembly"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_005",
+          "name": "Strings — chaînes utiles",
+          "short_name": "strings binary",
+          "description": "Extrait chaînes d'un binaire",
+          "command": "strings -a -n 6 $BINARY | sort -u | less",
+          "purpose": "Trouver URLs, commandes, erreurs, symboles ou secrets.",
+          "expected_output": "Chaînes uniques lisibles",
+          "risks": "Peut afficher secrets hardcodés.",
+          "prerequisites": [
+            "strings installé",
+            "Binaire autorisé"
+          ],
+          "tool_required": "strings",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "strings",
+            "reverse"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_006",
+          "name": "Ltrace — appels librairie",
+          "short_name": "ltrace",
+          "description": "Trace les appels de librairies dynamiques",
+          "command": "ltrace -f ./$BINARY",
+          "purpose": "Comprendre comportement runtime via appels libc/librairies.",
+          "expected_output": "Appels fonctions et arguments",
+          "risks": "Exécute le binaire; dangereux si binaire non fiable.",
+          "prerequisites": [
+            "ltrace installé",
+            "Binaire de lab"
+          ],
+          "tool_required": "ltrace",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "dynamic",
+            "trace"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_007",
+          "name": "Strace — syscalls",
+          "short_name": "strace",
+          "description": "Trace les appels système",
+          "command": "strace -f -o strace.log ./$BINARY",
+          "purpose": "Observer fichiers, réseau, processus et syscalls utilisés.",
+          "expected_output": "Trace syscalls dans strace.log",
+          "risks": "Exécute le binaire; utiliser sandbox/lab.",
+          "prerequisites": [
+            "strace installé",
+            "Binaire de lab"
+          ],
+          "tool_required": "strace",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "syscall",
+            "trace"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_008",
+          "name": "GDB — debug binaire",
+          "short_name": "gdb",
+          "description": "Lance gdb sur un binaire",
+          "command": "gdb -q ./$BINARY",
+          "purpose": "Déboguer, poser breakpoints et inspecter mémoire/registres.",
+          "expected_output": "Session gdb interactive",
+          "risks": "Exécute potentiellement du code non fiable.",
+          "prerequisites": [
+            "gdb installé",
+            "Binaire de lab"
+          ],
+          "tool_required": "gdb",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "debug",
+            "gdb",
+            "pwn"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_009",
+          "name": "Pwndbg — checksec GDB",
+          "short_name": "pwndbg checksec",
+          "description": "Lance checksec depuis GDB/pwndbg",
+          "command": "gdb -q ./$BINARY -ex 'checksec' -ex 'quit'",
+          "purpose": "Vérifier protections avec environnement pwndbg.",
+          "expected_output": "Sortie checksec depuis gdb",
+          "risks": "Charge le binaire dans gdb.",
+          "prerequisites": [
+            "gdb installé",
+            "pwndbg installé"
+          ],
+          "tool_required": "gdb",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "pwndbg",
+            "pwn"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_010",
+          "name": "ROPgadget — gadgets",
+          "short_name": "ROPgadget",
+          "description": "Liste gadgets ROP d'un binaire",
+          "command": "ROPgadget --binary $BINARY --only 'pop|ret'",
+          "purpose": "Trouver gadgets utiles pour exploitation ROP en CTF/lab.",
+          "expected_output": "Gadgets et adresses",
+          "risks": "Lecture locale; usage offensif en exploit dev.",
+          "prerequisites": [
+            "ROPgadget installé",
+            "Binaire ELF/PE"
+          ],
+          "tool_required": "ROPgadget",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "rop",
+            "pwn",
+            "exploit-dev"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_011",
+          "name": "One_gadget — libc gadgets",
+          "short_name": "one_gadget",
+          "description": "Trouve gadgets execve dans libc",
+          "command": "one_gadget $LIBC",
+          "purpose": "Identifier offsets one_gadget pour exploitation ret2libc.",
+          "expected_output": "Offsets et contraintes one_gadget",
+          "risks": "Usage exploit dev CTF/lab.",
+          "prerequisites": [
+            "one_gadget installé",
+            "libc cible disponible"
+          ],
+          "tool_required": "one_gadget",
+          "safe_to_run": false,
+          "dangerous": true,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "pwn",
+            "libc",
+            "rop"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_012",
+          "name": "Radare2 — analyse auto",
+          "short_name": "r2 aaa",
+          "description": "Lance radare2 avec analyse automatique",
+          "command": "r2 -A $BINARY",
+          "purpose": "Explorer fonctions, graphes et références d'un binaire.",
+          "expected_output": "Shell radare2 interactif",
+          "risks": "Lecture/analyse locale.",
+          "prerequisites": [
+            "radare2 installé",
+            "Binaire autorisé"
+          ],
+          "tool_required": "r2",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "reverse",
+            "radare2"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_013",
+          "name": "Cutter — GUI reverse",
+          "short_name": "cutter",
+          "description": "Ouvre Cutter sur un binaire",
+          "command": "cutter $BINARY",
+          "purpose": "Analyser visuellement un binaire avec interface radare2.",
+          "expected_output": "Interface Cutter",
+          "risks": "Ouvre une GUI locale.",
+          "prerequisites": [
+            "cutter installé",
+            "Binaire autorisé"
+          ],
+          "tool_required": "cutter",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "reverse",
+            "gui"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_014",
+          "name": "Ghidra — lancement projet",
+          "short_name": "ghidraRun",
+          "description": "Lance Ghidra",
+          "command": "ghidraRun",
+          "purpose": "Démarrer Ghidra pour analyse statique avancée.",
+          "expected_output": "Interface Ghidra",
+          "risks": "Ouvre une GUI locale.",
+          "prerequisites": [
+            "Ghidra installé"
+          ],
+          "tool_required": "ghidraRun",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "reverse",
+            "ghidra"
+          ],
+          "execution_policy": "normal"
+        },
+        {
+          "id": "bin_015",
+          "name": "Pwntools — checksec Python",
+          "short_name": "pwntools checksec",
+          "description": "Utilise pwntools pour vérifier protections",
+          "command": "python3 -c \"from pwn import *; print(ELF('$BINARY').checksec())\"",
+          "purpose": "Obtenir rapidement les protections ELF depuis Python/pwntools.",
+          "expected_output": "Résumé protections ELF",
+          "risks": "Lecture locale du binaire.",
+          "prerequisites": [
+            "pwntools installé",
+            "Binaire ELF"
+          ],
+          "tool_required": "python3",
+          "safe_to_run": false,
+          "dangerous": false,
+          "requires_sudo": false,
+          "category": "binary",
+          "tags": [
+            "binary",
+            "pwntools",
+            "pwn",
+            "checksec"
           ],
           "execution_policy": "normal"
         }

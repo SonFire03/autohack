@@ -1,0 +1,357 @@
+{
+  "label": "Forensics / DFIR",
+  "icon": "🧬",
+  "commands": [
+    {
+      "id": "dfir_001",
+      "name": "Volatility3 — info mémoire",
+      "short_name": "volatility3 windows.info",
+      "description": "Identifie le profil et les infos OS d'une image mémoire",
+      "command": "vol -f $MEMORY_IMAGE windows.info",
+      "purpose": "Démarrer l'analyse mémoire avec les métadonnées OS.",
+      "expected_output": "Kernel base, DTB, version Windows/Linux",
+      "risks": "Analyse locale d'un dump potentiellement sensible.",
+      "prerequisites": [
+        "volatility3 installé",
+        "Image mémoire autorisée"
+      ],
+      "tool_required": "vol",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "memory",
+        "volatility"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_002",
+      "name": "Volatility3 — processus",
+      "short_name": "volatility3 pslist",
+      "description": "Liste les processus depuis un dump mémoire",
+      "command": "vol -f $MEMORY_IMAGE windows.pslist",
+      "purpose": "Identifier processus suspects dans une image mémoire.",
+      "expected_output": "PID, PPID, image, offsets",
+      "risks": "Peut exposer noms/processus sensibles.",
+      "prerequisites": [
+        "volatility3 installé",
+        "Image mémoire"
+      ],
+      "tool_required": "vol",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "memory",
+        "process"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_003",
+      "name": "Volatility3 — connexions réseau",
+      "short_name": "volatility3 netscan",
+      "description": "Liste les connexions réseau dans un dump Windows",
+      "command": "vol -f $MEMORY_IMAGE windows.netscan",
+      "purpose": "Identifier connexions réseau suspectes au moment de la capture.",
+      "expected_output": "IP, ports, PID, états réseau",
+      "risks": "Analyse de données sensibles.",
+      "prerequisites": [
+        "volatility3 installé",
+        "Dump Windows"
+      ],
+      "tool_required": "vol",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "network",
+        "memory"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_004",
+      "name": "YARA — scan dossier",
+      "short_name": "yara recursive",
+      "description": "Scanne récursivement avec règles YARA",
+      "command": "yara -r $RULES_DIR $TARGET_DIR",
+      "purpose": "Détecter IoC/malware patterns dans fichiers d'un dossier.",
+      "expected_output": "Matches règle/fichier",
+      "risks": "Peut lire beaucoup de fichiers sensibles.",
+      "prerequisites": [
+        "yara installé",
+        "Règles YARA disponibles"
+      ],
+      "tool_required": "yara",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "yara",
+        "ioc"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_005",
+      "name": "ExifTool — métadonnées fichier",
+      "short_name": "exiftool",
+      "description": "Extrait les métadonnées d'un fichier",
+      "command": "exiftool $FILE",
+      "purpose": "Analyser métadonnées, timestamps, auteurs et informations embarquées.",
+      "expected_output": "Métadonnées structurées du fichier",
+      "risks": "Peut afficher données personnelles embarquées.",
+      "prerequisites": [
+        "exiftool installé",
+        "Fichier autorisé"
+      ],
+      "tool_required": "exiftool",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "metadata",
+        "exif"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_006",
+      "name": "Binwalk — analyse firmware",
+      "short_name": "binwalk",
+      "description": "Analyse signatures et systèmes embarqués",
+      "command": "binwalk -e $FIRMWARE",
+      "purpose": "Extraire partitions, fichiers et blobs depuis firmware.",
+      "expected_output": "Offsets, signatures, extraction _firmware.extracted",
+      "risks": "Extraction de contenu potentiellement sensible.",
+      "prerequisites": [
+        "binwalk installé",
+        "Firmware autorisé"
+      ],
+      "tool_required": "binwalk",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "firmware",
+        "embedded"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_007",
+      "name": "Foremost — file carving",
+      "short_name": "foremost",
+      "description": "Récupère fichiers depuis image disque",
+      "command": "foremost -i $IMAGE -o foremost_out",
+      "purpose": "Carver des fichiers supprimés ou non référencés.",
+      "expected_output": "Dossiers par type de fichier récupéré",
+      "risks": "Peut extraire données personnelles/sensibles.",
+      "prerequisites": [
+        "foremost installé",
+        "Image disque autorisée"
+      ],
+      "tool_required": "foremost",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "carving",
+        "disk"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_008",
+      "name": "Bulk Extractor — artefacts",
+      "short_name": "bulk_extractor",
+      "description": "Extrait emails, URLs, numéros et artefacts",
+      "command": "bulk_extractor -o bulk_out $IMAGE",
+      "purpose": "Extraire artefacts d'une image disque/mémoire.",
+      "expected_output": "Fichiers de features dans bulk_out",
+      "risks": "Peut extraire données personnelles massivement.",
+      "prerequisites": [
+        "bulk_extractor installé",
+        "Image autorisée"
+      ],
+      "tool_required": "bulk_extractor",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "artifacts",
+        "disk"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_009",
+      "name": "Strings — extraction ASCII/Unicode",
+      "short_name": "strings",
+      "description": "Extrait chaînes lisibles d'un binaire/image",
+      "command": "strings -a -n 8 $FILE | less",
+      "purpose": "Trouver URLs, chemins, clés ou IoC dans un fichier.",
+      "expected_output": "Chaînes lisibles filtrées",
+      "risks": "Peut afficher secrets présents dans le fichier.",
+      "prerequisites": [
+        "strings installé",
+        "Fichier autorisé"
+      ],
+      "tool_required": "strings",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "strings",
+        "ioc"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_010",
+      "name": "Hashdeep — hash récursif",
+      "short_name": "hashdeep",
+      "description": "Calcule les empreintes récursives",
+      "command": "hashdeep -rl $TARGET_DIR > hashes.txt",
+      "purpose": "Créer un inventaire d'intégrité pour comparaison.",
+      "expected_output": "Liste hashes et chemins",
+      "risks": "Lecture récursive d'un dossier sensible.",
+      "prerequisites": [
+        "hashdeep installé",
+        "Dossier autorisé"
+      ],
+      "tool_required": "hashdeep",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "hash",
+        "integrity"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_011",
+      "name": "ClamAV — scan dossier",
+      "short_name": "clamscan",
+      "description": "Scanne un dossier avec ClamAV",
+      "command": "clamscan -r --bell -i $TARGET_DIR",
+      "purpose": "Détecter malwares connus dans un dossier.",
+      "expected_output": "Fichiers infectés listés si trouvés",
+      "risks": "Lecture récursive de fichiers; faux positifs possibles.",
+      "prerequisites": [
+        "clamav installé",
+        "Signatures à jour"
+      ],
+      "tool_required": "clamscan",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "malware",
+        "antivirus"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_012",
+      "name": "Journalctl — erreurs récentes",
+      "short_name": "journalctl errors",
+      "description": "Extrait erreurs système récentes",
+      "command": "journalctl -p err..alert --since '24 hours ago'",
+      "purpose": "Trier rapidement les erreurs système post-incident.",
+      "expected_output": "Logs err/alert des dernières 24h",
+      "risks": "Peut afficher logs sensibles.",
+      "prerequisites": [
+        "systemd/journalctl disponible"
+      ],
+      "tool_required": "journalctl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "logs",
+        "linux"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_013",
+      "name": "Auth logs — connexions SSH",
+      "short_name": "grep auth ssh",
+      "description": "Filtre les logs auth pour SSH",
+      "command": "sudo grep -Ei 'sshd|failed|accepted|invalid' /var/log/auth.log | tail -100",
+      "purpose": "Identifier tentatives SSH, succès, échecs et utilisateurs invalides.",
+      "expected_output": "100 dernières lignes auth liées SSH",
+      "risks": "Lecture de logs système sensibles.",
+      "prerequisites": [
+        "Accès sudo",
+        "/var/log/auth.log présent"
+      ],
+      "tool_required": "grep",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": true,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "ssh",
+        "logs",
+        "linux"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "dfir_014",
+      "name": "Loki — IoC scanner",
+      "short_name": "loki",
+      "description": "Scanne un dossier avec règles Loki",
+      "command": "python3 loki.py -p $TARGET_DIR",
+      "purpose": "Détecter IoC connus via signatures Loki/YARA.",
+      "expected_output": "Findings Loki avec sévérité",
+      "risks": "Lecture récursive; dépend de règles à jour.",
+      "prerequisites": [
+        "Loki disponible",
+        "Dossier autorisé"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "forensics",
+      "tags": [
+        "forensics",
+        "ioc",
+        "yara",
+        "loki"
+      ],
+      "execution_policy": "normal"
+    }
+  ]
+}

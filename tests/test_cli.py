@@ -51,7 +51,10 @@ def test_list_ids_contains_known_ids():
 def test_list_categories_flag():
     r = run("--list-categories")
     assert r.returncode == 0
-    for cat in ("system", "network", "tor", "privoxy", "scrapy", "elastic", "diagnostic"):
+    for cat in (
+        "system", "network", "tor", "privoxy", "scrapy", "elastic", "diagnostic",
+        "cloud", "forensics", "binary",
+    ):
         assert cat in r.stdout
 
 
@@ -85,7 +88,8 @@ def test_category_invalid_exits_1():
 def test_category_all_valid_categories():
     """Chaque catégorie connue doit répondre avec code 0."""
     for cat in ("system", "network", "tor", "privoxy", "scrapy",
-                "json_export", "elastic", "diagnostic"):
+                "json_export", "elastic", "diagnostic",
+                "cloud", "forensics", "binary"):
         r = run("--category", cat)
         assert r.returncode == 0, f"--category {cat} a retourné {r.returncode}"
 
@@ -265,6 +269,24 @@ def test_search_docker_finds_new_system_command():
     r = run("--search", "docker containers")
     assert r.returncode == 0
     assert "sys_029" in r.stdout
+
+
+def test_search_trivy_finds_cloud_command():
+    r = run("--search", "trivy container")
+    assert r.returncode == 0
+    assert "cloud_001" in r.stdout
+
+
+def test_search_volatility_finds_forensics_command():
+    r = run("--search", "volatility memory")
+    assert r.returncode == 0
+    assert "dfir_001" in r.stdout
+
+
+def test_search_checksec_finds_binary_command():
+    r = run("--search", "checksec elf")
+    assert r.returncode == 0
+    assert "bin_002" in r.stdout
 
 
 # ── --tag ──────────────────────────────────────────────────────────────────────

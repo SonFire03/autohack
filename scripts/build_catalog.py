@@ -26,6 +26,9 @@ CATEGORY_ORDER = [
     "web_attack",
     "passwords",
     "post_exploit",
+    "cloud",
+    "forensics",
+    "binary",
     "xss",
 ]
 

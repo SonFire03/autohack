@@ -28,6 +28,9 @@ CATEGORY_LABELS = {
     "web_attack":  "Attaque Web",
     "passwords":   "Cracking / Brute-force",
     "post_exploit":"Post-Exploitation",
+    "cloud":       "Cloud / Kubernetes",
+    "forensics":   "Forensics / DFIR",
+    "binary":      "Binary / Reverse",
     "xss":         "XSS Payloads",
 }
 
@@ -44,6 +47,9 @@ CATEGORY_ICONS = {
     "web_attack":  "🕸 ",
     "passwords":   "🔑",
     "post_exploit":"💀",
+    "cloud":       "☁️",
+    "forensics":   "🧬",
+    "binary":      "🧩",
     "xss":         "⚡",
 }
 

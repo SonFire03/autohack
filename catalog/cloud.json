@@ -1,0 +1,471 @@
+{
+  "label": "Cloud / Kubernetes",
+  "icon": "☁️",
+  "commands": [
+    {
+      "id": "cloud_001",
+      "name": "Trivy — scan image container",
+      "short_name": "trivy image",
+      "description": "Scanne une image Docker/OCI pour CVE et secrets",
+      "command": "trivy image --severity HIGH,CRITICAL $IMAGE",
+      "purpose": "Identifier les vulnérabilités critiques dans une image avant déploiement.",
+      "expected_output": "Liste de CVE par paquet, sévérité et version corrigée",
+      "risks": "Télécharge des bases de vulnérabilités et analyse une image locale ou distante.",
+      "prerequisites": [
+        "trivy installé",
+        "Image autorisée"
+      ],
+      "tool_required": "trivy",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "cloud",
+        "container",
+        "docker",
+        "cve",
+        "trivy"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_002",
+      "name": "Trivy — scan filesystem",
+      "short_name": "trivy fs",
+      "description": "Scanne un répertoire pour CVE, secrets et IaC",
+      "command": "trivy fs --scanners vuln,secret,misconfig .",
+      "purpose": "Auditer un projet local pour dépendances vulnérables, secrets et erreurs IaC.",
+      "expected_output": "Findings par fichier, paquet ou secret potentiel",
+      "risks": "Peut afficher des secrets présents localement dans la sortie.",
+      "prerequisites": [
+        "trivy installé",
+        "Projet local à auditer"
+      ],
+      "tool_required": "trivy",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "trivy",
+        "filesystem",
+        "secrets",
+        "iac",
+        "cloud"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_003",
+      "name": "Syft — générer SBOM",
+      "short_name": "syft",
+      "description": "Génère une Software Bill of Materials pour image ou dossier",
+      "command": "syft $IMAGE -o table",
+      "purpose": "Lister les composants logiciels d'une image ou application.",
+      "expected_output": "SBOM avec paquets, versions et types",
+      "risks": "Lecture locale ou image distante. Pas destructif.",
+      "prerequisites": [
+        "syft installé",
+        "Image ou chemin disponible"
+      ],
+      "tool_required": "syft",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "sbom",
+        "syft",
+        "container",
+        "supply-chain"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_004",
+      "name": "Grype — scan vuln depuis SBOM/image",
+      "short_name": "grype",
+      "description": "Scanne une image ou SBOM contre une base CVE",
+      "command": "grype $IMAGE --fail-on high",
+      "purpose": "Détecter les vulnérabilités exploitables dans les composants logiciels.",
+      "expected_output": "CVE, sévérité, paquet affecté, version fix",
+      "risks": "Peut échouer volontairement si vulnérabilités high détectées.",
+      "prerequisites": [
+        "grype installé",
+        "Image ou SBOM autorisé"
+      ],
+      "tool_required": "grype",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "grype",
+        "cve",
+        "sbom",
+        "container"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_005",
+      "name": "Docker Bench — audit host Docker",
+      "short_name": "docker-bench-security",
+      "description": "Lance Docker Bench for Security sur l'hôte",
+      "command": "sudo docker run --rm --net host --pid host --userns host --cap-add audit_control -v /etc:/etc:ro -v /usr/bin/containerd:/usr/bin/containerd:ro -v /usr/bin/runc:/usr/bin/runc:ro -v /usr/lib/systemd:/usr/lib/systemd:ro -v /var/lib:/var/lib:ro -v /var/run/docker.sock:/var/run/docker.sock:ro docker/docker-bench-security",
+      "purpose": "Contrôler la configuration sécurité Docker selon CIS benchmark.",
+      "expected_output": "Liste de PASS/WARN/INFO sur la configuration Docker",
+      "risks": "Accès privilégié au socket Docker et à des chemins système.",
+      "prerequisites": [
+        "Docker installé",
+        "Droits sudo",
+        "Hôte Docker autorisé"
+      ],
+      "tool_required": "docker",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": true,
+      "category": "cloud",
+      "tags": [
+        "docker",
+        "cis",
+        "audit",
+        "container"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_006",
+      "name": "Kubectl — contexte courant",
+      "short_name": "kubectl config",
+      "description": "Affiche le contexte Kubernetes actif",
+      "command": "kubectl config current-context",
+      "purpose": "Vérifier le cluster Kubernetes ciblé avant toute commande.",
+      "expected_output": "Nom du contexte courant",
+      "risks": "Faible risque, lecture de configuration locale.",
+      "prerequisites": [
+        "kubectl installé",
+        "kubeconfig configuré"
+      ],
+      "tool_required": "kubectl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "kubernetes",
+        "kubectl",
+        "context"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_007",
+      "name": "Kubectl — droits can-i all",
+      "short_name": "kubectl auth can-i",
+      "description": "Vérifie les droits Kubernetes du compte courant",
+      "command": "kubectl auth can-i --list",
+      "purpose": "Lister les permissions RBAC du contexte courant.",
+      "expected_output": "Table des verbes/ressources autorisés",
+      "risks": "Peut révéler des permissions sensibles dans la sortie.",
+      "prerequisites": [
+        "kubectl installé",
+        "Accès cluster autorisé"
+      ],
+      "tool_required": "kubectl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "kubernetes",
+        "rbac",
+        "auth",
+        "can-i"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_008",
+      "name": "Kubectl — enum secrets",
+      "short_name": "kubectl secrets",
+      "description": "Liste les secrets Kubernetes accessibles",
+      "command": "kubectl get secrets -A",
+      "purpose": "Identifier les namespaces avec secrets exposés au compte courant.",
+      "expected_output": "Secrets par namespace, type et âge",
+      "risks": "Affiche des noms de secrets sensibles; ne dump pas les valeurs.",
+      "prerequisites": [
+        "kubectl installé",
+        "Accès cluster autorisé"
+      ],
+      "tool_required": "kubectl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "kubernetes",
+        "secrets",
+        "enum"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_009",
+      "name": "Kubectl — dump secret ciblé",
+      "short_name": "kubectl secret decode",
+      "description": "Décode un secret Kubernetes spécifique",
+      "command": "kubectl get secret $SECRET -n $NAMESPACE -o jsonpath='{.data}' | jq 'map_values(@base64d)'",
+      "purpose": "Lire les valeurs d'un secret accessible via RBAC.",
+      "expected_output": "Données du secret décodées",
+      "risks": "Expose directement des secrets. À utiliser uniquement avec autorisation.",
+      "prerequisites": [
+        "kubectl installé",
+        "jq installé",
+        "Droit de lecture sur le secret"
+      ],
+      "tool_required": "kubectl",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "kubernetes",
+        "secret",
+        "credentials",
+        "rbac"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_010",
+      "name": "Kube-bench — benchmark CIS",
+      "short_name": "kube-bench",
+      "description": "Exécute les contrôles CIS Kubernetes",
+      "command": "kube-bench run --targets node,policies,managedservices",
+      "purpose": "Auditer la configuration Kubernetes selon CIS.",
+      "expected_output": "PASS/FAIL/WARN par contrôle CIS",
+      "risks": "Lecture de configuration; peut nécessiter privilèges selon environnement.",
+      "prerequisites": [
+        "kube-bench installé",
+        "Cluster/noeud autorisé"
+      ],
+      "tool_required": "kube-bench",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "kubernetes",
+        "cis",
+        "audit"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_011",
+      "name": "Kube-hunter — scan cluster",
+      "short_name": "kube-hunter",
+      "description": "Scanne un cluster Kubernetes pour expositions connues",
+      "command": "kube-hunter --remote $TARGET",
+      "purpose": "Identifier services Kubernetes exposés et mauvaises configurations.",
+      "expected_output": "Findings kube-hunter avec sévérité",
+      "risks": "Scan actif réseau. Peut déclencher alertes.",
+      "prerequisites": [
+        "kube-hunter installé",
+        "Cible Kubernetes autorisée"
+      ],
+      "tool_required": "kube-hunter",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "kubernetes",
+        "scan",
+        "exposure"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_012",
+      "name": "Prowler — audit AWS",
+      "short_name": "prowler aws",
+      "description": "Lance un audit AWS sécurité/compliance",
+      "command": "prowler aws --profile $AWS_PROFILE --output-formats csv json html",
+      "purpose": "Auditer IAM, S3, CloudTrail, GuardDuty et services AWS.",
+      "expected_output": "Rapports CSV/JSON/HTML avec findings par contrôle",
+      "risks": "Nécessite credentials AWS; peut lister beaucoup de ressources sensibles.",
+      "prerequisites": [
+        "prowler installé",
+        "Profil AWS autorisé"
+      ],
+      "tool_required": "prowler",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "aws",
+        "cloud",
+        "audit",
+        "prowler"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_013",
+      "name": "ScoutSuite — audit multi-cloud AWS",
+      "short_name": "scoutsuite aws",
+      "description": "Génère un rapport ScoutSuite AWS",
+      "command": "scout aws --profile $AWS_PROFILE --report-dir scoutsuite-report",
+      "purpose": "Cartographier les risques de configuration AWS.",
+      "expected_output": "Rapport HTML ScoutSuite",
+      "risks": "Lecture de ressources cloud sensibles via credentials.",
+      "prerequisites": [
+        "ScoutSuite installé",
+        "Profil AWS autorisé"
+      ],
+      "tool_required": "scout",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "aws",
+        "scoutsuite",
+        "cloud",
+        "audit"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_014",
+      "name": "Pacu — console offensive AWS lab",
+      "short_name": "pacu",
+      "description": "Lance Pacu pour tests AWS autorisés",
+      "command": "pacu",
+      "purpose": "Démarrer un environnement modulaire de tests AWS offensifs en lab.",
+      "expected_output": "Console Pacu interactive",
+      "risks": "Peut exécuter des modules intrusifs selon actions utilisateur.",
+      "prerequisites": [
+        "pacu installé",
+        "Compte AWS lab autorisé"
+      ],
+      "tool_required": "pacu",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "aws",
+        "pacu",
+        "cloud",
+        "offensive"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_015",
+      "name": "AWS CLI — enum identité",
+      "short_name": "aws sts",
+      "description": "Affiche l'identité AWS courante",
+      "command": "aws sts get-caller-identity --profile $AWS_PROFILE",
+      "purpose": "Confirmer le compte, l'ARN et l'utilisateur/role avant audit.",
+      "expected_output": "Account, Arn, UserId",
+      "risks": "Lecture simple; révèle l'identité du compte.",
+      "prerequisites": [
+        "awscli installé",
+        "Profil AWS configuré"
+      ],
+      "tool_required": "aws",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "aws",
+        "iam",
+        "sts",
+        "identity"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_016",
+      "name": "AWS CLI — buckets S3",
+      "short_name": "aws s3 ls",
+      "description": "Liste les buckets S3 accessibles",
+      "command": "aws s3 ls --profile $AWS_PROFILE",
+      "purpose": "Identifier les buckets accessibles au profil courant.",
+      "expected_output": "Liste de buckets et dates",
+      "risks": "Peut révéler des noms de ressources sensibles.",
+      "prerequisites": [
+        "awscli installé",
+        "Profil AWS autorisé"
+      ],
+      "tool_required": "aws",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "aws",
+        "s3",
+        "enum",
+        "cloud"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_017",
+      "name": "GCP — identité active",
+      "short_name": "gcloud auth list",
+      "description": "Liste les comptes gcloud actifs",
+      "command": "gcloud auth list",
+      "purpose": "Vérifier quel compte GCP est utilisé avant audit.",
+      "expected_output": "Comptes gcloud et compte actif",
+      "risks": "Lecture locale de config gcloud.",
+      "prerequisites": [
+        "gcloud installé"
+      ],
+      "tool_required": "gcloud",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "gcp",
+        "cloud",
+        "identity"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "cloud_018",
+      "name": "Azure — compte courant",
+      "short_name": "az account show",
+      "description": "Affiche le tenant/subscription Azure actif",
+      "command": "az account show",
+      "purpose": "Confirmer subscription et tenant Azure avant audit.",
+      "expected_output": "JSON tenantId, subscriptionId, user",
+      "risks": "Révèle des informations de tenant/subscription.",
+      "prerequisites": [
+        "Azure CLI installé",
+        "Connexion az active"
+      ],
+      "tool_required": "az",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "cloud",
+      "tags": [
+        "azure",
+        "cloud",
+        "identity"
+      ],
+      "execution_policy": "normal"
+    }
+  ]
+}

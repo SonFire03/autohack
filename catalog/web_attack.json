@@ -1380,6 +1380,215 @@
         "audit"
       ],
       "execution_policy": "normal"
+    },
+    {
+      "id": "web_054",
+      "name": "Kiterunner — API route discovery",
+      "short_name": "kiterunner",
+      "description": "Bruteforce intelligent de routes API",
+      "command": "kr scan http://$TARGET -w routes.kite -A=apiroutes-210228",
+      "purpose": "Découvrir routes API cachées à partir de wordlists kiterunner.",
+      "expected_output": "Routes API valides avec status et longueur",
+      "risks": "Fuzzing actif potentiellement bruyant.",
+      "prerequisites": [
+        "kiterunner installé",
+        "Wordlist routes.kite disponible"
+      ],
+      "tool_required": "kr",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "api",
+        "kiterunner",
+        "routes",
+        "web"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_055",
+      "name": "Newman — replay collection Postman",
+      "short_name": "newman",
+      "description": "Exécute une collection Postman",
+      "command": "newman run $COLLECTION -e $ENVIRONMENT --reporters cli,json",
+      "purpose": "Rejouer des tests API documentés pour vérifier sécurité/régression.",
+      "expected_output": "Résultats assertions et rapport JSON",
+      "risks": "Peut modifier des données si la collection contient POST/PUT/DELETE.",
+      "prerequisites": [
+        "newman installé",
+        "Collection autorisée"
+      ],
+      "tool_required": "newman",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "api",
+        "postman",
+        "newman",
+        "testing"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_056",
+      "name": "OpenAPI — endpoints exposés",
+      "short_name": "curl swagger",
+      "description": "Télécharge une spécification OpenAPI exposée",
+      "command": "curl -s http://$TARGET/swagger.json | jq '.paths | keys'",
+      "purpose": "Lister les endpoints depuis Swagger/OpenAPI public.",
+      "expected_output": "Liste des chemins API",
+      "risks": "Lecture HTTP; révèle surface API.",
+      "prerequisites": [
+        "curl installé",
+        "jq installé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "api",
+        "openapi",
+        "swagger",
+        "recon"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_057",
+      "name": "JWT Tool — audit token",
+      "short_name": "jwt_tool audit",
+      "description": "Analyse et teste un JWT",
+      "command": "python3 jwt_tool.py $TOKEN -M at",
+      "purpose": "Tester algorithmes, claims et mauvaises configs JWT.",
+      "expected_output": "Résultats modules JWT Tool",
+      "risks": "Peut tenter des attaques actives selon modules.",
+      "prerequisites": [
+        "jwt_tool disponible",
+        "Token autorisé"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "api",
+        "jwt",
+        "token",
+        "auth"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_058",
+      "name": "FFUF — fuzz JSON API",
+      "short_name": "ffuf json",
+      "description": "Fuzz un paramètre JSON avec ffuf",
+      "command": "ffuf -w /usr/share/seclists/Discovery/Web-Content/api/actions.txt -u http://$TARGET/api -X POST -H 'Content-Type: application/json' -d '{\"action\":\"FUZZ\"}' -mc all",
+      "purpose": "Découvrir actions/valeurs cachées dans une API JSON.",
+      "expected_output": "Réponses différenciées par status/size/words",
+      "risks": "Fuzzing actif bruyant, peut déclencher des actions si endpoint sensible.",
+      "prerequisites": [
+        "ffuf installé",
+        "API autorisée",
+        "Wordlist disponible"
+      ],
+      "tool_required": "ffuf",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "api",
+        "ffuf",
+        "json",
+        "fuzzing"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_059",
+      "name": "Nuclei — API exposures",
+      "short_name": "nuclei api",
+      "description": "Lance templates nuclei orientés API/exposures",
+      "command": "nuclei -u http://$TARGET -tags exposure,api,swagger,graphql",
+      "purpose": "Détecter endpoints API exposés, Swagger, GraphQL et configs faibles.",
+      "expected_output": "Findings nuclei filtrés par tags",
+      "risks": "Scan actif avec templates variés.",
+      "prerequisites": [
+        "nuclei installé",
+        "templates à jour"
+      ],
+      "tool_required": "nuclei",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "api",
+        "nuclei",
+        "swagger",
+        "graphql"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_060",
+      "name": "GraphQL — introspection full",
+      "short_name": "graphql introspection",
+      "description": "Récupère le schéma GraphQL complet",
+      "command": "curl -s -X POST http://$TARGET/graphql -H 'Content-Type: application/json' --data '{\"query\":\"query IntrospectionQuery { __schema { types { name fields { name } } } }\"}' | jq",
+      "purpose": "Extraire types et champs GraphQL si introspection activée.",
+      "expected_output": "Schéma GraphQL JSON",
+      "risks": "Peut révéler toute la surface API.",
+      "prerequisites": [
+        "curl installé",
+        "jq installé",
+        "Endpoint GraphQL autorisé"
+      ],
+      "tool_required": "curl",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "api",
+        "graphql",
+        "introspection"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "web_061",
+      "name": "Corsy — audit CORS",
+      "short_name": "corsy",
+      "description": "Teste les mauvaises configurations CORS",
+      "command": "python3 corsy.py -u http://$TARGET",
+      "purpose": "Identifier CORS permissif exploitable.",
+      "expected_output": "Origines acceptées, credentials, verdict",
+      "risks": "Requêtes HTTP actives mais faibles.",
+      "prerequisites": [
+        "Corsy disponible",
+        "Application autorisée"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "web_attack",
+      "tags": [
+        "api",
+        "cors",
+        "web",
+        "misconfig"
+      ],
+      "execution_policy": "normal"
     }
   ]
 }

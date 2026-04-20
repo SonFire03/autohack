@@ -9,7 +9,7 @@
 
 AUTOHACK LAB COMMANDER is a terminal application for organizing, searching, documenting, and carefully running security lab commands from one place. It is built for students, CTF players, homelab users, and security practitioners who want a structured command catalog instead of scattered notes.
 
-The project provides both an interactive Rich-powered terminal UI and a non-interactive CLI. The catalog currently contains 1,358 commands across 13 categories, including system checks, local network diagnostics, Tor/Privoxy, Scrapy, Elasticsearch, reconnaissance, web testing, password auditing, post-exploitation lab workflows, and XSS payloads.
+The project provides both an interactive Rich-powered terminal UI and a non-interactive CLI. The catalog currently contains 1,413 commands across 16 categories, including system checks, local network diagnostics, Tor/Privoxy, Scrapy, Elasticsearch, reconnaissance, web testing, password auditing, post-exploitation lab workflows, cloud/Kubernetes, forensics, binary analysis, and XSS payloads.
 
 > Important: this project is intended for legal labs, owned systems, CTFs, training environments, and authorized security assessments only. Many catalog entries can be intrusive or dangerous outside a controlled environment.
 
@@ -45,7 +45,7 @@ AUTOHACK is not:
 
 - Interactive TUI built with `rich`
 - CLI mode for automation and quick lookups
-- 1,358 catalog entries
+- 1,413 catalog entries
 - 1,013 XSS payload entries
 - Tagged command search with accent-insensitive matching
 - Safety metadata: `safe`, `dry-run`, `lab-only`, `dangerous`, `sudo`
@@ -70,9 +70,12 @@ AUTOHACK is not:
 | Elastic / Logs | `elastic` | 13 |
 | Diagnostic / Debug | `diagnostic` | 18 |
 | Recon & Scan | `recon` | 46 |
-| Web Attack | `web_attack` | 53 |
+| Web Attack | `web_attack` | 61 |
 | Password Auditing | `passwords` | 34 |
 | Post-Exploitation Lab | `post_exploit` | 81 |
+| Cloud / Kubernetes | `cloud` | 18 |
+| Forensics / DFIR | `forensics` | 14 |
+| Binary / Reverse | `binary` | 15 |
 | XSS Payloads | `xss` | 1,013 |
 
 ## Installation

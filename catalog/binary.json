@@ -1,0 +1,385 @@
+{
+  "label": "Binary / Reverse",
+  "icon": "🧩",
+  "commands": [
+    {
+      "id": "bin_001",
+      "name": "File — type binaire",
+      "short_name": "file",
+      "description": "Identifie le type d'un fichier",
+      "command": "file $BINARY",
+      "purpose": "Obtenir format, architecture et informations de base.",
+      "expected_output": "Type ELF/PE/script, arch, linking",
+      "risks": "Lecture locale sans modification.",
+      "prerequisites": [
+        "file installé",
+        "Binaire autorisé"
+      ],
+      "tool_required": "file",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "triage",
+        "file"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_002",
+      "name": "Checksec — protections ELF",
+      "short_name": "checksec",
+      "description": "Affiche NX/PIE/RELRO/Canary",
+      "command": "checksec --file=$BINARY",
+      "purpose": "Identifier les protections exploit mitigation d'un binaire ELF.",
+      "expected_output": "RELRO, Canary, NX, PIE, RPATH",
+      "risks": "Lecture locale.",
+      "prerequisites": [
+        "checksec installé",
+        "Binaire ELF"
+      ],
+      "tool_required": "checksec",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "pwn",
+        "elf",
+        "mitigations"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_003",
+      "name": "Readelf — headers ELF",
+      "short_name": "readelf -h",
+      "description": "Affiche les headers ELF",
+      "command": "readelf -h $BINARY",
+      "purpose": "Lire architecture, entrypoint, type et ABI.",
+      "expected_output": "ELF header détaillé",
+      "risks": "Lecture locale.",
+      "prerequisites": [
+        "readelf installé",
+        "Binaire ELF"
+      ],
+      "tool_required": "readelf",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "elf",
+        "headers"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_004",
+      "name": "Objdump — désassemblage rapide",
+      "short_name": "objdump -d",
+      "description": "Désassemble les sections exécutables",
+      "command": "objdump -d $BINARY | less",
+      "purpose": "Inspecter fonctions, appels et instructions.",
+      "expected_output": "Désassemblage assembleur",
+      "risks": "Lecture locale.",
+      "prerequisites": [
+        "objdump installé",
+        "Binaire autorisé"
+      ],
+      "tool_required": "objdump",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "reverse",
+        "assembly"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_005",
+      "name": "Strings — chaînes utiles",
+      "short_name": "strings binary",
+      "description": "Extrait chaînes d'un binaire",
+      "command": "strings -a -n 6 $BINARY | sort -u | less",
+      "purpose": "Trouver URLs, commandes, erreurs, symboles ou secrets.",
+      "expected_output": "Chaînes uniques lisibles",
+      "risks": "Peut afficher secrets hardcodés.",
+      "prerequisites": [
+        "strings installé",
+        "Binaire autorisé"
+      ],
+      "tool_required": "strings",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "strings",
+        "reverse"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_006",
+      "name": "Ltrace — appels librairie",
+      "short_name": "ltrace",
+      "description": "Trace les appels de librairies dynamiques",
+      "command": "ltrace -f ./$BINARY",
+      "purpose": "Comprendre comportement runtime via appels libc/librairies.",
+      "expected_output": "Appels fonctions et arguments",
+      "risks": "Exécute le binaire; dangereux si binaire non fiable.",
+      "prerequisites": [
+        "ltrace installé",
+        "Binaire de lab"
+      ],
+      "tool_required": "ltrace",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "dynamic",
+        "trace"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_007",
+      "name": "Strace — syscalls",
+      "short_name": "strace",
+      "description": "Trace les appels système",
+      "command": "strace -f -o strace.log ./$BINARY",
+      "purpose": "Observer fichiers, réseau, processus et syscalls utilisés.",
+      "expected_output": "Trace syscalls dans strace.log",
+      "risks": "Exécute le binaire; utiliser sandbox/lab.",
+      "prerequisites": [
+        "strace installé",
+        "Binaire de lab"
+      ],
+      "tool_required": "strace",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "syscall",
+        "trace"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_008",
+      "name": "GDB — debug binaire",
+      "short_name": "gdb",
+      "description": "Lance gdb sur un binaire",
+      "command": "gdb -q ./$BINARY",
+      "purpose": "Déboguer, poser breakpoints et inspecter mémoire/registres.",
+      "expected_output": "Session gdb interactive",
+      "risks": "Exécute potentiellement du code non fiable.",
+      "prerequisites": [
+        "gdb installé",
+        "Binaire de lab"
+      ],
+      "tool_required": "gdb",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "debug",
+        "gdb",
+        "pwn"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_009",
+      "name": "Pwndbg — checksec GDB",
+      "short_name": "pwndbg checksec",
+      "description": "Lance checksec depuis GDB/pwndbg",
+      "command": "gdb -q ./$BINARY -ex 'checksec' -ex 'quit'",
+      "purpose": "Vérifier protections avec environnement pwndbg.",
+      "expected_output": "Sortie checksec depuis gdb",
+      "risks": "Charge le binaire dans gdb.",
+      "prerequisites": [
+        "gdb installé",
+        "pwndbg installé"
+      ],
+      "tool_required": "gdb",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "pwndbg",
+        "pwn"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_010",
+      "name": "ROPgadget — gadgets",
+      "short_name": "ROPgadget",
+      "description": "Liste gadgets ROP d'un binaire",
+      "command": "ROPgadget --binary $BINARY --only 'pop|ret'",
+      "purpose": "Trouver gadgets utiles pour exploitation ROP en CTF/lab.",
+      "expected_output": "Gadgets et adresses",
+      "risks": "Lecture locale; usage offensif en exploit dev.",
+      "prerequisites": [
+        "ROPgadget installé",
+        "Binaire ELF/PE"
+      ],
+      "tool_required": "ROPgadget",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "rop",
+        "pwn",
+        "exploit-dev"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_011",
+      "name": "One_gadget — libc gadgets",
+      "short_name": "one_gadget",
+      "description": "Trouve gadgets execve dans libc",
+      "command": "one_gadget $LIBC",
+      "purpose": "Identifier offsets one_gadget pour exploitation ret2libc.",
+      "expected_output": "Offsets et contraintes one_gadget",
+      "risks": "Usage exploit dev CTF/lab.",
+      "prerequisites": [
+        "one_gadget installé",
+        "libc cible disponible"
+      ],
+      "tool_required": "one_gadget",
+      "safe_to_run": false,
+      "dangerous": true,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "pwn",
+        "libc",
+        "rop"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_012",
+      "name": "Radare2 — analyse auto",
+      "short_name": "r2 aaa",
+      "description": "Lance radare2 avec analyse automatique",
+      "command": "r2 -A $BINARY",
+      "purpose": "Explorer fonctions, graphes et références d'un binaire.",
+      "expected_output": "Shell radare2 interactif",
+      "risks": "Lecture/analyse locale.",
+      "prerequisites": [
+        "radare2 installé",
+        "Binaire autorisé"
+      ],
+      "tool_required": "r2",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "reverse",
+        "radare2"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_013",
+      "name": "Cutter — GUI reverse",
+      "short_name": "cutter",
+      "description": "Ouvre Cutter sur un binaire",
+      "command": "cutter $BINARY",
+      "purpose": "Analyser visuellement un binaire avec interface radare2.",
+      "expected_output": "Interface Cutter",
+      "risks": "Ouvre une GUI locale.",
+      "prerequisites": [
+        "cutter installé",
+        "Binaire autorisé"
+      ],
+      "tool_required": "cutter",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "reverse",
+        "gui"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_014",
+      "name": "Ghidra — lancement projet",
+      "short_name": "ghidraRun",
+      "description": "Lance Ghidra",
+      "command": "ghidraRun",
+      "purpose": "Démarrer Ghidra pour analyse statique avancée.",
+      "expected_output": "Interface Ghidra",
+      "risks": "Ouvre une GUI locale.",
+      "prerequisites": [
+        "Ghidra installé"
+      ],
+      "tool_required": "ghidraRun",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "reverse",
+        "ghidra"
+      ],
+      "execution_policy": "normal"
+    },
+    {
+      "id": "bin_015",
+      "name": "Pwntools — checksec Python",
+      "short_name": "pwntools checksec",
+      "description": "Utilise pwntools pour vérifier protections",
+      "command": "python3 -c \"from pwn import *; print(ELF('$BINARY').checksec())\"",
+      "purpose": "Obtenir rapidement les protections ELF depuis Python/pwntools.",
+      "expected_output": "Résumé protections ELF",
+      "risks": "Lecture locale du binaire.",
+      "prerequisites": [
+        "pwntools installé",
+        "Binaire ELF"
+      ],
+      "tool_required": "python3",
+      "safe_to_run": false,
+      "dangerous": false,
+      "requires_sudo": false,
+      "category": "binary",
+      "tags": [
+        "binary",
+        "pwntools",
+        "pwn",
+        "checksec"
+      ],
+      "execution_policy": "normal"
+    }
+  ]
+}
