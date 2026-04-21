@@ -214,12 +214,12 @@
       "name": "TheHarvester — OSINT emails",
       "short_name": "theHarvester",
       "description": "Collecte emails, sous-domaines, IPs via moteurs de recherche publics",
-      "command": "theHarvester -d $DOMAIN -b google,bing,duckduckgo -l 200",
+      "command": "theHarvester -d $DOMAIN -b duckduckgo,crtsh,hackertarget,rapiddns -l 200",
       "purpose": "Trouver des adresses email d'employés, sous-domaines exposés et IPs associées à une organisation.",
       "expected_output": "Emails, sous-domaines, hôtes, IPs découverts via OSINT",
       "risks": "Requiert des API keys pour certaines sources. Résultats limités sans clés.",
       "prerequisites": [
-        "theHarvester installé (pip install theHarvester ou Kali)"
+        "theHarvester installé (pipx install git+https://github.com/laramies/theHarvester.git)"
       ],
       "tool_required": "theHarvester",
       "safe_to_run": false,
@@ -231,7 +231,8 @@
         "email",
         "subdomain",
         "theharvester",
-        "google"
+        "duckduckgo",
+        "crtsh"
       ]
     },
     {
@@ -1262,12 +1263,12 @@
       "name": "theHarvester — email et OSINT domaine",
       "short_name": "theHarvester -d -b",
       "description": "Collecte emails, sous-domaines, IPs via moteurs de recherche et sources OSINT publiques",
-      "command": "theHarvester -d $TARGET -b google,bing,linkedin,crtsh -l 500 -f /tmp/harvest_$TARGET",
+      "command": "theHarvester -d $TARGET -b duckduckgo,crtsh,hackertarget,rapiddns -l 500 -f /tmp/harvest_$TARGET",
       "purpose": "Cartographier ressources exposées et adresses email pour recon et phishing ciblé.",
       "expected_output": "Emails: john.doe@target.com; Hosts: mail.target.com [93.184.x.x]",
       "risks": "Interroge moteurs — peut déclencher CAPTCHAs. Résultats peuvent contenir données personnelles.",
       "prerequisites": [
-        "theHarvester installé (apt install theharvester)"
+        "theHarvester installé (pipx install git+https://github.com/laramies/theHarvester.git)"
       ],
       "tool_required": "theHarvester",
       "safe_to_run": false,

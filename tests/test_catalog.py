@@ -177,6 +177,15 @@ def test_catalog_covers_lpe_c2_and_persistence_gaps(catalog):
         assert tag in cmd.get("tags", [])
 
 
+def test_theharvester_commands_use_supported_sources(catalog):
+    unsupported_sources = {"google", "bing", "linkedin"}
+    for cmd in catalog.get_all():
+        if cmd.get("tool_required") == "theHarvester":
+            command = cmd["command"]
+            assert not any(f"-b {source}" in command for source in unsupported_sources)
+            assert not any(f",{source}" in command for source in unsupported_sources)
+
+
 def test_reload_keeps_same_count(catalog):
     before = len(catalog.get_all())
     catalog.reload()
