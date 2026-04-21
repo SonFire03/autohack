@@ -118,8 +118,7 @@ Launch the interactive interface:
 python3 main.py
 ```
 
-<img width="1580" height="1309" alt="image" src="https://github.com/user-attachments/assets/7ea00c7b-4659-40cc-a624-2ca65e028bed" />
-
+<img width="1580" height="1309" alt="AUTOHACK main menu" src="docs/screenshots/main-menu.png" />
 
 Search the catalog:
 
@@ -191,6 +190,11 @@ python3 main.py --missing-tools
 python3 main.py --install-profile basic --install-dry-run
 python3 main.py --install-profile advanced --install-dry-run
 ```
+
+The interactive `UTILS` column also includes:
+
+- `Target Workspace` to define the current target, URL, scope, notes, and shared variables.
+- `Command Builder` to render common lab commands from `$TARGET`, `$LHOST`, `$LPORT`, `$WORDLIST`, and related variables without executing them automatically.
 
 ## CLI Reference
 
@@ -277,6 +281,7 @@ Runtime data is stored locally. These files are not meant to be committed:
 - `~/.autohack.json` for user configuration
 - `~/.autohack_history.json` for local history
 - `~/.autohack_favorites.json` for favorites
+- `~/.autohack_variables.json` for target workspace variables
 
 The repository includes `.gitkeep` files so `logs/` and `exports/` exist, but generated content inside them is ignored by Git.
 

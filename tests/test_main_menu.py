@@ -61,8 +61,16 @@ def test_quick_view_docker_collects_tool_and_tag_matches():
 
 def test_main_menu_exposes_new_catalog_sections():
     keys = {item[0] for item in _ITEMS}
-    assert {"21", "22", "23"} <= keys
+    assert {"15", "16", "17"} <= keys
     labels = {item[2] for item in _ITEMS}
     assert "Cloud / K8s" in labels
     assert "Forensics / DFIR" in labels
     assert "Binary / Reverse" in labels
+
+
+def test_main_menu_exposes_target_workspace_and_command_builder():
+    keys = {item[0] for item in _ITEMS}
+    assert {"18", "19"} <= keys
+    labels = {item[2] for item in _ITEMS}
+    assert "Target Workspace" in labels
+    assert "Command Builder" in labels

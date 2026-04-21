@@ -41,6 +41,8 @@ from menus.cloud import CloudMenu
 from menus.forensics import ForensicsMenu
 from menus.binary import BinaryMenu
 from menus.xss_menu import XssMenu
+from menus.target_workspace_menu import TargetWorkspaceMenu
+from menus.command_builder_menu import CommandBuilderMenu
 from menus.variables_menu import VariablesMenu
 from menus.revshell_menu import RevShellMenu
 from menus.hash_id_menu import HashIdMenu
@@ -81,24 +83,26 @@ _ITEMS = [
     ("15", "☁️ ", "Cloud / K8s",       "trivy · kubectl · prowler",     "kali"),
     ("16", "🧬", "Forensics / DFIR",  "volatility · yara · logs",      "kali"),
     ("17", "🧩", "Binary / Reverse",  "gdb · checksec · ghidra",       "kali"),
-    # UTILS — 18-28
-    ("18", "🌐", "Variables",         "$TARGET · $LHOST · $LPORT",     "utils"),
-    ("19", "🐚", "Rev Shells",        "Bash · Python · PS · Java",     "utils"),
-    ("20", "🔓", "Hash Identifier",   "MD5 · NTLM · bcrypt · SHA",     "utils"),
-    ("21", "💎", "Loot Vault",        "Credentials · flags · clés",    "utils"),
-    ("22", "🔤", "Encoder",           "Base64 · URL · Hex · NTLM",     "utils"),
-    ("23", "📚", "Wordlists",         "Parcourir les listes système",   "utils"),
-    ("24", "🔌", "Port Reference",    "85+ ports · pentest notes",     "utils"),
-    ("25", "🪙", "JWT Decoder",       "Header · payload · alg check",  "utils"),
-    ("26", "📐", "CIDR Calc",         "Subnet · broadcast · hosts",    "utils"),
-    ("27", "📝", "Report Generator",  "Markdown · session + loot",     "utils"),
-    ("28", "🧰", "Toolbox Installer", "Installer les profils outils",  "utils"),
-    # OUTILS — 29-34
-    ("29", "📖", "Aide",              "Documentation pédagogique",     "tools"),
-    ("30", "💾", "Export catalogue",  "md · txt · json · html",        "tools"),
-    ("31", "🔎", "Recherche",         "Chercher une commande",         "tools"),
-    ("32", "🚦", "Vérifications",     "Lancer les checks safe",        "tools"),
-    ("33", "⚙️ ", "Configuration",    "Paramètres de l'appli",         "tools"),
+    # UTILS — 18-29
+    ("18", "🎯", "Target Workspace",  "$TARGET · scope · notes",       "utils"),
+    ("19", "🧱", "Command Builder",   "nmap · ffuf · hydra · curl",    "utils"),
+    ("20", "🌐", "Variables",         "$TARGET · $LHOST · $LPORT",     "utils"),
+    ("21", "🐚", "Rev Shells",        "Bash · Python · PS · Java",     "utils"),
+    ("22", "🔓", "Hash Identifier",   "MD5 · NTLM · bcrypt · SHA",     "utils"),
+    ("23", "💎", "Loot Vault",        "Credentials · flags · clés",    "utils"),
+    ("24", "🔤", "Encoder",           "Base64 · URL · Hex · NTLM",     "utils"),
+    ("25", "📚", "Wordlists",         "Parcourir les listes système",   "utils"),
+    ("26", "🔌", "Port Reference",    "85+ ports · pentest notes",     "utils"),
+    ("27", "🪙", "JWT Decoder",       "Header · payload · alg check",  "utils"),
+    ("28", "📐", "CIDR Calc",         "Subnet · broadcast · hosts",    "utils"),
+    ("29", "📝", "Report Generator",  "Markdown · session + loot",     "utils"),
+    ("30", "🧰", "Toolbox Installer", "Installer les profils outils",  "utils"),
+    # OUTILS — 31-35
+    ("31", "📖", "Aide",              "Documentation pédagogique",     "tools"),
+    ("32", "💾", "Export catalogue",  "md · txt · json · html",        "tools"),
+    ("33", "🔎", "Recherche",         "Chercher une commande",         "tools"),
+    ("34", "🚦", "Vérifications",     "Lancer les checks safe",        "tools"),
+    ("35", "⚙️ ", "Configuration",    "Paramètres de l'appli",         "tools"),
 ]
 
 
@@ -183,25 +187,27 @@ class MainMenu:
             "15": CloudMenu(**kwargs),
             "16": ForensicsMenu(**kwargs),
             "17": BinaryMenu(**kwargs),
-            # UTILS 18-28
-            "18": VariablesMenu(store=self._var_store),
-            "19": RevShellMenu(store=self._var_store),
-            "20": HashIdMenu(),
-            "21": LootMenu(vault=self._loot_vault),
-            "22": EncoderMenu(),
-            "23": WordlistMenu(),
-            "24": PortRefMenu(),
-            "25": JwtMenu(),
-            "26": CidrMenu(),
-            "27": ReportMenu(history=self._history, vault=self._loot_vault),
-            "28": ToolboxMenu(),
-            # OUTILS 29-34
-            "29": HelpMenu(**kwargs),
-            "30": ExportAllMenu(**kwargs),
-            "31": SearchMenu(**kwargs),
-            "32": RunAllChecksMenu(**kwargs),
-            "33": ConfigMenuScreen(**kwargs),
-            "34": FavoritesMenu(**kwargs),
+            # UTILS 18-30
+            "18": TargetWorkspaceMenu(store=self._var_store),
+            "19": CommandBuilderMenu(store=self._var_store),
+            "20": VariablesMenu(store=self._var_store),
+            "21": RevShellMenu(store=self._var_store),
+            "22": HashIdMenu(),
+            "23": LootMenu(vault=self._loot_vault),
+            "24": EncoderMenu(),
+            "25": WordlistMenu(),
+            "26": PortRefMenu(),
+            "27": JwtMenu(),
+            "28": CidrMenu(),
+            "29": ReportMenu(history=self._history, vault=self._loot_vault),
+            "30": ToolboxMenu(),
+            # OUTILS 31-35
+            "31": HelpMenu(**kwargs),
+            "32": ExportAllMenu(**kwargs),
+            "33": SearchMenu(**kwargs),
+            "34": RunAllChecksMenu(**kwargs),
+            "35": ConfigMenuScreen(**kwargs),
+            "36": FavoritesMenu(**kwargs),
         }
 
     def _open_command(self, cmd_id: str) -> bool:
@@ -351,15 +357,18 @@ class MainMenu:
         for idx, item in enumerate(utils_items):
             if item[0] == "18":
                 utils_items[idx] = (item[0], item[1], item[2],
+                                    f"{var_count} variable(s) · scope", item[4])
+            elif item[0] == "20":
+                utils_items[idx] = (item[0], item[1], item[2],
                                     f"{var_count} variable(s) définies", item[4])
-            elif item[0] == "21":
+            elif item[0] == "23":
                 utils_items[idx] = (item[0], item[1], item[2],
                                     f"{loot_count} entrée(s) capturées", item[4])
 
         # Favoris dans la section tools
         fav_count = len(self._favorites)
         fav_desc  = f"{fav_count} enregistré(s)" if fav_count else "aucun pour l'instant"
-        tools_items.append(("34", "⭐", "Favoris", fav_desc, "tools"))
+        tools_items.append(("36", "⭐", "Favoris", fav_desc, "tools"))
         tools_items.append(("q",  "🚪", "Quitter", "", "tools"))
 
         col_lab   = _menu_section(lab_items,   "🛠  LAB",    self._checker, self._catalog)
@@ -387,7 +396,7 @@ class MainMenu:
         ], title="Profils", width=dashboard_width)
 
         help_footer([
-            ("1-34", "ouvrir une section"),
+            ("1-36", "ouvrir une section"),
             ("q", "quitter"),
         ], title="Accès rapide", width=dashboard_width)
 
@@ -455,7 +464,7 @@ class MainMenu:
 
         route = {
             "search": "31",
-            "favorites": "34",
+            "favorites": "36",
             "config": "33",
             "checks": "32",
             "help": "29",
@@ -512,5 +521,5 @@ class MainMenu:
                     raise SystemExit(0)
             else:
                 console.print(
-                    "  [grey50]Choix invalide — entrez 1–34, un ID (ex: rec_001), ou q.[/grey50]"
+                    "  [grey50]Choix invalide — entrez 1–36, un ID (ex: rec_001), ou q.[/grey50]"
                 )
