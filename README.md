@@ -161,12 +161,16 @@ Preview a command without executing it:
 ```bash
 python3 main.py --dry-run sys_001
 ```
+<img width="1598" height="121" alt="image" src="https://github.com/user-attachments/assets/f363c0f4-7628-4ae9-b803-ff0097b3cd6a" />
+
 
 Run a command by ID:
 
 ```bash
 python3 main.py --run sys_001
 ```
+<img width="1598" height="557" alt="image" src="https://github.com/user-attachments/assets/652027dc-8e3b-41a3-87a3-fc1adc7354c1" />
+
 
 Export the full catalog:
 
@@ -175,12 +179,17 @@ python3 main.py --export md
 python3 main.py --export json
 python3 main.py --export html
 ```
+<img width="1596" height="46" alt="image" src="https://github.com/user-attachments/assets/62e66692-0743-42d2-bc11-b5c7b73a299c" />
+
 
 Run tests:
 
 ```bash
 python3 -m pytest
 ```
+
+<img width="1599" height="88" alt="image" src="https://github.com/user-attachments/assets/b2c78506-60d2-421c-9e08-003b23471d8d" />
+
 
 Run lint and coverage locally:
 
@@ -197,6 +206,8 @@ python3 main.py --missing-tools
 python3 main.py --install-profile basic --install-dry-run
 python3 main.py --install-profile advanced --install-dry-run
 ```
+<img width="1591" height="844" alt="image" src="https://github.com/user-attachments/assets/6060a2ff-9d25-4e66-9e31-95e1083196e7" />
+
 
 The interactive `UTILS` column also includes:
 
@@ -208,6 +219,7 @@ The interactive `UTILS` column also includes:
 ```text
 python3 main.py --help
 ```
+<img width="1599" height="713" alt="image" src="https://github.com/user-attachments/assets/50e93439-8a75-4be3-8f65-30158ff915ab" />
 
 Available options:
 
