@@ -118,7 +118,9 @@ Launch the interactive interface:
 python3 main.py
 ```
 
-<img width="1580" height="1309" alt="AUTOHACK main menu" src="docs/screenshots/main-menu.png" />
+<img width="1580" height="1309" alt="image" src="https://github.com/user-attachments/assets/9ff2170f-b007-49cb-958a-c1d6ca3986ca" />
+
+
 
 Search the catalog:
 
@@ -140,6 +142,8 @@ python3 main.py --category web_attack
 ```
 
 <img width="1580" height="1309" alt="AUTOHACK reconnaissance category view" src="docs/screenshots/category-recon.png" />
+<img width="1580" height="1309" alt="image" src="https://github.com/user-attachments/assets/bc9e8e08-ffbc-4c80-adb3-7c591c32d1b9" />
+
 
 Show a guided command pack:
 
@@ -148,6 +152,9 @@ python3 main.py --pack web-recon
 python3 main.py --pack ad-lab
 python3 main.py --pack cloud-audit
 ```
+<img width="1598" height="333" alt="image" src="https://github.com/user-attachments/assets/acd73638-caee-41d9-b4cb-c1aaa7b1dd0c" />
+
+
 
 Preview a command without executing it:
 
