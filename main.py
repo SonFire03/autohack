@@ -45,6 +45,12 @@ def build_parser() -> argparse.ArgumentParser:
     group.add_argument("--search",   metavar="KEYWORD", help="Rechercher dans le catalogue (multi-mots)")
     group.add_argument("--pack",     metavar="PACK",    help="Afficher un pack de commandes guidé")
     group.add_argument("--run-pack", metavar="PACK",    help="Exécuter un pack guidé pas-à-pas")
+    group.add_argument("--generate-playbook", metavar="PACK", help="Générer un playbook markdown depuis un pack")
+    group.add_argument("--catalog-diff", metavar="RANGE", help="Comparer deux refs de catalogue (ex: v0.3.0..v0.4.0)")
+    group.add_argument("--usage-metrics", action="store_true", help="Afficher les métriques d'usage locales")
+    group.add_argument("--verify-audit-chain", action="store_true", help="Vérifier l'intégrité de la chaîne d'audit")
+    group.add_argument("--serve-api", action="store_true", help="Lancer l'API locale read-only")
+    group.add_argument("--apply-profile", metavar="PROFILE", help="Appliquer un profil environnement (lab1/lab2/ctf/client)")
     group.add_argument("--approve-command", metavar="CMD_ID", help="Approuver une commande en file secondaire")
     group.add_argument("--list-approvals", action="store_true", help="Lister les commandes en attente d'approbation")
     group.add_argument("--export",   metavar="FORMAT",  choices=["md", "txt", "json", "html"],
@@ -103,6 +109,7 @@ def _get_core():
         redact_secrets=config.get("redact_secrets_in_logs"),
         require_secondary_approval=config.get("require_secondary_approval"),
         approval_queue=ApprovalQueue(),
+        enforce_allowlist=config.get("enforce_command_allowlist"),
     )
     checker = ToolChecker(catalog, ttl_seconds=config.get("tool_cache_ttl_seconds"))
     return catalog, executor, checker
@@ -338,6 +345,77 @@ def cli_export_exec_report() -> None:
     exporter = Exporter(catalog.get_all())
     path = exporter.export_execution_html()
     console.print(f"[bold green]✅ Rapport exécutions créé :[/bold green] [magenta]{path}[/magenta]")
+
+
+def cli_generate_playbook(pack_name: str) -> None:
+    from core.playbook import generate_pack_playbook
+    catalog, _, _ = _get_core()
+    path = generate_pack_playbook(pack_name, catalog, Path("exports"))
+    console.print(f"[bold green]✅ Playbook créé :[/bold green] [magenta]{path}[/magenta]")
+
+
+def cli_catalog_diff(range_expr: str) -> None:
+    from core.catalog_diff import diff_refs
+    if ".." not in range_expr:
+        console.print("[bold red]❌ Format attendu: refA..refB[/bold red]")
+        sys.exit(1)
+    ref_a, ref_b = [x.strip() for x in range_expr.split("..", 1)]
+    report = diff_refs(ref_a, ref_b)
+    console.print(f"[bold]Catalog diff[/bold] {report['from']} -> {report['to']}")
+    console.print(f"  + added: {len(report['added'])}")
+    console.print(f"  - removed: {len(report['removed'])}")
+    console.print(f"  ~ changed: {len(report['changed'])}")
+    for cid in report["added"][:10]:
+        console.print(f"    [green]+ {cid}[/green]")
+    for cid in report["removed"][:10]:
+        console.print(f"    [red]- {cid}[/red]")
+
+
+def cli_usage_metrics() -> None:
+    from core.metrics import usage_metrics
+    data = usage_metrics()
+    console.print(f"[bold]Usage metrics[/bold] total_events={data['total']}")
+    if data["top_commands"]:
+        console.print("Top commands:")
+        for cid, n in data["top_commands"][:10]:
+            console.print(f"  - {cid}: {n}")
+    if data["fail_by_tool"]:
+        console.print("Failures by tool:")
+        for tool, n in data["fail_by_tool"][:10]:
+            console.print(f"  - {tool}: {n}")
+
+
+def cli_verify_audit_chain() -> None:
+    from core.audit_chain import verify
+    ok, line = verify()
+    if ok:
+        console.print(f"[bold green]✅ Audit chain valide ({line} events).[/bold green]")
+        return
+    console.print(f"[bold red]❌ Audit chain invalide à la ligne {line}.[/bold red]")
+    sys.exit(1)
+
+
+def cli_serve_api() -> None:
+    import uvicorn
+    uvicorn.run("api.server:app", host="127.0.0.1", port=8765, reload=False)
+
+
+def cli_apply_profile(name: str) -> None:
+    from core.config_manager import ConfigManager
+    from core.env_profiles import get_profile, list_profiles
+    from core.variables import VariableStore
+    profile = get_profile(name)
+    if not profile:
+        console.print(f"[bold red]❌ Profil inconnu: {name}[/bold red]")
+        console.print(f"[dim]Disponibles: {', '.join(list_profiles())}[/dim]")
+        sys.exit(1)
+    config = ConfigManager()
+    for key, value in profile.config_overrides.items():
+        config.set(key, value)
+    store = VariableStore()
+    for key, value in profile.variables.items():
+        store.set(key, value)
+    console.print(f"[bold green]✅ Profil appliqué:[/bold green] {profile.name}")
 
 
 def cli_check() -> None:
@@ -586,7 +664,7 @@ _autohack_complete() {{
     cur="${{COMP_WORDS[COMP_CWORD]}}"
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
 
-    local opts="--run --dry-run --search --pack --run-pack --approve-command --list-approvals --refresh-tools --export-session --replay-session --category --safe --dangerous --tool --regex --sort-by --limit --export --export-exec-report --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --yes --version"
+    local opts="--run --dry-run --search --pack --run-pack --generate-playbook --catalog-diff --usage-metrics --verify-audit-chain --serve-api --apply-profile --approve-command --list-approvals --refresh-tools --export-session --replay-session --category --safe --dangerous --tool --regex --sort-by --limit --export --export-exec-report --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --yes --version"
     local ids="{ids}"
     local cats="{cats}"
     local packs="{packs}"
@@ -595,9 +673,9 @@ _autohack_complete() {{
     local profiles="basic advanced all"
 
     case "$prev" in
-        --run|--dry-run) COMPREPLY=($(compgen -W "$ids" -- "$cur")) ; return ;;
-        --pack|--run-pack) COMPREPLY=($(compgen -W "$packs" -- "$cur")) ; return ;;
         --approve-command|--run|--dry-run) COMPREPLY=($(compgen -W "$ids" -- "$cur")) ; return ;;
+        --generate-playbook|--pack|--run-pack) COMPREPLY=($(compgen -W "$packs" -- "$cur")) ; return ;;
+        --apply-profile) COMPREPLY=($(compgen -W "lab1 lab2 ctf client" -- "$cur")) ; return ;;
         --category)      COMPREPLY=($(compgen -W "$cats" -- "$cur")) ; return ;;
         --export)        COMPREPLY=($(compgen -W "$formats" -- "$cur")) ; return ;;
         --generate-completion) COMPREPLY=($(compgen -W "$shells" -- "$cur")) ; return ;;
@@ -632,6 +710,12 @@ _autohack() {{
         '--search[Rechercher]:keyword:' \\
         '--pack[Afficher un pack guidé]:pack:($packs)' \\
         '--run-pack[Exécuter un pack guidé pas-à-pas]:pack:($packs)' \\
+        '--generate-playbook[Générer un playbook markdown]:pack:($packs)' \\
+        '--catalog-diff[Comparer deux refs de catalogue]:range:' \\
+        '--usage-metrics[Afficher les métriques d usage]' \\
+        '--verify-audit-chain[Vérifier l intégrité de la chaîne d audit]' \\
+        '--serve-api[Lancer l API locale read-only]' \\
+        '--apply-profile[Appliquer un profil environnement]:profile:(lab1 lab2 ctf client)' \\
         '--approve-command[Approuver une commande en attente]:id:($ids)' \\
         '--list-approvals[Lister les commandes en attente d approbation]' \\
         '--refresh-tools[Réinitialiser le cache de détection des outils]' \\
@@ -673,6 +757,18 @@ def main() -> None:
 
     if args.run:
         cli_run(args.run)
+    elif getattr(args, "generate_playbook", None):
+        cli_generate_playbook(args.generate_playbook)
+    elif getattr(args, "catalog_diff", None):
+        cli_catalog_diff(args.catalog_diff)
+    elif getattr(args, "usage_metrics", False):
+        cli_usage_metrics()
+    elif getattr(args, "verify_audit_chain", False):
+        cli_verify_audit_chain()
+    elif getattr(args, "serve_api", False):
+        cli_serve_api()
+    elif getattr(args, "apply_profile", None):
+        cli_apply_profile(args.apply_profile)
     elif getattr(args, "approve_command", None):
         from core.approval_queue import ApprovalQueue
         from core.rbac import can

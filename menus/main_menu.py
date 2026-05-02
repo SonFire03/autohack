@@ -159,6 +159,7 @@ class MainMenu:
             redact_secrets=self._config.get("redact_secrets_in_logs"),
             require_secondary_approval=self._config.get("require_secondary_approval"),
             approval_queue=ApprovalQueue(),
+            enforce_allowlist=self._config.get("enforce_command_allowlist"),
         )
         self._checker    = ToolChecker(self._catalog, ttl_seconds=self._config.get("tool_cache_ttl_seconds"))
         self._history    = SessionHistory(

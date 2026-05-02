@@ -16,6 +16,7 @@ from rich.table import Table
 from config.settings import EXPORTS_DIR
 from core.logger import ActionLogger, redact_sensitive, write_execution_event
 from core.i18n import tr
+from core.command_allowlist import is_allowed
 
 console = Console()
 
@@ -83,6 +84,7 @@ class CommandExecutor:
         redact_secrets: bool = True,
         require_secondary_approval: bool = False,
         approval_queue=None,
+        enforce_allowlist: bool = False,
     ) -> None:
         # Valeurs saisies durant la session — réutilisées comme défaut
         self._var_cache: Dict[str, str] = {}
@@ -93,6 +95,7 @@ class CommandExecutor:
         self._redact_secrets = redact_secrets
         self._require_secondary_approval = require_secondary_approval
         self._approval_queue = approval_queue
+        self._enforce_allowlist = enforce_allowlist
 
     def show_warning(self, cmd: Dict[str, Any]) -> None:
         """Affiche un avertissement pédagogique avant toute exécution."""
@@ -149,6 +152,10 @@ class CommandExecutor:
                     "[bold red]❌ Mode shell strict: opérateurs shell bloqués "
                     "(ajouter allow_shell_features=true pour cette commande).[/bold red]"
                 )
+                return False
+        if self._enforce_allowlist and action in {"run", "capture"}:
+            if not is_allowed(cmd):
+                console.print("[bold red]❌ Commande bloquée par la politique allowlist.[/bold red]")
                 return False
         if self._require_secondary_approval and action in {"run", "capture"}:
             cmd_id = cmd.get("id", "")

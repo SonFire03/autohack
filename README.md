@@ -57,11 +57,19 @@ AUTOHACK is not:
 - Local RBAC roles: `reader`, `operator`, `admin`
 - Secondary approval queue for sensitive commands
 - Catalog signature verification (`commands_catalog.sig`)
+- Category-based command allowlist execution policy
+- Environment profiles (`lab1`, `lab2`, `ctf`, `client`)
 - Session export/replay (`--export-session`, `--replay-session`)
 - Plugin catalog merge support via `plugins/catalog/*.json`
 - Tool checker cache TTL control and manual refresh
 - Execution report export (`--export-exec-report`)
 - FR/EN message layer for core security prompts
+- Catalog diff tooling across refs/tags (`--catalog-diff`)
+- Pack-to-playbook generation (`--generate-playbook`)
+- Local read-only API server (`--serve-api`)
+- Local usage analytics (`--usage-metrics`)
+- Signed audit chain verification (`--verify-audit-chain`)
+- Binary packaging script + CI artifact workflow
 - Tool availability checks
 - Optional dependency installer profiles with dry-run support
 - Favorites and session history
@@ -173,6 +181,12 @@ Run a guided pack step-by-step:
 
 ```bash
 python3 main.py --run-pack web-recon
+python3 main.py --generate-playbook web-recon
+python3 main.py --catalog-diff v0.3.0..v0.4.0
+python3 main.py --usage-metrics
+python3 main.py --verify-audit-chain
+python3 main.py --serve-api
+python3 main.py --apply-profile lab1
 python3 main.py --list-approvals
 python3 main.py --approve-command pex_074
 ```
@@ -262,6 +276,12 @@ Available options:
 | `--search KEYWORD` | Search the catalog with multi-word matching |
 | `--pack PACK` | Show a guided read-only command pack |
 | `--run-pack PACK` | Execute a guided command pack step-by-step |
+| `--generate-playbook PACK` | Generate a markdown playbook from a command pack |
+| `--catalog-diff REF_A..REF_B` | Compare catalog entries between two git refs/tags |
+| `--usage-metrics` | Show local command usage/failure/timing metrics |
+| `--verify-audit-chain` | Verify signed execution audit-chain integrity |
+| `--serve-api` | Run local read-only API (`127.0.0.1:8765`) |
+| `--apply-profile PROFILE` | Apply environment profile (`lab1/lab2/ctf/client`) |
 | `--approve-command CMD_ID` | Approve a command queued for secondary approval |
 | `--list-approvals` | List commands pending secondary approval |
 | `--category CAT` | List commands in a category, or filter `--search` |
@@ -295,6 +315,13 @@ Security and integrity options:
 - `require_secondary_approval=true` queues dangerous/lab-only commands until explicit CLI approval
 - `enforce_catalog_signature=true` verifies `commands_catalog.json` with `commands_catalog.sig`
 - use `AUTOHACK_CATALOG_SECRET` + `python3 scripts/sign_catalog.py` to sign catalog updates
+- `enforce_command_allowlist=true` blocks commands that do not match category allowlist patterns
+- `python3 scripts/verify_execution_chain.py` verifies hash-chained `logs/executions.jsonl`
+
+Binary packaging:
+
+- build locally: `bash scripts/build_binary.sh`
+- CI workflow: `.github/workflows/binary.yml` publishes `dist/autohack` + SHA256 as artifacts
 
 Available command packs:
 

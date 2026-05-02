@@ -24,6 +24,15 @@
 - Added OS-aware package manager detection for installer planning.
 - Added FR/EN message layer for security and policy prompts.
 - Added optional TUI E2E smoke test (`tests/test_e2e_tui.py` with `pexpect`).
+- Added category-based command allowlist enforcement (`enforce_command_allowlist`).
+- Added environment profiles (`--apply-profile`) for lab and engagement contexts.
+- Added catalog diff command (`--catalog-diff refA..refB`) to review release changes.
+- Added hash-chained signed audit logs and verification command (`--verify-audit-chain`).
+- Added playbook generator from packs (`--generate-playbook`).
+- Added local read-only API server (`--serve-api`) with catalog and metrics endpoints.
+- Added local usage metrics command (`--usage-metrics`) from execution telemetry.
+- Added mutation-inspired security regression tests (`tests/test_security_mutation_guards.py`).
+- Added binary packaging script + CI workflow (`scripts/build_binary.sh`, `.github/workflows/binary.yml`).
 
 ## 0.1.0
 

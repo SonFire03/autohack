@@ -2,6 +2,7 @@ import os
 import logging
 import json
 import re
+import hashlib
 from datetime import datetime, timezone
 from typing import Any
 from config.settings import LOG_FILE, EXECUTION_LOG_FILE
@@ -50,6 +51,16 @@ def redact_sensitive(text: str, enabled: bool = True) -> str:
 def write_execution_event(event: dict[str, Any]) -> None:
     payload = dict(event)
     payload["ts"] = datetime.now(timezone.utc).isoformat()
+    prev_hash = ""
+    if EXECUTION_LOG_FILE.exists():
+        try:
+            last = EXECUTION_LOG_FILE.read_text(encoding="utf-8").splitlines()[-1]
+            prev_hash = json.loads(last).get("event_hash", "")
+        except Exception:
+            prev_hash = ""
+    payload["prev_hash"] = prev_hash
+    event_material = json.dumps(payload, ensure_ascii=False, sort_keys=True)
+    payload["event_hash"] = hashlib.sha256(event_material.encode("utf-8")).hexdigest()
     with EXECUTION_LOG_FILE.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
 

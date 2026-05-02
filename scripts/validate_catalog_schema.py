@@ -104,6 +104,11 @@ def validate_catalog(path: Path = CATALOG_PATH) -> list[str]:
             timeout_seconds = cmd.get("timeout_seconds")
             if timeout_seconds is not None and isinstance(timeout_seconds, int) and timeout_seconds <= 0:
                 errors.append(f"{prefix}.timeout_seconds: must be > 0")
+            # Security consistency gates
+            if cmd.get("dangerous") and cmd.get("safe_to_run"):
+                errors.append(f"{prefix}: dangerous=true conflicts with safe_to_run=true")
+            if cmd.get("safe_to_run") and policy == "lab_only":
+                errors.append(f"{prefix}: safe_to_run=true conflicts with lab_only policy")
 
     return errors
 

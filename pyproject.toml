@@ -13,7 +13,9 @@ authors = [
 ]
 dependencies = [
   "rich",
-  "pyperclip"
+  "pyperclip",
+  "fastapi",
+  "uvicorn"
 ]
 
 [project.optional-dependencies]
@@ -21,7 +23,8 @@ dev = [
   "pytest",
   "pytest-cov",
   "ruff",
-  "pexpect"
+  "pexpect",
+  "pyinstaller"
 ]
 
 [project.scripts]

@@ -20,6 +20,7 @@ DEFAULTS: dict[str, Any] = {
     "enforce_catalog_signature": False,
     "require_secondary_approval": False,
     "tool_cache_ttl_seconds": 120,
+    "enforce_command_allowlist": False,
 }
 
 

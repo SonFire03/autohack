@@ -344,6 +344,18 @@ def test_replay_session_missing_file_exits_nonzero(tmp_path):
     assert r.returncode != 0
 
 
+def test_usage_metrics_flag():
+    r = run("--usage-metrics")
+    assert r.returncode == 0
+    assert "Usage metrics" in r.stdout
+
+
+def test_catalog_diff_head_to_head():
+    r = run("--catalog-diff", "HEAD..HEAD")
+    assert r.returncode == 0
+    assert "Catalog diff" in r.stdout
+
+
 # ── --tag ──────────────────────────────────────────────────────────────────────
 
 def test_tag_known_tag_returns_results():

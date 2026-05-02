@@ -20,6 +20,7 @@ SETTING_LABELS = {
     "enforce_catalog_signature": ("Vérifier signature catalogue", "true | false"),
     "require_secondary_approval": ("Approval secondaire",      "true | false"),
     "tool_cache_ttl_seconds":("TTL cache outils (s)",         "entier > 0"),
+    "enforce_command_allowlist": ("Allowlist commandes",      "true | false"),
     "log_level":             ("Niveau de log",                "INFO | DEBUG | WARNING"),
     "export_dir":            ("Dossier d'export",             "chemin absolu ou vide (=défaut)"),
 }
