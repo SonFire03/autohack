@@ -71,3 +71,14 @@ def test_generate_full_report_is_markdown(exporter, tmp_path, monkeypatch):
     path = exporter.generate_full_report()
     assert path.suffix == ".md"
     assert path.exists()
+
+
+def test_export_execution_html_creates_file(exporter, tmp_path, monkeypatch):
+    log_path = tmp_path / "executions.jsonl"
+    log_path.write_text('{"ts":"2026-01-01T00:00:00Z","mode":"run","id":"sys_001","tool":"python3","exit_code":0,"duration_s":0.2,"command":"python3 --version"}\n', encoding="utf-8")
+    monkeypatch.setattr("core.exporter.EXECUTION_LOG_FILE", log_path)
+    path = exporter.export_execution_html()
+    assert path.exists()
+    content = path.read_text(encoding="utf-8")
+    assert "Execution Report" in content
+    assert "sys_001" in content

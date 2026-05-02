@@ -56,6 +56,7 @@ from menus.report_menu import ReportMenu
 from menus.toolbox_menu import ToolboxMenu
 from core.variables import VariableStore
 from core.loot import LootVault
+from core.approval_queue import ApprovalQueue
 
 console = Console()
 
@@ -156,8 +157,10 @@ class MainMenu:
             default_timeout=self._config.get("command_timeout"),
             strict_shell_mode=self._config.get("strict_shell_mode"),
             redact_secrets=self._config.get("redact_secrets_in_logs"),
+            require_secondary_approval=self._config.get("require_secondary_approval"),
+            approval_queue=ApprovalQueue(),
         )
-        self._checker    = ToolChecker(self._catalog)
+        self._checker    = ToolChecker(self._catalog, ttl_seconds=self._config.get("tool_cache_ttl_seconds"))
         self._history    = SessionHistory(
             max_size=self._config.get("history_size"),
             persist_path=HISTORY_PATH,

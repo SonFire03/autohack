@@ -15,6 +15,11 @@ DEFAULTS: dict[str, Any] = {
     "command_timeout": 30,         # timeout d'exécution global (secondes)
     "strict_shell_mode": False,    # bloque les opérateurs shell risqués à l'exécution
     "redact_secrets_in_logs": True,# masque mots de passe/tokens dans logs/exports
+    "user_role": "admin",          # reader | operator | admin
+    "lang": "fr",                  # fr | en
+    "enforce_catalog_signature": False,
+    "require_secondary_approval": False,
+    "tool_cache_ttl_seconds": 120,
 }
 
 
@@ -45,6 +50,8 @@ class ConfigManager:
     _ALLOWED: dict[str, set] = {
         "export_format": {"markdown", "txt", "json"},
         "log_level":     {"INFO", "DEBUG", "WARNING"},
+        "user_role": {"reader", "operator", "admin"},
+        "lang": {"fr", "en"},
     }
     _POSITIVE_INT_KEYS = {"page_size", "history_size", "command_timeout"}
 

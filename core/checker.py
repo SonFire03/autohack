@@ -9,20 +9,25 @@ _CACHE_TTL = 120  # secondes avant ré-interrogation du système
 class ToolChecker:
     """Vérifie la disponibilité des outils sur le système via shutil.which."""
 
-    def __init__(self, catalog: CommandCatalog) -> None:
+    def __init__(self, catalog: CommandCatalog, ttl_seconds: int = _CACHE_TTL) -> None:
         self._catalog = catalog
+        self._ttl = max(1, int(ttl_seconds))
         self._cache: Dict[str, Tuple[bool, float]] = {}  # tool → (present, timestamp)
 
     def check(self, tool_name: str) -> bool:
         now = time.monotonic()
         cached = self._cache.get(tool_name)
-        if cached is None or now - cached[1] > _CACHE_TTL:
+        if cached is None or now - cached[1] > self._ttl:
             self._cache[tool_name] = (shutil.which(tool_name) is not None, now)
         return self._cache[tool_name][0]
 
     def refresh(self) -> None:
         """Vide le cache pour forcer une ré-vérification complète."""
         self._cache.clear()
+
+    def set_ttl(self, ttl_seconds: int) -> None:
+        self._ttl = max(1, int(ttl_seconds))
+        self.refresh()
 
     def check_all(self) -> Dict[str, bool]:
         tools = {

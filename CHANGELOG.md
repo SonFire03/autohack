@@ -14,6 +14,16 @@
 - Added regex/risk sorting search options and `--run-pack` guided step-by-step pack execution.
 - Added strict catalog schema validation script and CI gate (`scripts/validate_catalog_schema.py`).
 - Added manual GitHub release workflow (`.github/workflows/release.yml`).
+- Added RBAC roles (`reader`, `operator`, `admin`) enforced across CLI and TUI run actions.
+- Added secondary approval queue (`--list-approvals`, `--approve-command`) for sensitive commands.
+- Added catalog signing and verification support (`scripts/sign_catalog.py`, `commands_catalog.sig`, `AUTOHACK_CATALOG_SECRET`).
+- Added session export/replay capabilities (`--export-session`, `--replay-session`).
+- Added execution telemetry HTML exporter (`--export-exec-report`).
+- Added plugin catalog merge support from `plugins/catalog/*.json` in build pipeline.
+- Added configurable checker cache TTL and CLI cache refresh (`--refresh-tools`).
+- Added OS-aware package manager detection for installer planning.
+- Added FR/EN message layer for security and policy prompts.
+- Added optional TUI E2E smoke test (`tests/test_e2e_tui.py` with `pexpect`).
 
 ## 0.1.0
 

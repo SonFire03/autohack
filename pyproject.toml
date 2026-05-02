@@ -20,7 +20,8 @@ dependencies = [
 dev = [
   "pytest",
   "pytest-cov",
-  "ruff"
+  "ruff",
+  "pexpect"
 ]
 
 [project.scripts]

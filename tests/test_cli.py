@@ -334,6 +334,16 @@ def test_run_pack_unknown_exits_1():
     assert "Pack inconnu" in r.stdout
 
 
+def test_list_approvals_flag():
+    r = run("--list-approvals")
+    assert r.returncode == 0
+
+
+def test_replay_session_missing_file_exits_nonzero(tmp_path):
+    r = run("--replay-session", str(tmp_path / "missing.json"))
+    assert r.returncode != 0
+
+
 # ── --tag ──────────────────────────────────────────────────────────────────────
 
 def test_tag_known_tag_returns_results():

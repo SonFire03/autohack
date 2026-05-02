@@ -27,6 +27,11 @@ from rich import box
 console = Console()
 
 
+def _role() -> str:
+    from core.config_manager import ConfigManager
+    return ConfigManager().get("user_role")
+
+
 def build_parser() -> argparse.ArgumentParser:
     from config.settings import APP_VERSION
     parser = argparse.ArgumentParser(
@@ -40,8 +45,11 @@ def build_parser() -> argparse.ArgumentParser:
     group.add_argument("--search",   metavar="KEYWORD", help="Rechercher dans le catalogue (multi-mots)")
     group.add_argument("--pack",     metavar="PACK",    help="Afficher un pack de commandes guidé")
     group.add_argument("--run-pack", metavar="PACK",    help="Exécuter un pack guidé pas-à-pas")
+    group.add_argument("--approve-command", metavar="CMD_ID", help="Approuver une commande en file secondaire")
+    group.add_argument("--list-approvals", action="store_true", help="Lister les commandes en attente d'approbation")
     group.add_argument("--export",   metavar="FORMAT",  choices=["md", "txt", "json", "html"],
                        help="Exporter le catalogue (md | txt | json | html)")
+    group.add_argument("--export-exec-report", action="store_true", help="Exporter le rapport HTML des exécutions")
     group.add_argument("--check",    action="store_true", help="Lancer toutes les vérifications safe")
     group.add_argument("--list-ids", action="store_true", help="Lister tous les IDs du catalogue")
     group.add_argument("--list-categories", action="store_true", help="Lister les catégories disponibles")
@@ -49,6 +57,9 @@ def build_parser() -> argparse.ArgumentParser:
     group.add_argument("--favorites", action="store_true", help="Afficher les commandes favorites")
     group.add_argument("--generate-completion", metavar="SHELL", choices=["bash", "zsh"],
                        help="Générer le script de complétion shell (bash | zsh)")
+    group.add_argument("--refresh-tools", action="store_true", help="Vider le cache des outils détectés")
+    group.add_argument("--export-session", metavar="FILE", help="Exporter la session (history + variables + loot) en JSON")
+    group.add_argument("--replay-session", metavar="FILE", help="Afficher un replay de session exportée")
     group.add_argument("--tag", metavar="TAG",
                        help="Lister les commandes ayant un tag donné")
     group.add_argument("--missing-tools", action="store_true",
@@ -83,18 +94,27 @@ def _get_core():
     from core.executor import CommandExecutor
     from core.checker import ToolChecker
     from core.config_manager import ConfigManager
+    from core.approval_queue import ApprovalQueue
     config = ConfigManager()
     catalog = CommandCatalog()
     executor = CommandExecutor(
         default_timeout=config.get("command_timeout"),
         strict_shell_mode=config.get("strict_shell_mode"),
         redact_secrets=config.get("redact_secrets_in_logs"),
+        require_secondary_approval=config.get("require_secondary_approval"),
+        approval_queue=ApprovalQueue(),
     )
-    checker = ToolChecker(catalog)
+    checker = ToolChecker(catalog, ttl_seconds=config.get("tool_cache_ttl_seconds"))
     return catalog, executor, checker
 
 
 def cli_run(cmd_id: str) -> None:
+    from core.rbac import can
+    from core.i18n import tr
+    from core.config_manager import ConfigManager
+    if not can(_role(), "run"):
+        console.print(f"[bold red]❌ {tr('rbac_denied', ConfigManager().get('lang'))}[/bold red]")
+        sys.exit(1)
     catalog, executor, checker = _get_core()
     cmd = catalog.get_by_id(cmd_id)
     if not cmd:
@@ -221,6 +241,12 @@ def cli_pack(pack_name: str) -> None:
 
 
 def cli_run_pack(pack_name: str) -> None:
+    from core.rbac import can
+    from core.i18n import tr
+    from core.config_manager import ConfigManager
+    if not can(_role(), "run_pack"):
+        console.print(f"[bold red]❌ {tr('rbac_denied', ConfigManager().get('lang'))}[/bold red]")
+        sys.exit(1)
     from rich.prompt import Confirm
     from core.packs import get_pack, list_pack_names
 
@@ -304,6 +330,14 @@ def cli_export(fmt: str) -> None:
     dispatch = {"md": exporter.export_markdown, "txt": exporter.export_txt, "json": exporter.export_json, "html": exporter.export_html}
     path = dispatch[fmt]()
     console.print(f"[bold green]✅ Export créé :[/bold green] [magenta]{path}[/magenta]")
+
+
+def cli_export_exec_report() -> None:
+    from core.exporter import Exporter
+    catalog, _, _ = _get_core()
+    exporter = Exporter(catalog.get_all())
+    path = exporter.export_execution_html()
+    console.print(f"[bold green]✅ Rapport exécutions créé :[/bold green] [magenta]{path}[/magenta]")
 
 
 def cli_check() -> None:
@@ -473,6 +507,7 @@ def cli_install_profile(profile: str, dry_run: bool = False, assume_yes: bool = 
     commands = plan.commands()
 
     console.print(f"\n[bold]Installation profile:[/bold] [cyan]{profile}[/cyan]\n")
+    console.print(f"[dim]Detected package manager: {plan.package_manager}[/dim]\n")
 
     table = Table(show_header=True, header_style="bold cyan", box=box.SIMPLE_HEAVY)
     table.add_column("Manager", style="bold white", width=12)
@@ -551,7 +586,7 @@ _autohack_complete() {{
     cur="${{COMP_WORDS[COMP_CWORD]}}"
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
 
-    local opts="--run --dry-run --search --pack --run-pack --category --safe --dangerous --tool --regex --sort-by --limit --export --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --yes --version"
+    local opts="--run --dry-run --search --pack --run-pack --approve-command --list-approvals --refresh-tools --export-session --replay-session --category --safe --dangerous --tool --regex --sort-by --limit --export --export-exec-report --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --yes --version"
     local ids="{ids}"
     local cats="{cats}"
     local packs="{packs}"
@@ -562,6 +597,7 @@ _autohack_complete() {{
     case "$prev" in
         --run|--dry-run) COMPREPLY=($(compgen -W "$ids" -- "$cur")) ; return ;;
         --pack|--run-pack) COMPREPLY=($(compgen -W "$packs" -- "$cur")) ; return ;;
+        --approve-command|--run|--dry-run) COMPREPLY=($(compgen -W "$ids" -- "$cur")) ; return ;;
         --category)      COMPREPLY=($(compgen -W "$cats" -- "$cur")) ; return ;;
         --export)        COMPREPLY=($(compgen -W "$formats" -- "$cur")) ; return ;;
         --generate-completion) COMPREPLY=($(compgen -W "$shells" -- "$cur")) ; return ;;
@@ -596,6 +632,12 @@ _autohack() {{
         '--search[Rechercher]:keyword:' \\
         '--pack[Afficher un pack guidé]:pack:($packs)' \\
         '--run-pack[Exécuter un pack guidé pas-à-pas]:pack:($packs)' \\
+        '--approve-command[Approuver une commande en attente]:id:($ids)' \\
+        '--list-approvals[Lister les commandes en attente d approbation]' \\
+        '--refresh-tools[Réinitialiser le cache de détection des outils]' \\
+        '--export-session[Exporter la session en JSON]:file:_files' \\
+        '--replay-session[Afficher une session exportée]:file:_files' \\
+        '--export-exec-report[Exporter le rapport HTML des exécutions]' \\
         '--category[Lister une catégorie]:cat:($cats)' \\
         '--safe[Filtrer la recherche sur les commandes safe]' \\
         '--dangerous[Filtrer la recherche sur les commandes dangereuses]' \\
@@ -631,6 +673,22 @@ def main() -> None:
 
     if args.run:
         cli_run(args.run)
+    elif getattr(args, "approve_command", None):
+        from core.approval_queue import ApprovalQueue
+        from core.rbac import can
+        if not can(_role(), "approve"):
+            console.print("[bold red]❌ Action non autorisée pour ce rôle.[/bold red]")
+            sys.exit(1)
+        ok = ApprovalQueue().approve(args.approve_command)
+        console.print("[bold green]✅ Approuvée.[/bold green]" if ok else "[yellow]Aucune entrée en attente.[/yellow]")
+    elif getattr(args, "list_approvals", False):
+        from core.approval_queue import ApprovalQueue
+        pending = ApprovalQueue().list_pending()
+        if not pending:
+            console.print("[dim]Aucune commande en attente.[/dim]")
+        else:
+            for cmd_id in pending:
+                print(cmd_id)
     elif getattr(args, "dry_run", None):
         cli_dry_run(args.dry_run)
     elif args.search:
@@ -641,6 +699,8 @@ def main() -> None:
         cli_run_pack(args.run_pack)
     elif args.export:
         cli_export(args.export)
+    elif getattr(args, "export_exec_report", False):
+        cli_export_exec_report()
     elif args.check:
         cli_check()
     elif args.list_ids:
@@ -661,6 +721,25 @@ def main() -> None:
         cli_missing_tools()
     elif getattr(args, "install_profile", None):
         cli_install_profile(args.install_profile, args.install_dry_run, args.yes)
+    elif getattr(args, "refresh_tools", False):
+        _, _, checker = _get_core()
+        checker.refresh()
+        console.print("[bold green]✅ Cache outils vidé.[/bold green]")
+    elif getattr(args, "export_session", None):
+        from core.session_history import SessionHistory, HISTORY_PATH
+        from core.variables import VariableStore
+        from core.loot import LootVault
+        from core.session_replay import export_session
+        out = Path(args.export_session)
+        export_session(out, SessionHistory(persist_path=HISTORY_PATH), VariableStore(), LootVault())
+        console.print(f"[bold green]✅ Session exportée:[/bold green] {out}")
+    elif getattr(args, "replay_session", None):
+        from core.session_replay import load_session
+        data = load_session(Path(args.replay_session))
+        hist = data.get("history", [])
+        console.print(f"[bold]Replay[/bold] entries={len(hist)} variables={len(data.get('variables', {}))} loot={len(data.get('loot', []))}")
+        for item in hist[:30]:
+            print(f"{item.get('timestamp','')}\t{item.get('id','')}\t{item.get('exit_code','')}\t{item.get('command','')[:80]}")
     else:
         # Mode interactif par défaut
         try:
@@ -681,3 +760,9 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    from core.rbac import can
+    from core.i18n import tr
+    from core.config_manager import ConfigManager
+    if not can(_role(), "install"):
+        console.print(f"[bold red]❌ {tr('rbac_denied', ConfigManager().get('lang'))}[/bold red]")
+        sys.exit(1)

@@ -224,6 +224,7 @@ def apt_package_available(package: str) -> bool:
 @dataclass(frozen=True)
 class InstallPlan:
     profile: str
+    package_manager: str
     apt_packages: list[str]
     pipx_packages: list[str]
     go_packages: list[str]
@@ -232,8 +233,15 @@ class InstallPlan:
     def commands(self) -> list[list[str]]:
         commands = []
         if self.apt_packages:
-            commands.append(["sudo", "apt-get", "update"])
-            commands.append(["sudo", "apt-get", "install", "-y", *self.apt_packages])
+            if self.package_manager == "apt":
+                commands.append(["sudo", "apt-get", "update"])
+                commands.append(["sudo", "apt-get", "install", "-y", *self.apt_packages])
+            elif self.package_manager == "dnf":
+                commands.append(["sudo", "dnf", "install", "-y", *self.apt_packages])
+            elif self.package_manager == "pacman":
+                commands.append(["sudo", "pacman", "-S", "--noconfirm", *self.apt_packages])
+            elif self.package_manager == "brew":
+                commands.append(["brew", "install", *self.apt_packages])
         if self.pipx_packages:
             commands.append(["python3", "-m", "pip", "install", "--user", "pipx"])
             commands.append(["python3", "-m", "pipx", "ensurepath"])
@@ -284,7 +292,7 @@ class ToolInstaller:
                 manual[tool] = (
                     f"APT package '{package}' is not available in the configured repositories."
                 )
-        return InstallPlan(profile, apt_packages, pipx_packages, go_packages, manual)
+        return InstallPlan(profile, self.detect_package_manager(), apt_packages, pipx_packages, go_packages, manual)
 
     @staticmethod
     def run(plan: InstallPlan, dry_run: bool = False) -> int:
@@ -295,3 +303,14 @@ class ToolInstaller:
             if result.returncode != 0:
                 return result.returncode
         return 0
+    @staticmethod
+    def detect_package_manager() -> str:
+        if shutil.which("apt-get"):
+            return "apt"
+        if shutil.which("dnf"):
+            return "dnf"
+        if shutil.which("pacman"):
+            return "pacman"
+        if shutil.which("brew"):
+            return "brew"
+        return "manual"

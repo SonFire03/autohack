@@ -1,8 +1,12 @@
 import json
+import os
 import re
 import unicodedata
 from typing import List, Dict, Any, Optional
 from config.settings import CATALOG_PATH
+from core.catalog_signature import SIG_PATH, verify_signature
+from core.config_manager import ConfigManager
+from core.i18n import tr
 
 
 class CommandCatalog:
@@ -25,6 +29,13 @@ class CommandCatalog:
         return "".join(char for char in normalized if not unicodedata.combining(char))
 
     def load(self) -> None:
+        config = ConfigManager()
+        if config.get("enforce_catalog_signature"):
+            secret = os.environ.get("AUTOHACK_CATALOG_SECRET", "")
+            if not secret:
+                raise ValueError(tr("catalog_sig_missing", config.get("lang")))
+            if not verify_signature(CATALOG_PATH, SIG_PATH, secret):
+                raise ValueError(tr("catalog_sig_invalid", config.get("lang")))
         with open(CATALOG_PATH, encoding="utf-8") as f:
             self._data = json.load(f)
         self._all_commands = []

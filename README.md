@@ -54,6 +54,14 @@ AUTOHACK is not:
 - Configurable command timeout and strict shell mode
 - Secret redaction in logs and exports
 - Structured execution telemetry in `logs/executions.jsonl`
+- Local RBAC roles: `reader`, `operator`, `admin`
+- Secondary approval queue for sensitive commands
+- Catalog signature verification (`commands_catalog.sig`)
+- Session export/replay (`--export-session`, `--replay-session`)
+- Plugin catalog merge support via `plugins/catalog/*.json`
+- Tool checker cache TTL control and manual refresh
+- Execution report export (`--export-exec-report`)
+- FR/EN message layer for core security prompts
 - Tool availability checks
 - Optional dependency installer profiles with dry-run support
 - Favorites and session history
@@ -137,6 +145,7 @@ python3 main.py --search xss --dangerous --limit 20
 python3 main.py --search certipy --tool certipy
 python3 main.py --search "sys_00[1-3]" --regex
 python3 main.py --search xss --dangerous --sort-by risk --limit 10
+python3 main.py --refresh-tools
 ```
 
 <img width="1580" height="1309" alt="AUTOHACK search results for Tor commands" src="docs/screenshots/search-tor.png" />
@@ -164,6 +173,8 @@ Run a guided pack step-by-step:
 
 ```bash
 python3 main.py --run-pack web-recon
+python3 main.py --list-approvals
+python3 main.py --approve-command pex_074
 ```
 <img width="1598" height="333" alt="image" src="https://github.com/user-attachments/assets/acd73638-caee-41d9-b4cb-c1aaa7b1dd0c" />
 
@@ -191,6 +202,9 @@ Export the full catalog:
 python3 main.py --export md
 python3 main.py --export json
 python3 main.py --export html
+python3 main.py --export-exec-report
+python3 main.py --export-session session.json
+python3 main.py --replay-session session.json
 ```
 <img width="1596" height="46" alt="image" src="https://github.com/user-attachments/assets/62e66692-0743-42d2-bc11-b5c7b73a299c" />
 
@@ -248,6 +262,8 @@ Available options:
 | `--search KEYWORD` | Search the catalog with multi-word matching |
 | `--pack PACK` | Show a guided read-only command pack |
 | `--run-pack PACK` | Execute a guided command pack step-by-step |
+| `--approve-command CMD_ID` | Approve a command queued for secondary approval |
+| `--list-approvals` | List commands pending secondary approval |
 | `--category CAT` | List commands in a category, or filter `--search` |
 | `--safe` | Filter `--search` to safe commands |
 | `--dangerous` | Filter `--search` to dangerous commands |
@@ -256,6 +272,10 @@ Available options:
 | `--sort-by score\|risk` | Sort search results by relevance score or risk level |
 | `--limit N` | Limit `--search` results |
 | `--export FORMAT` | Export catalog as `md`, `txt`, `json`, or `html` |
+| `--export-exec-report` | Export execution telemetry as a searchable HTML report |
+| `--export-session FILE` | Export history/variables/loot session data to JSON |
+| `--replay-session FILE` | Replay and inspect a previously exported session |
+| `--refresh-tools` | Clear tool detection cache and force re-check |
 | `--check` | Run safe tool checks |
 | `--list-ids` | Print all command IDs |
 | `--list-categories` | Print available categories |
@@ -268,6 +288,13 @@ Available options:
 | `--yes` | Confirm installation commands automatically |
 | `--generate-completion SHELL` | Generate Bash or Zsh completion |
 | `--version` | Print the app version |
+
+Security and integrity options:
+
+- `user_role` in config controls RBAC permissions (`reader`, `operator`, `admin`)
+- `require_secondary_approval=true` queues dangerous/lab-only commands until explicit CLI approval
+- `enforce_catalog_signature=true` verifies `commands_catalog.json` with `commands_catalog.sig`
+- use `AUTOHACK_CATALOG_SECRET` + `python3 scripts/sign_catalog.py` to sign catalog updates
 
 Available command packs:
 

@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from config.settings import EXPORTS_DIR, CATEGORY_LABELS, CATEGORY_ICONS, APP_NAME, APP_VERSION
+from config.settings import EXPORTS_DIR, CATEGORY_LABELS, CATEGORY_ICONS, APP_NAME, APP_VERSION, EXECUTION_LOG_FILE
 from core.logger import ActionLogger
 
 
@@ -198,3 +198,51 @@ s.addEventListener('input',()=>{{
 
     def generate_full_report(self) -> Path:
         return self.export_markdown()
+
+    def export_execution_html(self) -> Path:
+        path = self._path(f"execution_report_{self._ts}.html")
+        rows = []
+        if EXECUTION_LOG_FILE.exists():
+            for line in EXECUTION_LOG_FILE.read_text(encoding="utf-8").splitlines():
+                try:
+                    rows.append(json.loads(line))
+                except Exception:
+                    continue
+        rows.sort(key=lambda item: item.get("ts", ""), reverse=True)
+
+        from html import escape
+        tr_rows = []
+        for r in rows[:2000]:
+            status = "OK" if r.get("exit_code") == 0 else f"ERR({r.get('exit_code')})"
+            tr_rows.append(
+                "<tr>"
+                f"<td>{escape(str(r.get('ts', '')))}</td>"
+                f"<td>{escape(str(r.get('mode', '')))}</td>"
+                f"<td>{escape(str(r.get('id', '')))}</td>"
+                f"<td>{escape(str(r.get('tool', '')))}</td>"
+                f"<td>{escape(status)}</td>"
+                f"<td>{escape(str(r.get('duration_s', '')))}</td>"
+                f"<td><code>{escape(str(r.get('command', '')))}</code></td>"
+                "</tr>"
+            )
+
+        html = f"""<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Execution Report</title>
+<style>
+body{{font-family:system-ui,Segoe UI,sans-serif;background:#0b1220;color:#e5e7eb;padding:20px}}
+table{{width:100%;border-collapse:collapse;font-size:13px}} th,td{{border:1px solid #334155;padding:8px;vertical-align:top}}
+th{{background:#1e293b;position:sticky;top:0}} code{{white-space:pre-wrap}}
+input{{width:100%;padding:10px;margin:12px 0;background:#0f172a;color:#e5e7eb;border:1px solid #334155}}
+</style></head><body>
+<h1>Execution Report ({len(rows)} events)</h1>
+<input id="q" placeholder="Filter...">
+<table id="t"><thead><tr><th>Time</th><th>Mode</th><th>ID</th><th>Tool</th><th>Status</th><th>Duration</th><th>Command</th></tr></thead>
+<tbody>{''.join(tr_rows)}</tbody></table>
+<script>
+const q=document.getElementById('q');q.addEventListener('input',()=>{{const v=q.value.toLowerCase();document.querySelectorAll('#t tbody tr').forEach(tr=>{{tr.style.display=tr.textContent.toLowerCase().includes(v)?'':'none';}});}});
+</script>
+</body></html>"""
+        path.write_text(html, encoding="utf-8")
+        ActionLogger.log_export(str(path), "html-execution")
+        return path

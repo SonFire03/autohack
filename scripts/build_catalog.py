@@ -11,6 +11,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE_DIR = ROOT / "catalog"
+DEFAULT_PLUGIN_DIR = ROOT / "plugins" / "catalog"
 DEFAULT_OUTPUT = ROOT / "commands_catalog.json"
 
 CATEGORY_ORDER = [
@@ -66,6 +67,18 @@ def load_categories(source_dir: Path) -> dict[str, dict[str, Any]]:
     return categories
 
 
+def load_plugin_categories(plugin_dir: Path) -> dict[str, dict[str, Any]]:
+    if not plugin_dir.exists():
+        return {}
+    categories: dict[str, dict[str, Any]] = {}
+    for path in sorted(plugin_dir.glob("*.json")):
+        data = load_json(path)
+        if "commands" not in data:
+            raise ValueError(f"{path}: missing 'commands' list")
+        categories[path.stem] = data
+    return categories
+
+
 def validate_catalog(catalog: dict[str, Any]) -> None:
     ids_seen: set[str] = set()
     errors = []
@@ -91,10 +104,12 @@ def validate_catalog(catalog: dict[str, Any]) -> None:
         raise ValueError("Invalid catalog:\n" + "\n".join(errors))
 
 
-def build_catalog(source_dir: Path = DEFAULT_SOURCE_DIR) -> dict[str, Any]:
+def build_catalog(source_dir: Path = DEFAULT_SOURCE_DIR, plugin_dir: Path = DEFAULT_PLUGIN_DIR) -> dict[str, Any]:
+    merged = load_categories(source_dir)
+    merged.update(load_plugin_categories(plugin_dir))
     catalog = {
         "version": "1.0.0",
-        "categories": load_categories(source_dir),
+        "categories": merged,
     }
     validate_catalog(catalog)
     return catalog
@@ -122,13 +137,19 @@ def main() -> int:
         help="Merged catalog output path",
     )
     parser.add_argument(
+        "--plugin-dir",
+        type=Path,
+        default=DEFAULT_PLUGIN_DIR,
+        help="Directory containing plugin category json files",
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help="Validate that the output file already matches the generated catalog",
     )
     args = parser.parse_args()
 
-    catalog = build_catalog(args.source_dir)
+    catalog = build_catalog(args.source_dir, args.plugin_dir)
     if args.check:
         expected = json.dumps(catalog, ensure_ascii=False, indent=2) + "\n"
         current = args.output.read_text(encoding="utf-8")

@@ -15,6 +15,7 @@ from rich.table import Table
 
 from config.settings import EXPORTS_DIR
 from core.logger import ActionLogger, redact_sensitive, write_execution_event
+from core.i18n import tr
 
 console = Console()
 
@@ -80,6 +81,8 @@ class CommandExecutor:
         default_timeout: int = 30,
         strict_shell_mode: bool = False,
         redact_secrets: bool = True,
+        require_secondary_approval: bool = False,
+        approval_queue=None,
     ) -> None:
         # Valeurs saisies durant la session — réutilisées comme défaut
         self._var_cache: Dict[str, str] = {}
@@ -88,6 +91,8 @@ class CommandExecutor:
         self._default_timeout = max(1, int(default_timeout))
         self._strict_shell_mode = strict_shell_mode
         self._redact_secrets = redact_secrets
+        self._require_secondary_approval = require_secondary_approval
+        self._approval_queue = approval_queue
 
     def show_warning(self, cmd: Dict[str, Any]) -> None:
         """Affiche un avertissement pédagogique avant toute exécution."""
@@ -145,6 +150,14 @@ class CommandExecutor:
                     "(ajouter allow_shell_features=true pour cette commande).[/bold red]"
                 )
                 return False
+        if self._require_secondary_approval and action in {"run", "capture"}:
+            cmd_id = cmd.get("id", "")
+            if cmd.get("dangerous") or self._execution_policy(cmd) == "lab_only":
+                if self._approval_queue is not None and not self._approval_queue.is_approved(cmd_id):
+                    self._approval_queue.queue(cmd_id)
+                    console.print(f"[bold yellow]⚠ {tr('approval_pending')}[/bold yellow]")
+                    console.print(f"[dim]{tr('approval_need')}[/dim]")
+                    return False
         return True
 
     @staticmethod

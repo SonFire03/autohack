@@ -15,6 +15,11 @@ SETTING_LABELS = {
     "command_timeout":       ("Timeout commande (s)",         "entier > 0"),
     "strict_shell_mode":     ("Mode shell strict",            "true | false"),
     "redact_secrets_in_logs":("Masquer secrets logs",         "true | false"),
+    "user_role":             ("Rôle utilisateur",             "reader | operator | admin"),
+    "lang":                  ("Langue interface",             "fr | en"),
+    "enforce_catalog_signature": ("Vérifier signature catalogue", "true | false"),
+    "require_secondary_approval": ("Approval secondaire",      "true | false"),
+    "tool_cache_ttl_seconds":("TTL cache outils (s)",         "entier > 0"),
     "log_level":             ("Niveau de log",                "INFO | DEBUG | WARNING"),
     "export_dir":            ("Dossier d'export",             "chemin absolu ou vide (=défaut)"),
 }

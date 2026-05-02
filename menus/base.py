@@ -18,6 +18,8 @@ from core.theme import (
     C_PRIMARY, BOX_TABLE, status_bar, help_footer, metric_cards, legend_panel,
 )
 from config.settings import CATEGORY_ICONS, CATEGORY_LABELS
+from core.rbac import can
+from core.i18n import tr
 
 console = Console()
 
@@ -440,6 +442,9 @@ class BaseMenu:
                 return "quit"
 
             if choice == "r":
+                if not can(self._config.get("user_role"), "run"):
+                    console.print(f"  [bold red]❌ {tr('rbac_denied', self._config.get('lang'))}[/bold red]")
+                    continue
                 skip = (cmd.get("safe_to_run", False)
                         and not self._config.get("confirm_safe_commands"))
                 code = self._executor.confirm_and_run(cmd, skip_confirm=skip)
@@ -457,10 +462,16 @@ class BaseMenu:
                 console.input("\n  [grey50]Entrée pour continuer…[/grey50]")
 
             elif choice == "c":
+                if not can(self._config.get("user_role"), "copy"):
+                    console.print(f"  [bold red]❌ {tr('rbac_denied', self._config.get('lang'))}[/bold red]")
+                    continue
                 self._executor.copy_to_clipboard(cmd)
                 console.input("\n  [grey50]Entrée pour continuer…[/grey50]")
 
             elif choice == "s":
+                if not can(self._config.get("user_role"), "run"):
+                    console.print(f"  [bold red]❌ {tr('rbac_denied', self._config.get('lang'))}[/bold red]")
+                    continue
                 path, save_code = self._executor.run_and_save(
                     cmd, export_dir=self._config.get("export_dir")
                 )
