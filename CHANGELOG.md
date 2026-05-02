@@ -8,6 +8,12 @@
 - Added cloud/Kubernetes, forensics/DFIR, binary/reverse, and API security command coverage.
 - Added advanced CLI search filters and guided read-only command packs.
 - Added Target Workspace and Command Builder utilities for reusable lab variables and command generation.
+- Enforced `execution_policy` at runtime (`dry_run_only` blocked in run/capture, `lab_only` requires explicit confirmation).
+- Added configurable execution hardening: `command_timeout`, `strict_shell_mode`, and secret redaction in logs/exports.
+- Added structured execution telemetry in `logs/executions.jsonl`.
+- Added regex/risk sorting search options and `--run-pack` guided step-by-step pack execution.
+- Added strict catalog schema validation script and CI gate (`scripts/validate_catalog_schema.py`).
+- Added manual GitHub release workflow (`.github/workflows/release.yml`).
 
 ## 0.1.0
 

@@ -144,6 +144,18 @@ def test_search_finds_by_command_text(catalog):
     assert any("--version" in r["command"] for r in results)
 
 
+def test_search_regex_mode(catalog):
+    results = catalog.search(r"sys_00[1-3]", use_regex=True)
+    assert len(results) > 0
+    assert any(r["id"].startswith("sys_00") for r in results)
+
+
+def test_search_sort_by_risk_returns_dangerous_first(catalog):
+    results = catalog.search("xss", sort_by="risk")
+    assert len(results) > 0
+    assert results[0].get("dangerous") or results[0].get("execution_policy") == "lab_only"
+
+
 def test_catalog_covers_advanced_web_attack_gaps(catalog):
     expected = {
         "web_041": "ssti",

@@ -96,3 +96,8 @@ def test_set_command_timeout_valid(config):
 def test_set_command_timeout_zero_raises(config):
     with pytest.raises(ValueError, match="entier > 0"):
         config.set("command_timeout", 0)
+
+
+def test_set_strict_shell_mode_bool(config):
+    config.set("strict_shell_mode", True)
+    assert config.get("strict_shell_mode") is True

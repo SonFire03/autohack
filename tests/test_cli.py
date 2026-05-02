@@ -310,10 +310,28 @@ def test_search_can_filter_dangerous_with_limit():
     assert "limit=5" in r.stdout
 
 
+def test_search_regex_mode():
+    r = run("--search", "sys_00[1-3]", "--regex")
+    assert r.returncode == 0
+    assert "sys_001" in r.stdout
+
+
+def test_search_sort_by_risk():
+    r = run("--search", "xss", "--sort-by", "risk", "--limit", "5")
+    assert r.returncode == 0
+    assert "sort=risk" in r.stdout
+
+
 def test_search_rejects_conflicting_risk_filters():
     r = run("--search", "tor", "--safe", "--dangerous")
     assert r.returncode == 1
     assert "incompatibles" in r.stdout
+
+
+def test_run_pack_unknown_exits_1():
+    r = run("--run-pack", "unknown-pack")
+    assert r.returncode == 1
+    assert "Pack inconnu" in r.stdout
 
 
 # ── --tag ──────────────────────────────────────────────────────────────────────

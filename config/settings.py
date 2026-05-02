@@ -10,6 +10,7 @@ LOGS_DIR.mkdir(exist_ok=True)
 EXPORTS_DIR.mkdir(exist_ok=True)
 
 LOG_FILE = LOGS_DIR / "autohack.log"
+EXECUTION_LOG_FILE = LOGS_DIR / "executions.jsonl"
 
 APP_NAME = "AUTOHACK LAB COMMANDER"
 APP_VERSION = __version__

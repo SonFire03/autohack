@@ -13,6 +13,8 @@ SETTING_LABELS = {
     "show_history_in_menu":  ("Afficher historique en menu",  "true | false"),
     "history_size":          ("Taille historique de session", "entier > 0"),
     "command_timeout":       ("Timeout commande (s)",         "entier > 0"),
+    "strict_shell_mode":     ("Mode shell strict",            "true | false"),
+    "redact_secrets_in_logs":("Masquer secrets logs",         "true | false"),
     "log_level":             ("Niveau de log",                "INFO | DEBUG | WARNING"),
     "export_dir":            ("Dossier d'export",             "chemin absolu ou vide (=défaut)"),
 }
@@ -29,7 +31,7 @@ class ConfigMenuScreen(BaseMenu):
             self._header("⚙️  Configuration utilisateur")
             self._show_current()
             console.print(
-                "\n  [bold yellow]1-6[/bold yellow] modifier un paramètre  "
+                f"\n  [bold yellow]1-{len(SETTING_LABELS)}[/bold yellow] modifier un paramètre  "
                 "[bold yellow]r[/bold yellow] réinitialiser  "
                 "[bold yellow]b[/bold yellow] retour\n"
             )

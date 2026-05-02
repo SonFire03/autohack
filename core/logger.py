@@ -1,6 +1,10 @@
 import os
 import logging
-from config.settings import LOG_FILE
+import json
+import re
+from datetime import datetime, timezone
+from typing import Any
+from config.settings import LOG_FILE, EXECUTION_LOG_FILE
 
 
 def _setup_logger() -> logging.Logger:
@@ -27,20 +31,43 @@ def apply_log_level(level: str) -> None:
 _logger = _setup_logger()
 
 
+_SECRET_PATTERNS = [
+    (re.compile(r"(?i)(password|passwd|token|apikey|api_key|secret)\s*=\s*([^\s'\";]+)"), r"\1=***"),
+    (re.compile(r"(?i)(-p|--password)\s+([^\s'\";]+)"), r"\1 ***"),
+    (re.compile(r"\$PASS(?:WORD)?"), "$***"),
+]
+
+
+def redact_sensitive(text: str, enabled: bool = True) -> str:
+    if not enabled:
+        return text
+    masked = text
+    for pattern, replacement in _SECRET_PATTERNS:
+        masked = pattern.sub(replacement, masked)
+    return masked
+
+
+def write_execution_event(event: dict[str, Any]) -> None:
+    payload = dict(event)
+    payload["ts"] = datetime.now(timezone.utc).isoformat()
+    with EXECUTION_LOG_FILE.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
+
+
 class ActionLogger:
     """Journalise les actions de l'utilisateur dans logs/autohack.log."""
 
     @staticmethod
-    def log_run(command: str, exit_code: int, dry_run: bool = False) -> None:
+    def log_run(command: str, exit_code: int, dry_run: bool = False, redact: bool = True) -> None:
         user = os.environ.get("USER", "unknown")
         mode = "DRY-RUN" if dry_run else "RUN"
         status = "OK" if exit_code == 0 else f"ERROR({exit_code})"
-        _logger.info(f"[{mode}] user={user} exit={status} cmd={command!r}")
+        _logger.info(f"[{mode}] user={user} exit={status} cmd={redact_sensitive(command, redact)!r}")
 
     @staticmethod
-    def log_copy(command: str) -> None:
+    def log_copy(command: str, redact: bool = True) -> None:
         user = os.environ.get("USER", "unknown")
-        _logger.info(f"[COPY] user={user} cmd={command!r}")
+        _logger.info(f"[COPY] user={user} cmd={redact_sensitive(command, redact)!r}")
 
     @staticmethod
     def log_export(path: str, fmt: str) -> None:

@@ -1,4 +1,5 @@
 import json
+import re
 import unicodedata
 from typing import List, Dict, Any, Optional
 from config.settings import CATALOG_PATH
@@ -10,6 +11,9 @@ class CommandCatalog:
     def __init__(self) -> None:
         self._data: Dict[str, Any] = {}
         self._all_commands: List[Dict[str, Any]] = []
+        self._category_cache: dict[str, List[Dict[str, Any]]] = {}
+        self._search_cache: dict[tuple, List[Dict[str, Any]]] = {}
+        self._search_index: List[Dict[str, Any]] = []
         self.load()
 
     REQUIRED_FIELDS = ("id", "name", "command", "risks", "safe_to_run")
@@ -32,10 +36,33 @@ class CommandCatalog:
                 if missing:
                     errors.append(f"[{cmd.get('id', '?')}] champs manquants : {missing}")
                 self._all_commands.append(cmd)
+        self._category_cache = {}
+        self._search_cache = {}
+        self._search_index = [self._index_entry(cmd) for cmd in self._all_commands]
         if errors:
             raise ValueError(
                 f"Catalogue invalide — {len(errors)} erreur(s) :\n" + "\n".join(errors)
             )
+
+    def _index_entry(self, cmd: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "cmd": cmd,
+            "id": self._normalize_text(cmd.get("id", "")),
+            "name": self._normalize_text(cmd.get("name", "") + " " + cmd.get("short_name", "")),
+            "tags": self._normalize_text(" ".join(cmd.get("tags", []))),
+            "desc": self._normalize_text(cmd.get("description", "") + " " + cmd.get("purpose", "")),
+            "command": self._normalize_text(cmd.get("command", "")),
+        }
+
+    @staticmethod
+    def _risk_score(cmd: Dict[str, Any]) -> int:
+        if cmd.get("dangerous") or cmd.get("execution_policy") == "lab_only":
+            return 3
+        if cmd.get("execution_policy") == "dry_run_only":
+            return 2
+        if cmd.get("requires_sudo"):
+            return 1
+        return 0
 
     def validate(self) -> List[str]:
         """Retourne la liste des problèmes sans lever d'exception."""
@@ -57,7 +84,9 @@ class CommandCatalog:
         resolved = self.resolve_category(category)
         if not resolved:
             return []
-        return [c for c in self._all_commands if c["category"] == resolved]
+        if resolved not in self._category_cache:
+            self._category_cache[resolved] = [c for c in self._all_commands if c["category"] == resolved]
+        return list(self._category_cache[resolved])
 
     def get_by_id(self, cmd_id: str) -> Optional[Dict[str, Any]]:
         return next((c for c in self._all_commands if c["id"] == cmd_id), None)
@@ -65,29 +94,59 @@ class CommandCatalog:
     def get_all(self) -> List[Dict[str, Any]]:
         return list(self._all_commands)
 
-    def search(self, keyword: str) -> List[Dict[str, Any]]:
+    def search(
+        self,
+        keyword: str,
+        *,
+        category: str | None = None,
+        tag: str | None = None,
+        use_regex: bool = False,
+        sort_by: str = "score",
+    ) -> List[Dict[str, Any]]:
         """Recherche multi-mots avec scoring par pertinence.
 
         Score : +10 match ID, +8 nom/short_name, +5 tags, +2 description/purpose.
         Tous les mots doivent correspondre (AND). Résultats triés score desc.
         """
+        cache_key = (keyword, category or "", tag or "", use_regex, sort_by)
+        if cache_key in self._search_cache:
+            return list(self._search_cache[cache_key])
+
         words = self._normalize_text(keyword).split()
         if not words:
             return []
 
         scored: List[tuple[int, Dict[str, Any]]] = []
-        for cmd in self._all_commands:
-            name     = self._normalize_text(cmd.get("name", "") + " " + cmd.get("short_name", ""))
-            tags     = self._normalize_text(" ".join(cmd.get("tags", [])))
-            desc     = self._normalize_text(cmd.get("description", "") + " " + cmd.get("purpose", ""))
-            cmd_id   = self._normalize_text(cmd.get("id", ""))
-            cmd_text = self._normalize_text(cmd.get("command", ""))
+        resolved_cat = self.resolve_category(category) if category else None
+        wanted_tag = self._normalize_text(tag) if tag else ""
+        regexes = []
+        if use_regex:
+            for w in words:
+                regexes.append(re.compile(w))
+
+        for entry in self._search_index:
+            cmd = entry["cmd"]
+            name = entry["name"]
+            tags = entry["tags"]
+            desc = entry["desc"]
+            cmd_id = entry["id"]
+            cmd_text = entry["command"]
+
+            if resolved_cat and cmd.get("category") != resolved_cat:
+                continue
+            if wanted_tag and wanted_tag not in tags:
+                continue
 
             score = 0
             for w in words:
-                if w not in cmd_id and w not in name and w not in tags and w not in desc and w not in cmd_text:
+                regex_match = False
+                if use_regex:
+                    regex_match = any(rgx.search(cmd_id) or rgx.search(name) or rgx.search(tags) or rgx.search(desc) or rgx.search(cmd_text) for rgx in regexes)
+                if (w not in cmd_id and w not in name and w not in tags and w not in desc and w not in cmd_text and not regex_match):
                     score = -1
                     break
+                if regex_match:
+                    score += 4
                 if w in cmd_id:
                     score += 10
                 if w in name:
@@ -102,8 +161,13 @@ class CommandCatalog:
             if score > 0:
                 scored.append((score, cmd))
 
-        scored.sort(key=lambda x: x[0], reverse=True)
-        return [cmd for _, cmd in scored]
+        if sort_by == "risk":
+            scored.sort(key=lambda x: (self._risk_score(x[1]), x[0]), reverse=True)
+        else:
+            scored.sort(key=lambda x: x[0], reverse=True)
+        results = [cmd for _, cmd in scored]
+        self._search_cache[cache_key] = list(results)
+        return results
 
     def get_categories(self) -> List[str]:
         return list(self._data["categories"].keys())

@@ -57,6 +57,13 @@ def test_log_event(temp_log):
     assert "Session démarrée" in content
 
 
+def test_log_run_redacts_password(temp_log):
+    ActionLogger.log_run("tool --password supersecret", 0, redact=True)
+    content = temp_log.read_text()
+    assert "supersecret" not in content
+    assert "--password ***" in content
+
+
 def test_apply_log_level_debug(temp_log):
     import logging
     from core.logger import apply_log_level, _logger

@@ -13,6 +13,8 @@ DEFAULTS: dict[str, Any] = {
     "show_history_in_menu": True,
     "history_size": 10,
     "command_timeout": 30,         # timeout d'exécution global (secondes)
+    "strict_shell_mode": False,    # bloque les opérateurs shell risqués à l'exécution
+    "redact_secrets_in_logs": True,# masque mots de passe/tokens dans logs/exports
 }
 
 

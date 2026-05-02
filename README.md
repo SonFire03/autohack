@@ -48,7 +48,12 @@ AUTOHACK is not:
 - 1,413 catalog entries
 - 1,013 XSS payload entries
 - Tagged command search with accent-insensitive matching
+- Advanced search modes: regex and risk-first sorting
 - Safety metadata: `safe`, `dry-run`, `lab-only`, `dangerous`, `sudo`
+- Enforced execution policies (`dry_run_only`, `lab_only`)
+- Configurable command timeout and strict shell mode
+- Secret redaction in logs and exports
+- Structured execution telemetry in `logs/executions.jsonl`
 - Tool availability checks
 - Optional dependency installer profiles with dry-run support
 - Favorites and session history
@@ -130,6 +135,8 @@ python3 main.py --search "graphql introspection"
 python3 main.py --search aws --category cloud
 python3 main.py --search xss --dangerous --limit 20
 python3 main.py --search certipy --tool certipy
+python3 main.py --search "sys_00[1-3]" --regex
+python3 main.py --search xss --dangerous --sort-by risk --limit 10
 ```
 
 <img width="1580" height="1309" alt="AUTOHACK search results for Tor commands" src="docs/screenshots/search-tor.png" />
@@ -151,6 +158,12 @@ Show a guided command pack:
 python3 main.py --pack web-recon
 python3 main.py --pack ad-lab
 python3 main.py --pack cloud-audit
+```
+
+Run a guided pack step-by-step:
+
+```bash
+python3 main.py --run-pack web-recon
 ```
 <img width="1598" height="333" alt="image" src="https://github.com/user-attachments/assets/acd73638-caee-41d9-b4cb-c1aaa7b1dd0c" />
 
@@ -234,10 +247,13 @@ Available options:
 | `--dry-run CMD_ID` | Show a command without executing it |
 | `--search KEYWORD` | Search the catalog with multi-word matching |
 | `--pack PACK` | Show a guided read-only command pack |
+| `--run-pack PACK` | Execute a guided command pack step-by-step |
 | `--category CAT` | List commands in a category, or filter `--search` |
 | `--safe` | Filter `--search` to safe commands |
 | `--dangerous` | Filter `--search` to dangerous commands |
 | `--tool TOOL` | Filter `--search` by required tool |
+| `--regex` | Interpret `--search` as a regular expression |
+| `--sort-by score\|risk` | Sort search results by relevance score or risk level |
 | `--limit N` | Limit `--search` results |
 | `--export FORMAT` | Export catalog as `md`, `txt`, `json`, or `html` |
 | `--check` | Run safe tool checks |

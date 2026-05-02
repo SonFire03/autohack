@@ -217,7 +217,7 @@ def test_execution_policy_defaults_dangerous_for_dangerous_flag(executor):
 
 
 def test_confirm_and_run_lab_only_executes_with_confirmation(executor):
-    """lab_only ne bloque plus — la commande s'exécute après confirmation."""
+    """lab_only exige une confirmation explicite LAB avant exécution."""
     cmd = {
         "id": "lab_001",
         "name": "Lab command",
@@ -225,12 +225,13 @@ def test_confirm_and_run_lab_only_executes_with_confirmation(executor):
         "execution_policy": "lab_only",
         "dangerous": False,
     }
-    with patch("rich.prompt.Confirm.ask", return_value=True):
-        with patch("subprocess.run") as mock_run:
-            mock_run.return_value.returncode = 0
-            result = executor.confirm_and_run(cmd)
-            assert result == 0
-            mock_run.assert_called_once()
+    with patch("rich.console.Console.input", return_value="LAB"):
+        with patch("rich.prompt.Confirm.ask", return_value=True):
+            with patch("subprocess.run") as mock_run:
+                mock_run.return_value.returncode = 0
+                result = executor.confirm_and_run(cmd)
+                assert result == 0
+                mock_run.assert_called_once()
 
 
 def test_run_and_save_blocks_dry_run_only_policy(executor, tmp_path):
@@ -240,26 +241,29 @@ def test_run_and_save_blocks_dry_run_only_policy(executor, tmp_path):
         "command": "echo blocked",
         "execution_policy": "dry_run_only",
     }
-    with patch("rich.prompt.Confirm.ask", return_value=True):
-        with patch("subprocess.run") as mock_run:
-            mock_run.return_value.returncode = 0
-            mock_run.return_value.stdout = "ok"
-            mock_run.return_value.stderr = ""
-            path, code = executor.run_and_save(cmd, export_dir=tmp_path)
-            assert path is not None
-            assert code == 0
-            mock_run.assert_called_once()
+    with patch("subprocess.run") as mock_run:
+        path, code = executor.run_and_save(cmd, export_dir=tmp_path)
+        assert path is None
+        assert code == -1
+        mock_run.assert_not_called()
 
 
-def test_confirm_and_run_allows_dry_run_only_policy(executor):
+def test_confirm_and_run_blocks_dry_run_only_policy(executor):
     cmd = {
         "id": "dry_002",
-        "name": "Dry now allowed",
+        "name": "Dry now blocked",
         "command": "echo ok",
         "execution_policy": "dry_run_only",
     }
-    with patch("rich.prompt.Confirm.ask", return_value=True):
-        with patch("subprocess.run") as mock_run:
-            mock_run.return_value.returncode = 0
-            assert executor.confirm_and_run(cmd) == 0
-            mock_run.assert_called_once()
+    with patch("subprocess.run") as mock_run:
+        assert executor.confirm_and_run(cmd) is None
+        mock_run.assert_not_called()
+
+
+def test_confirm_and_run_blocks_shell_operators_in_strict_mode(safe_cmd):
+    executor = CommandExecutor(strict_shell_mode=True)
+    cmd = dict(safe_cmd)
+    cmd["command"] = "echo hello | cat"
+    with patch("subprocess.run") as mock_run:
+        assert executor.confirm_and_run(cmd, skip_confirm=True) is None
+        mock_run.assert_not_called()

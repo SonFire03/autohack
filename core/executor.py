@@ -14,7 +14,7 @@ from rich.text import Text
 from rich.table import Table
 
 from config.settings import EXPORTS_DIR
-from core.logger import ActionLogger
+from core.logger import ActionLogger, redact_sensitive, write_execution_event
 
 console = Console()
 
@@ -74,12 +74,20 @@ def _run_args(command_str: str) -> dict:
 class CommandExecutor:
     """Gère l'exécution, le dry-run, la copie et la capture des commandes shell."""
 
-    def __init__(self, var_store=None, default_timeout: int = 30) -> None:
+    def __init__(
+        self,
+        var_store=None,
+        default_timeout: int = 30,
+        strict_shell_mode: bool = False,
+        redact_secrets: bool = True,
+    ) -> None:
         # Valeurs saisies durant la session — réutilisées comme défaut
         self._var_cache: Dict[str, str] = {}
         # Persistent variable store (VariableStore) — checked before prompting
         self._var_store = var_store
         self._default_timeout = max(1, int(default_timeout))
+        self._strict_shell_mode = strict_shell_mode
+        self._redact_secrets = redact_secrets
 
     def show_warning(self, cmd: Dict[str, Any]) -> None:
         """Affiche un avertissement pédagogique avant toute exécution."""
@@ -116,6 +124,27 @@ class CommandExecutor:
         return "normal"
 
     def _check_execution_policy(self, cmd: Dict[str, Any], action: str) -> bool:
+        policy = self._execution_policy(cmd)
+        if policy == "dry_run_only" and action in {"run", "capture"}:
+            console.print("[bold red]❌ Cette commande est marquée dry-run only.[/bold red]")
+            return False
+        if policy == "lab_only" and action in {"run", "capture"}:
+            console.print(
+                "[bold yellow]🧪 Commande lab-only : confirmez le contexte contrôlé.[/bold yellow]"
+            )
+            marker = console.input("[bold yellow]Tapez LAB pour continuer > [/bold yellow]").strip()
+            if marker != "LAB":
+                console.print("[dim]Annulé.[/dim]")
+                return False
+        if self._strict_shell_mode and action in {"run", "capture"}:
+            command = cmd.get("command", "")
+            allow_shell = bool(cmd.get("allow_shell_features"))
+            if (any(op in command for op in _SHELL_OPERATORS)) and not allow_shell:
+                console.print(
+                    "[bold red]❌ Mode shell strict: opérateurs shell bloqués "
+                    "(ajouter allow_shell_features=true pour cette commande).[/bold red]"
+                )
+                return False
         return True
 
     @staticmethod
@@ -239,6 +268,24 @@ class CommandExecutor:
         except (TypeError, ValueError):
             return self._default_timeout
 
+    def _masked(self, command: str) -> str:
+        return redact_sensitive(command, self._redact_secrets)
+
+    def _record_execution(
+        self, cmd: Dict[str, Any], exit_code: int, duration_s: float, mode: str, stderr: str = ""
+    ) -> None:
+        write_execution_event({
+            "mode": mode,
+            "id": cmd.get("id"),
+            "category": cmd.get("category"),
+            "tool": cmd.get("tool_required"),
+            "exit_code": exit_code,
+            "duration_s": round(duration_s, 3),
+            "timeout_s": self._effective_timeout(cmd),
+            "command": self._masked(cmd.get("command", "")),
+            "stderr": (stderr or "")[:500],
+        })
+
     def confirm_and_run(
         self, cmd: Dict[str, Any], capture: bool = False, skip_confirm: bool = False
     ) -> Optional[int]:
@@ -320,7 +367,7 @@ class CommandExecutor:
 
         content = [
             f"# Résultat : {cmd.get('name', '')}",
-            f"# Commande : {cmd.get('command', '')}",
+            f"# Commande : {self._masked(cmd.get('command', ''))}",
             f"# Date     : {ts}",
             f"# Code     : {code}",
             "",
@@ -331,8 +378,9 @@ class CommandExecutor:
             content += ["", "## stderr", stderr]
 
         path.write_text("\n".join(content), encoding="utf-8")
-        ActionLogger.log_run(cmd.get("command", ""), code)
+        ActionLogger.log_run(cmd.get("command", ""), code, redact=self._redact_secrets)
         ActionLogger.log_export(str(path), "txt-capture")
+        self._record_execution(cmd, code, duration_s, mode="capture", stderr=stderr)
 
         self._render_execution_summary(
             cmd,
@@ -361,7 +409,7 @@ class CommandExecutor:
             border_style="blue",
             padding=(1, 2),
         ))
-        ActionLogger.log_run(command_str, 0, dry_run=True)
+        ActionLogger.log_run(command_str, 0, dry_run=True, redact=self._redact_secrets)
 
     def copy_to_clipboard(self, cmd: Dict[str, Any]) -> bool:
         """Copie la commande dans le presse-papiers (avec substitution des variables)."""
@@ -373,7 +421,7 @@ class CommandExecutor:
             import pyperclip
             pyperclip.copy(command_str)
             console.print("[bold green]✅ Commande copiée dans le presse-papiers ![/bold green]")
-            ActionLogger.log_copy(command_str)
+            ActionLogger.log_copy(command_str, redact=self._redact_secrets)
             return True
         except Exception:
             console.print(
@@ -403,7 +451,8 @@ class CommandExecutor:
             code = 1
         duration_s = time.perf_counter() - started
 
-        ActionLogger.log_run(command_str, code)
+        ActionLogger.log_run(command_str, code, redact=self._redact_secrets)
+        self._record_execution(cmd, code, duration_s, mode="run")
         self._render_execution_summary(cmd, code, duration_s)
         return code
 

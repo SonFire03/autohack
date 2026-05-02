@@ -154,6 +154,8 @@ class MainMenu:
         self._executor   = CommandExecutor(
             var_store=self._var_store,
             default_timeout=self._config.get("command_timeout"),
+            strict_shell_mode=self._config.get("strict_shell_mode"),
+            redact_secrets=self._config.get("redact_secrets_in_logs"),
         )
         self._checker    = ToolChecker(self._catalog)
         self._history    = SessionHistory(

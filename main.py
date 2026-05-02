@@ -39,6 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
     group.add_argument("--dry-run",  metavar="CMD_ID",  help="Afficher une commande sans l'exécuter")
     group.add_argument("--search",   metavar="KEYWORD", help="Rechercher dans le catalogue (multi-mots)")
     group.add_argument("--pack",     metavar="PACK",    help="Afficher un pack de commandes guidé")
+    group.add_argument("--run-pack", metavar="PACK",    help="Exécuter un pack guidé pas-à-pas")
     group.add_argument("--export",   metavar="FORMAT",  choices=["md", "txt", "json", "html"],
                        help="Exporter le catalogue (md | txt | json | html)")
     group.add_argument("--check",    action="store_true", help="Lancer toutes les vérifications safe")
@@ -62,6 +63,11 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Filtrer --search sur les commandes dangereuses")
     parser.add_argument("--tool", metavar="TOOL",
                         help="Filtrer --search sur l'outil requis")
+    parser.add_argument("--regex", action="store_true",
+                        help="Interpréter --search comme regex")
+    parser.add_argument("--sort-by", choices=["score", "risk"],
+                        default="score",
+                        help="Tri de --search: score | risk")
     parser.add_argument("--limit", metavar="N", type=int,
                         help="Limiter le nombre de résultats --search")
     parser.add_argument("--install-dry-run", action="store_true",
@@ -79,7 +85,11 @@ def _get_core():
     from core.config_manager import ConfigManager
     config = ConfigManager()
     catalog = CommandCatalog()
-    executor = CommandExecutor(default_timeout=config.get("command_timeout"))
+    executor = CommandExecutor(
+        default_timeout=config.get("command_timeout"),
+        strict_shell_mode=config.get("strict_shell_mode"),
+        redact_secrets=config.get("redact_secrets_in_logs"),
+    )
     checker = ToolChecker(catalog)
     return catalog, executor, checker
 
@@ -110,9 +120,15 @@ def cli_search(
     safe: bool = False,
     dangerous: bool = False,
     limit: int | None = None,
+    regex: bool = False,
+    sort_by: str = "score",
 ) -> None:
     catalog, _, _ = _get_core()
-    results = catalog.search(keyword)
+    try:
+        results = catalog.search(keyword, category=category, use_regex=regex, sort_by=sort_by)
+    except Exception as exc:
+        console.print(f"[bold red]❌ Regex invalide: {exc}[/bold red]")
+        sys.exit(1)
     filters = []
     if safe and dangerous:
         console.print("[bold red]❌ --safe et --dangerous sont incompatibles.[/bold red]")
@@ -126,7 +142,6 @@ def cli_search(
                 f"[dim]Disponibles : {available}[/dim]"
             )
             sys.exit(1)
-        results = [cmd for cmd in results if cmd["category"] == resolved_cat]
         filters.append(f"category={resolved_cat}")
     if tool:
         wanted_tool = tool.lower().strip()
@@ -144,6 +159,10 @@ def cli_search(
             sys.exit(1)
         results = results[:limit]
         filters.append(f"limit={limit}")
+    if regex:
+        filters.append("regex")
+    if sort_by != "score":
+        filters.append(f"sort={sort_by}")
     if not results:
         console.print(f"[yellow]Aucun résultat pour « {keyword} »[/yellow]")
         sys.exit(0)
@@ -199,6 +218,81 @@ def cli_pack(pack_name: str) -> None:
             cmd["command"][:55],
         )
     console.print(table)
+
+
+def cli_run_pack(pack_name: str) -> None:
+    from rich.prompt import Confirm
+    from core.packs import get_pack, list_pack_names
+
+    catalog, executor, checker = _get_core()
+    pack = get_pack(pack_name)
+    if not pack:
+        console.print(
+            f"[bold red]❌ Pack inconnu : {pack_name}[/bold red]\n"
+            f"[dim]Disponibles : {', '.join(list_pack_names())}[/dim]"
+        )
+        sys.exit(1)
+
+    console.print(f"\n[bold cyan]{pack.title}[/bold cyan] [dim]({pack.name})[/dim]")
+    console.print(f"[dim]{pack.description}[/dim]\n")
+    console.print("[bold yellow]Mode guidé:[/bold yellow] chaque étape peut être exécutée, ignorée ou arrêtée.\n")
+
+    done = skipped = failed = 0
+    index = 0
+    while index < len(pack.command_ids):
+        cmd_id = pack.command_ids[index]
+        cmd = catalog.get_by_id(cmd_id)
+        if cmd is None:
+            console.print(f"[bold red]❌ ID introuvable dans le catalogue: {cmd_id}[/bold red]")
+            failed += 1
+            index += 1
+            continue
+
+        tool = cmd.get("tool_required", "")
+        badge = checker.badge(tool) if tool else "  "
+        console.print(
+            f"[bold]{index + 1}/{len(pack.command_ids)}[/bold] "
+            f"[cyan]{cmd['id']}[/cyan] {badge} {cmd['name']}\n"
+            f"[magenta]{cmd['command']}[/magenta]"
+        )
+        choice = console.input(
+            "[bold yellow][r][/bold yellow]un / [bold yellow][s][/bold yellow]kip / "
+            "[bold yellow][q][/bold yellow]uit > "
+        ).strip().lower()
+
+        if choice == "q":
+            break
+        if choice == "s":
+            skipped += 1
+            index += 1
+            continue
+        if choice != "r":
+            console.print("[dim]Choix invalide.[/dim]")
+            continue
+
+        exit_code = executor.confirm_and_run(cmd)
+        if exit_code is None:
+            if Confirm.ask("[bold yellow]Réessayer cette étape ?[/bold yellow]", default=False):
+                continue
+            skipped += 1
+            index += 1
+            continue
+        if exit_code == 0:
+            done += 1
+            index += 1
+            continue
+
+        failed += 1
+        if Confirm.ask("[bold red]Étape en échec. Réessayer ?[/bold red]", default=False):
+            continue
+        index += 1
+
+    console.print(
+        f"\n[bold]Résumé pack[/bold]\n"
+        f"  ✅ exécutées: {done}\n"
+        f"  ⏭ ignorées: {skipped}\n"
+        f"  ❌ échecs: {failed}\n"
+    )
 
 
 def cli_export(fmt: str) -> None:
@@ -457,7 +551,7 @@ _autohack_complete() {{
     cur="${{COMP_WORDS[COMP_CWORD]}}"
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
 
-    local opts="--run --dry-run --search --pack --category --safe --dangerous --tool --limit --export --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --yes --version"
+    local opts="--run --dry-run --search --pack --run-pack --category --safe --dangerous --tool --regex --sort-by --limit --export --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --yes --version"
     local ids="{ids}"
     local cats="{cats}"
     local packs="{packs}"
@@ -467,11 +561,12 @@ _autohack_complete() {{
 
     case "$prev" in
         --run|--dry-run) COMPREPLY=($(compgen -W "$ids" -- "$cur")) ; return ;;
-        --pack)          COMPREPLY=($(compgen -W "$packs" -- "$cur")) ; return ;;
+        --pack|--run-pack) COMPREPLY=($(compgen -W "$packs" -- "$cur")) ; return ;;
         --category)      COMPREPLY=($(compgen -W "$cats" -- "$cur")) ; return ;;
         --export)        COMPREPLY=($(compgen -W "$formats" -- "$cur")) ; return ;;
         --generate-completion) COMPREPLY=($(compgen -W "$shells" -- "$cur")) ; return ;;
         --install-profile) COMPREPLY=($(compgen -W "$profiles" -- "$cur")) ; return ;;
+        --sort-by)       COMPREPLY=($(compgen -W "score risk" -- "$cur")) ; return ;;
     esac
 
     if [[ "$cur" == -* ]]; then
@@ -500,10 +595,13 @@ _autohack() {{
         '--dry-run[Afficher sans exécuter]:id:($ids)' \\
         '--search[Rechercher]:keyword:' \\
         '--pack[Afficher un pack guidé]:pack:($packs)' \\
+        '--run-pack[Exécuter un pack guidé pas-à-pas]:pack:($packs)' \\
         '--category[Lister une catégorie]:cat:($cats)' \\
         '--safe[Filtrer la recherche sur les commandes safe]' \\
         '--dangerous[Filtrer la recherche sur les commandes dangereuses]' \\
         '--tool[Filtrer la recherche par outil]:tool:' \\
+        '--regex[Interpréter la recherche comme regex]' \\
+        '--sort-by[Tri de la recherche]:mode:(score risk)' \\
         '--limit[Limiter les résultats de recherche]:limit:' \\
         '--export[Exporter le catalogue]:format:(md txt json html)' \\
         '--check[Vérifications safe]' \\
@@ -536,9 +634,11 @@ def main() -> None:
     elif getattr(args, "dry_run", None):
         cli_dry_run(args.dry_run)
     elif args.search:
-        cli_search(args.search, args.category, args.tool, args.safe, args.dangerous, args.limit)
+        cli_search(args.search, args.category, args.tool, args.safe, args.dangerous, args.limit, args.regex, args.sort_by)
     elif getattr(args, "pack", None):
         cli_pack(args.pack)
+    elif getattr(args, "run_pack", None):
+        cli_run_pack(args.run_pack)
     elif args.export:
         cli_export(args.export)
     elif args.check:
