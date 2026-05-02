@@ -76,8 +76,10 @@ def _get_core():
     from core.catalog import CommandCatalog
     from core.executor import CommandExecutor
     from core.checker import ToolChecker
+    from core.config_manager import ConfigManager
+    config = ConfigManager()
     catalog = CommandCatalog()
-    executor = CommandExecutor()
+    executor = CommandExecutor(default_timeout=config.get("command_timeout"))
     checker = ToolChecker(catalog)
     return catalog, executor, checker
 
@@ -212,13 +214,15 @@ def cli_export(fmt: str) -> None:
 
 def cli_check() -> None:
     import subprocess
+    from core.config_manager import ConfigManager
     catalog, _, _ = _get_core()
+    timeout_s = ConfigManager().get("command_timeout")
     safe = catalog.get_safe_commands()
     console.print(f"[bold]Exécution de {len(safe)} vérifications…[/bold]\n")
     ok = fail = 0
     for cmd in safe:
         try:
-            r = subprocess.run(cmd["command"], shell=True, capture_output=True, text=True, timeout=10)
+            r = subprocess.run(cmd["command"], shell=True, capture_output=True, text=True, timeout=timeout_s)
             code = r.returncode
         except Exception:
             code = -1

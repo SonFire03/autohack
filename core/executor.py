@@ -74,11 +74,12 @@ def _run_args(command_str: str) -> dict:
 class CommandExecutor:
     """Gère l'exécution, le dry-run, la copie et la capture des commandes shell."""
 
-    def __init__(self, var_store=None) -> None:
+    def __init__(self, var_store=None, default_timeout: int = 30) -> None:
         # Valeurs saisies durant la session — réutilisées comme défaut
         self._var_cache: Dict[str, str] = {}
         # Persistent variable store (VariableStore) — checked before prompting
         self._var_store = var_store
+        self._default_timeout = max(1, int(default_timeout))
 
     def show_warning(self, cmd: Dict[str, Any]) -> None:
         """Affiche un avertissement pédagogique avant toute exécution."""
@@ -145,6 +146,9 @@ class CommandExecutor:
         summary.add_row("Shell", Text(cmd.get("command", ""), style="magenta"))
         if saved_path is not None:
             summary.add_row("Capture", Text(str(saved_path), style="bold bright_yellow"))
+        timeout_s = cmd.get("_effective_timeout")
+        if timeout_s:
+            summary.add_row("Timeout", Text(f"{timeout_s}s", style="grey70"))
         if stdout:
             summary.add_row("stdout", Text(f"{len(stdout)} caractères", style="grey70"))
         if stderr:
@@ -228,6 +232,13 @@ class CommandExecutor:
 
         return result
 
+    def _effective_timeout(self, cmd: Dict[str, Any]) -> int:
+        raw = cmd.get("timeout_seconds", self._default_timeout)
+        try:
+            return max(1, int(raw))
+        except (TypeError, ValueError):
+            return self._default_timeout
+
     def confirm_and_run(
         self, cmd: Dict[str, Any], capture: bool = False, skip_confirm: bool = False
     ) -> Optional[int]:
@@ -241,6 +252,7 @@ class CommandExecutor:
         if resolved is None:
             return None
         cmd = {**cmd, "command": resolved}
+        cmd["_effective_timeout"] = self._effective_timeout(cmd)
 
         if not self._check_execution_policy(cmd, "run"):
             return None
@@ -282,6 +294,7 @@ class CommandExecutor:
         if resolved is None:
             return None, -1
         cmd = {**cmd, "command": resolved}
+        cmd["_effective_timeout"] = self._effective_timeout(cmd)
 
         if not self._check_execution_policy(cmd, "capture"):
             return None, -1
@@ -376,9 +389,15 @@ class CommandExecutor:
         command_str = cmd.get("command", "")
         console.print(f"\n[bold green]▶ Exécution :[/bold green] [magenta]{command_str}[/magenta]\n")
         started = time.perf_counter()
+        timeout_s = self._effective_timeout(cmd)
         try:
-            result = subprocess.run(**_run_args(command_str), text=True)
+            result = subprocess.run(**_run_args(command_str), text=True, timeout=timeout_s)
             code = result.returncode
+        except subprocess.TimeoutExpired:
+            console.print(
+                f"[bold red]❌ Timeout dépassé ({timeout_s}s). Commande interrompue.[/bold red]"
+            )
+            code = 124
         except Exception as exc:
             console.print(f"[bold red]❌ Erreur : {exc}[/bold red]")
             code = 1
@@ -391,12 +410,16 @@ class CommandExecutor:
     def _run_capture(self, cmd: Dict[str, Any]) -> Tuple[str, str, int]:
         """Exécute et capture stdout + stderr."""
         command_str = cmd.get("command", "")
+        timeout_s = self._effective_timeout(cmd)
         try:
             result = subprocess.run(
                 **_run_args(command_str),
                 text=True,
                 capture_output=True,
+                timeout=timeout_s,
             )
             return result.stdout or "", result.stderr or "", result.returncode
+        except subprocess.TimeoutExpired:
+            return "", f"Timeout dépassé ({timeout_s}s).", 124
         except Exception as exc:
             return "", str(exc), 1

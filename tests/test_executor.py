@@ -1,4 +1,5 @@
 import pytest
+import subprocess
 from unittest.mock import patch
 from core.executor import CommandExecutor, _run_args
 
@@ -66,6 +67,34 @@ def test_run_capture_returns_tuple(executor, safe_cmd):
     assert isinstance(stderr, str)
     assert isinstance(code, int)
     assert code == 0
+
+
+def test_run_capture_uses_default_timeout(executor, safe_cmd):
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value.stdout = "ok"
+        mock_run.return_value.stderr = ""
+        mock_run.return_value.returncode = 0
+        executor._run_capture(safe_cmd)
+        assert mock_run.call_args.kwargs["timeout"] == 30
+
+
+def test_run_capture_uses_command_timeout_override(executor, safe_cmd):
+    cmd = dict(safe_cmd)
+    cmd["timeout_seconds"] = 7
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value.stdout = "ok"
+        mock_run.return_value.stderr = ""
+        mock_run.return_value.returncode = 0
+        executor._run_capture(cmd)
+        assert mock_run.call_args.kwargs["timeout"] == 7
+
+
+def test_run_capture_timeout_returns_124(executor, safe_cmd):
+    with patch("subprocess.run", side_effect=subprocess.TimeoutExpired(cmd="x", timeout=1)):
+        stdout, stderr, code = executor._run_capture(safe_cmd)
+        assert stdout == ""
+        assert "Timeout dépassé" in stderr
+        assert code == 124
 
 
 def test_run_capture_bad_command(executor):

@@ -12,6 +12,7 @@ DEFAULTS: dict[str, Any] = {
     "confirm_safe_commands": True, # demander confirmation même pour safe_to_run=True
     "show_history_in_menu": True,
     "history_size": 10,
+    "command_timeout": 30,         # timeout d'exécution global (secondes)
 }
 
 
@@ -43,7 +44,7 @@ class ConfigManager:
         "export_format": {"markdown", "txt", "json"},
         "log_level":     {"INFO", "DEBUG", "WARNING"},
     }
-    _POSITIVE_INT_KEYS = {"page_size", "history_size"}
+    _POSITIVE_INT_KEYS = {"page_size", "history_size", "command_timeout"}
 
     def set(self, key: str, value: Any) -> None:
         if key not in DEFAULTS:

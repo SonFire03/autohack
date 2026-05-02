@@ -214,6 +214,11 @@ The interactive `UTILS` column also includes:
 - `Target Workspace` to define the current target, URL, scope, notes, and shared variables.
 - `Command Builder` to render common lab commands from `$TARGET`, `$LHOST`, `$LPORT`, `$WORDLIST`, and related variables without executing them automatically.
 
+The interactive `UTILS` column also includes:
+
+- `Target Workspace` to define the current target, URL, scope, notes, and shared variables.
+- `Command Builder` to render common lab commands from `$TARGET`, `$LHOST`, `$LPORT`, `$WORDLIST`, and related variables without executing them automatically.
+
 ## CLI Reference
 
 ```text

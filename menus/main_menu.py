@@ -150,9 +150,12 @@ class MainMenu:
         self._catalog    = CommandCatalog()
         self._var_store  = VariableStore()
         self._loot_vault = LootVault()
-        self._executor   = CommandExecutor(var_store=self._var_store)
-        self._checker    = ToolChecker(self._catalog)
         self._config     = ConfigManager()
+        self._executor   = CommandExecutor(
+            var_store=self._var_store,
+            default_timeout=self._config.get("command_timeout"),
+        )
+        self._checker    = ToolChecker(self._catalog)
         self._history    = SessionHistory(
             max_size=self._config.get("history_size"),
             persist_path=HISTORY_PATH,

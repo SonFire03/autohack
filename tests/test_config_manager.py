@@ -86,3 +86,13 @@ def test_set_export_dir_none(config):
 def test_set_export_dir_string(config):
     config.set("export_dir", "/tmp/myexports")
     assert config.get("export_dir") == "/tmp/myexports"
+
+
+def test_set_command_timeout_valid(config):
+    config.set("command_timeout", 45)
+    assert config.get("command_timeout") == 45
+
+
+def test_set_command_timeout_zero_raises(config):
+    with pytest.raises(ValueError, match="entier > 0"):
+        config.set("command_timeout", 0)

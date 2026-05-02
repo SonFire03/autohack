@@ -12,6 +12,7 @@ SETTING_LABELS = {
     "confirm_safe_commands": ("Confirmer commandes safe",     "true | false"),
     "show_history_in_menu":  ("Afficher historique en menu",  "true | false"),
     "history_size":          ("Taille historique de session", "entier > 0"),
+    "command_timeout":       ("Timeout commande (s)",         "entier > 0"),
     "log_level":             ("Niveau de log",                "INFO | DEBUG | WARNING"),
     "export_dir":            ("Dossier d'export",             "chemin absolu ou vide (=défaut)"),
 }
