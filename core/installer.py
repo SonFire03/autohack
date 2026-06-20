@@ -271,15 +271,23 @@ class ToolInstaller:
             return set(self._required_tools)
         raise ValueError(f"Unknown install profile: {profile}")
 
-    def plan(self, profile: str, only_missing: bool = True) -> InstallPlan:
+    def plan(
+        self,
+        profile: str,
+        only_missing: bool = True,
+        check_apt_availability: bool = True,
+    ) -> InstallPlan:
         selected = self._profile_tools(profile)
         if only_missing:
             selected = {tool for tool in selected if not self._is_present(tool)}
 
         apt_tools = {tool: APT_PACKAGES[tool] for tool in selected if tool in APT_PACKAGES}
-        apt_packages = sorted(
-            {package for package in apt_tools.values() if apt_package_available(package)}
-        )
+        if check_apt_availability:
+            apt_packages = sorted(
+                {package for package in apt_tools.values() if apt_package_available(package)}
+            )
+        else:
+            apt_packages = sorted(set(apt_tools.values()))
         pipx_packages = sorted({PIPX_PACKAGES[tool] for tool in selected if tool in PIPX_PACKAGES})
         go_packages = sorted({GO_PACKAGES[tool] for tool in selected if tool in GO_PACKAGES})
         automated = set(APT_PACKAGES) | set(PIPX_PACKAGES) | set(GO_PACKAGES)

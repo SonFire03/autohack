@@ -514,10 +514,12 @@ def cli_install_profile(profile: str, dry_run: bool = False, assume_yes: bool = 
     from core.installer import ToolInstaller
     from rich.prompt import Confirm
 
-    catalog, _, _ = _get_core()
-    required_tools = [cmd.get("tool_required", "") for cmd in catalog.get_all()]
+    required_tools = []
+    if profile == "all" or not dry_run:
+        catalog, _, _ = _get_core()
+        required_tools = [cmd.get("tool_required", "") for cmd in catalog.get_all()]
     installer = ToolInstaller(required_tools)
-    plan = installer.plan(profile)
+    plan = installer.plan(profile, check_apt_availability=not dry_run)
     commands = plan.commands()
 
     console.print(f"\n[bold]Installation profile:[/bold] [cyan]{profile}[/cyan]\n")
