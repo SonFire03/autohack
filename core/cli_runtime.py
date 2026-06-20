@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import argparse
+
 import sys
 from pathlib import Path
 
+from core import cli_commands as commands
 from rich.console import Console
 from rich.panel import Panel
 
@@ -74,10 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _app_module():
-    module = sys.modules.get("main") or sys.modules.get("__main__")
-    if module is None:
-        raise RuntimeError("AUTOHACK app module not loaded")
-    return module
+    return commands
 
 
 def main() -> None:
@@ -154,10 +153,11 @@ def main() -> None:
         checker.refresh()
         console.print("[bold green]✅ Cache outils vidé.[/bold green]")
     elif getattr(args, "export_session", None):
+        from core.session_replay import export_session
+
         from core.session_history import SessionHistory, HISTORY_PATH
         from core.variables import VariableStore
         from core.loot import LootVault
-        from core.session_replay import export_session
 
         out = Path(args.export_session)
         export_session(out, SessionHistory(persist_path=HISTORY_PATH), VariableStore(), LootVault())
