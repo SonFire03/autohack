@@ -64,6 +64,51 @@ def build_parser() -> argparse.ArgumentParser:
     completion_parser = subparsers.add_parser("generate-completion", help="Générer un script de complétion shell")
     completion_parser.add_argument("shell", choices=["bash", "zsh"], help="Shell cible")
 
+    session_parser = subparsers.add_parser("session", help="Exporter ou rejouer une session")
+    session_sub = session_parser.add_subparsers(dest="session_command")
+    session_export = session_sub.add_parser("export", help="Exporter la session")
+    session_export.add_argument("file", metavar="FILE", help="Fichier de sortie JSON")
+    session_replay = session_sub.add_parser("replay", help="Rejouer une session exportée")
+    session_replay.add_argument("file", metavar="FILE", help="Fichier JSON à rejouer")
+
+    catalog_parser = subparsers.add_parser("catalog", help="Inspecter le catalogue")
+    catalog_sub = catalog_parser.add_subparsers(dest="catalog_command")
+    catalog_sub.add_parser("list-ids", help="Lister tous les IDs")
+    catalog_sub.add_parser("list-categories", help="Lister les catégories")
+    catalog_sub.add_parser("stats", help="Statistiques du catalogue")
+    catalog_sub.add_parser("favorites", help="Afficher les favoris")
+    catalog_missing = catalog_sub.add_parser("missing-tools", help="Lister les outils requis non installés")
+    catalog_missing.add_argument("--profile", choices=["basic", "advanced", "all"], help="Profil de référence optionnel")
+    catalog_tag = catalog_sub.add_parser("tag", help="Lister les commandes ayant un tag")
+    catalog_tag.add_argument("tag", metavar="TAG", help="Tag recherché")
+    catalog_sub.add_parser("check", help="Lancer les vérifications safe")
+    catalog_export = catalog_sub.add_parser("export", help="Exporter le catalogue")
+    catalog_export.add_argument("format", choices=["md", "txt", "json", "html"], help="Format d'export")
+    catalog_diff = catalog_sub.add_parser("diff", help="Comparer deux refs de catalogue")
+    catalog_diff.add_argument("range_expr", metavar="RANGE", help="Référence de type refA..refB")
+    catalog_search = catalog_sub.add_parser("search", help="Rechercher dans le catalogue")
+    catalog_search.add_argument("keyword", metavar="KEYWORD", help="Mot-clé ou regex de recherche")
+    catalog_search.add_argument("--category", metavar="CAT", help="Filtrer par catégorie")
+    catalog_search.add_argument("--tool", metavar="TOOL", help="Filtrer par outil requis")
+    catalog_search.add_argument("--safe", action="store_true", help="Limiter aux commandes safe")
+    catalog_search.add_argument("--dangerous", action="store_true", help="Limiter aux commandes dangereuses")
+    catalog_search.add_argument("--regex", action="store_true", help="Interpréter la recherche comme regex")
+    catalog_search.add_argument("--sort-by", choices=["score", "risk"], default="score", help="Tri des résultats")
+    catalog_search.add_argument("--limit", metavar="N", type=int, help="Limiter le nombre de résultats")
+
+    admin_parser = subparsers.add_parser("admin", help="Actions d'administration")
+    admin_sub = admin_parser.add_subparsers(dest="admin_command")
+    admin_sub.add_parser("usage-metrics", help="Afficher les métriques d'usage locales")
+    admin_sub.add_parser("verify-audit-chain", help="Vérifier l'intégrité de la chaîne d'audit")
+    admin_sub.add_parser("serve-api", help="Lancer l'API locale read-only")
+    admin_apply = admin_sub.add_parser("apply-profile", help="Appliquer un profil environnement")
+    admin_apply.add_argument("profile", metavar="PROFILE", help="Profil à appliquer")
+    admin_approve = admin_sub.add_parser("approve", help="Approuver une commande en file secondaire")
+    admin_approve.add_argument("cmd_id", metavar="CMD_ID", help="Identifiant de commande")
+    admin_sub.add_parser("approvals", help="Lister les commandes en attente d'approbation")
+    admin_sub.add_parser("refresh-tools", help="Vider le cache des outils détectés")
+    admin_sub.add_parser("export-exec-report", help="Exporter le rapport HTML des exécutions")
+
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--run",      metavar="CMD_ID",  help="Exécuter une commande par son ID")
     group.add_argument("--dry-run",  metavar="CMD_ID",  help="Afficher une commande sans l'exécuter")
@@ -168,6 +213,93 @@ def main() -> None:
         if shell is None:
             parser.error("generate-completion requires a shell argument")
         app.cli_generate_completion(shell)
+    elif getattr(args, "command", None) == "session":
+        if getattr(args, "session_command", None) == "export":
+            from core.session_history import SessionHistory, HISTORY_PATH
+            from core.session_replay import export_session
+            from core.variables import VariableStore
+            from core.loot import LootVault
+
+            out = Path(args.file)
+            export_session(out, SessionHistory(persist_path=HISTORY_PATH), VariableStore(), LootVault())
+            console.print(f"[bold green]✅ Session exportée:[/bold green] {out}")
+        elif getattr(args, "session_command", None) == "replay":
+            from core.session_replay import load_session
+
+            data = load_session(Path(args.file))
+            hist = data.get("history", [])
+            console.print(f"[bold]Replay[/bold] entries={len(hist)} variables={len(data.get('variables', {}))} loot={len(data.get('loot', []))}")
+            for item in hist[:30]:
+                print(f"{item.get('timestamp','')}\t{item.get('id','')}\t{item.get('exit_code','')}\t{item.get('command','')[:80]}")
+        else:
+            parser.error("session requires export or replay")
+    elif getattr(args, "command", None) == "catalog":
+        if getattr(args, "catalog_command", None) == "list-ids":
+            app.cli_list_ids()
+        elif getattr(args, "catalog_command", None) == "list-categories":
+            app.cli_list_categories()
+        elif getattr(args, "catalog_command", None) == "stats":
+            app.cli_stats()
+        elif getattr(args, "catalog_command", None) == "favorites":
+            app.cli_favorites()
+        elif getattr(args, "catalog_command", None) == "missing-tools":
+            app.cli_missing_tools()
+        elif getattr(args, "catalog_command", None) == "tag":
+            app.cli_tag(args.tag)
+        elif getattr(args, "catalog_command", None) == "check":
+            app.cli_check()
+        elif getattr(args, "catalog_command", None) == "export":
+            app.cli_export(args.format)
+        elif getattr(args, "catalog_command", None) == "diff":
+            app.cli_catalog_diff(args.range_expr)
+        elif getattr(args, "catalog_command", None) == "search":
+            app.cli_search(
+                args.keyword,
+                args.category,
+                args.tool,
+                args.safe,
+                args.dangerous,
+                args.limit,
+                args.regex,
+                args.sort_by,
+            )
+        else:
+            parser.error("catalog requires a subcommand")
+    elif getattr(args, "command", None) == "admin":
+        if getattr(args, "admin_command", None) == "usage-metrics":
+            app.cli_usage_metrics()
+        elif getattr(args, "admin_command", None) == "verify-audit-chain":
+            app.cli_verify_audit_chain()
+        elif getattr(args, "admin_command", None) == "serve-api":
+            app.cli_serve_api()
+        elif getattr(args, "admin_command", None) == "apply-profile":
+            app.cli_apply_profile(args.profile)
+        elif getattr(args, "admin_command", None) == "approve":
+            from core.approval_queue import ApprovalQueue
+            from core.rbac import can
+
+            if not can(app._role(), "approve"):
+                console.print("[bold red]❌ Action non autorisée pour ce rôle.[/bold red]")
+                sys.exit(1)
+            ok = ApprovalQueue().approve(args.cmd_id)
+            console.print("[bold green]✅ Approuvée.[/bold green]" if ok else "[yellow]Aucune entrée en attente.[/yellow]")
+        elif getattr(args, "admin_command", None) == "approvals":
+            from core.approval_queue import ApprovalQueue
+
+            pending = ApprovalQueue().list_pending()
+            if not pending:
+                console.print("[dim]Aucune commande en attente.[/dim]")
+            else:
+                for cmd_id in pending:
+                    print(cmd_id)
+        elif getattr(args, "admin_command", None) == "refresh-tools":
+            _, _, checker = app._get_core()
+            checker.refresh()
+            console.print("[bold green]✅ Cache outils vidé.[/bold green]")
+        elif getattr(args, "admin_command", None) == "export-exec-report":
+            app.cli_export_exec_report()
+        else:
+            parser.error("admin requires a subcommand")
     elif args.run:
         app.cli_run(args.run)
     elif getattr(args, "generate_playbook", None):

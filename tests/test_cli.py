@@ -46,6 +46,14 @@ def test_list_ids_contains_known_ids():
     assert "net_001" in r.stdout
 
 
+def test_catalog_list_ids_subcommand_contains_known_ids():
+    r = run("catalog", "list-ids")
+    assert r.returncode == 0
+    assert "sys_001" in r.stdout
+    assert "tor_001" in r.stdout
+    assert "net_001" in r.stdout
+
+
 # ── --list-categories ────────────────────────────────────────────────────────
 
 def test_list_categories_flag():
@@ -177,6 +185,14 @@ def test_export_html_creates_file():
     assert r.returncode == 0
     assert "Export créé" in r.stdout
     assert ".html" in r.stdout
+
+
+def test_session_export_subcommand_creates_file(tmp_path):
+    out = tmp_path / "session.json"
+    r = run("session", "export", str(out))
+    assert r.returncode == 0
+    assert out.exists()
+    assert "Session exportée" in r.stdout
 
 
 # ── Catalogue enrichi ─────────────────────────────────────────────────────────
@@ -356,6 +372,12 @@ def test_usage_metrics_flag():
     assert "Usage metrics" in r.stdout
 
 
+def test_admin_usage_metrics_subcommand():
+    r = run("admin", "usage-metrics")
+    assert r.returncode == 0
+    assert "Usage metrics" in r.stdout
+
+
 def test_catalog_diff_head_to_head():
     r = run("--catalog-diff", "HEAD..HEAD")
     assert r.returncode == 0
@@ -385,6 +407,12 @@ def test_missing_tools_exits_zero():
 
 def test_missing_tools_lists_tools_or_all_ok():
     r = run("--missing-tools")
+    assert r.returncode == 0
+    assert ("manquant" in r.stdout.lower() or "installés" in r.stdout.lower())
+
+
+def test_catalog_missing_tools_subcommand():
+    r = run("catalog", "missing-tools")
     assert r.returncode == 0
     assert ("manquant" in r.stdout.lower() or "installés" in r.stdout.lower())
 
@@ -450,6 +478,14 @@ def test_generate_completion_zsh_contains_new_flags():
     assert "--pack" in r.stdout
     assert "--safe" in r.stdout
     assert "binary-ctf" in r.stdout
+
+
+def test_generate_completion_mentions_new_subcommands():
+    r = run("--generate-completion", "bash")
+    assert r.returncode == 0
+    assert "session" in r.stdout
+    assert "catalog" in r.stdout
+    assert "admin" in r.stdout
 
 
 # ── --category prefix matching ─────────────────────────────────────────────────

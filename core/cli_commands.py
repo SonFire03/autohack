@@ -608,7 +608,7 @@ _autohack_complete() {{
     cur="${{COMP_WORDS[COMP_CWORD]}}"
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
 
-    local commands="search run dry-run pack run-pack export install list-ids list-categories stats favorites tag missing-tools generate-completion"
+    local commands="search run dry-run pack run-pack export install list-ids list-categories stats favorites tag missing-tools generate-completion session catalog admin"
     local opts="--run --dry-run --search --pack --run-pack --generate-playbook --catalog-diff --usage-metrics --verify-audit-chain --serve-api --apply-profile --approve-command --list-approvals --refresh-tools --export-session --replay-session --category --safe --dangerous --tool --regex --sort-by --limit --export --export-exec-report --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --profile --yes --version"
     local ids="{ids}"
     local cats="{cats}"
@@ -653,7 +653,7 @@ _autohack() {{
     ids=({ids})
     cats=({cats})
     packs=({packs})
-    commands=(search run dry-run pack run-pack export install list-ids list-categories stats favorites tag missing-tools generate-completion)
+    commands=(search run dry-run pack run-pack export install list-ids list-categories stats favorites tag missing-tools generate-completion session catalog admin)
 
     _arguments \\
         '1:command:($commands)' \\
