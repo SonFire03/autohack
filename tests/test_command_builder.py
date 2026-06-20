@@ -27,6 +27,11 @@ def test_templates_have_unique_keys():
     assert len(keys) == len(set(keys))
 
 
+def test_templates_have_unique_commands():
+    commands = [template.command for template in COMMAND_TEMPLATES]
+    assert len(commands) == len(set(commands))
+
+
 def test_placeholders_are_detected():
     template = template_by_key("certutil-download")
     assert placeholders_for(template) == ["FILE", "LHOST", "PORT"]
