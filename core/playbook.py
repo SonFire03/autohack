@@ -32,7 +32,7 @@ def generate_pack_playbook(pack_name: str, catalog, out_dir: Path) -> Path:
             continue
         lines += [
             f"### {idx}. `{cmd['id']}` — {cmd['name']}",
-            f"- [ ] Execute",
+            "- [ ] Execute",
             f"- Category: `{cmd.get('category','')}`",
             f"- Tool: `{cmd.get('tool_required','')}`",
             f"- Risk: {cmd.get('risks','')}",

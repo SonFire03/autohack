@@ -113,10 +113,11 @@ class LootMenu:
                 ltype = parts[1].lower()
                 if ltype not in LOOT_TYPES:
                     console.print(f"  [red]Type invalide. Valides: {', '.join(LOOT_TYPES)}[/red]")
-                    console.input("[dim]  Entrée…[/dim]"); continue
-                val    = parts[2]
+                    console.input("[dim]  Entrée…[/dim]")
+                    continue
+                val = parts[2]
                 source = parts[3] if len(parts) > 3 else ""
-                entry  = self._vault.add(ltype, val, source=source)
+                entry = self._vault.add(ltype, val, source=source)
                 console.print(f"  [green]✓[/green] [{entry['id']}] {ltype}: {val[:50]}")
                 console.input("[dim]  Entrée…[/dim]")
 
@@ -124,11 +125,12 @@ class LootMenu:
                 ltype = parts[1].lower()
                 if ltype not in LOOT_TYPES:
                     console.print(f"  [red]Type invalide: {ltype}[/red]")
-                    console.input("[dim]  Entrée…[/dim]"); continue
+                    console.input("[dim]  Entrée…[/dim]")
+                    continue
                 try:
-                    val    = console.input(f"  [bold yellow]Valeur ({ltype}):[/bold yellow] ").strip()
+                    val = console.input(f"  [bold yellow]Valeur ({ltype}):[/bold yellow] ").strip()
                     source = console.input("  [dim]Source (optionnel):[/dim] ").strip()
-                    notes  = console.input("  [dim]Notes  (optionnel):[/dim] ").strip()
+                    notes = console.input("  [dim]Notes  (optionnel):[/dim] ").strip()
                     if val:
                         entry = self._vault.add(ltype, val, source=source, notes=notes)
                         console.print(f"  [green]✓[/green] [{entry['id']}] ajouté.")

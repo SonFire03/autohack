@@ -1,7 +1,6 @@
 """JWT decoder — decode and inspect JWT tokens without external libs."""
 import base64
 import json
-import re
 from datetime import datetime
 from rich.console import Console
 from rich.panel import Panel

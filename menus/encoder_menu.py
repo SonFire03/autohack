@@ -86,18 +86,22 @@ class EncoderMenu:
             parts = raw.split(None, 1)
             if len(parts) < 2 or not parts[0].isdigit():
                 console.print("  [dim]Usage: <n> <texte>  ex: 1 hello[/dim]")
-                console.input("[dim]  Entrée…[/dim]"); continue
+                console.input("[dim]  Entrée…[/dim]")
+                continue
 
             key, text = parts[0], parts[1]
             fn = None
             label = ""
             for k, lbl, func in MODES:
                 if k == key:
-                    fn = func; label = lbl; break
+                    fn = func
+                    label = lbl
+                    break
 
             if fn is None:
                 console.print(f"  [dim]Mode {key} inconnu.[/dim]")
-                console.input("[dim]  Entrée…[/dim]"); continue
+                console.input("[dim]  Entrée…[/dim]")
+                continue
 
             try:
                 result = fn(text)
@@ -105,7 +109,8 @@ class EncoderMenu:
                 last_output = result
             except Exception as e:
                 console.print(f"  [red]Erreur:[/red] {e}")
-                console.input("[dim]  Entrée…[/dim]"); continue
+                console.input("[dim]  Entrée…[/dim]")
+                continue
 
             console.print()
             console.print(f"  [dim]{label}[/dim]")
@@ -115,7 +120,9 @@ class EncoderMenu:
             action = console.input("  [dim]Entrée=copier  b=retour >[/dim] ").strip().lower()
             if action != "b":
                 try:
-                    import pyperclip; pyperclip.copy(result)
+                    import pyperclip
+
+                    pyperclip.copy(result)
                     console.print("  [green]✓[/green] Copié.")
                 except Exception:
                     console.print("  [dim]pyperclip non disponible.[/dim]")

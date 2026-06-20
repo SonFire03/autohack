@@ -1,11 +1,7 @@
 """Session report generator — markdown from session history + loot vault."""
 from datetime import datetime
-from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
-from rich.text import Text
-from rich import box
 from config.settings import EXPORTS_DIR
 from core.theme import help_footer, status_bar
 

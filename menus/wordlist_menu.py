@@ -1,11 +1,9 @@
 """Wordlist Browser — scan system wordlists with size, line count and path copy."""
-import os
 import subprocess
 from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.text import Text
 from rich import box
 from core.theme import help_footer, status_bar
 
@@ -170,9 +168,11 @@ class WordlistMenu:
             elif cmd == "pp":
                 page = max(page - 1, 0)
             elif cmd == "fa":
-                filter_q = ""; page = 0
+                filter_q = ""
+                page = 0
             elif cmd == "f" and len(parts) >= 2:
-                filter_q = parts[1]; page = 0
+                filter_q = parts[1]
+                page = 0
             elif cmd == "l" and len(parts) >= 2 and parts[1].isdigit():
                 idx = int(parts[1]) - 1
                 if 0 <= idx < len(shown):
@@ -197,7 +197,9 @@ class WordlistMenu:
                 if 0 <= idx < len(shown):
                     path = str(shown[idx]["path"])
                     try:
-                        import pyperclip; pyperclip.copy(path)
+                        import pyperclip
+
+                        pyperclip.copy(path)
                         console.print(f"  [green]✓[/green] Chemin copié: {path}")
                     except Exception:
                         console.print(f"  [dim]Chemin: {path}[/dim]")

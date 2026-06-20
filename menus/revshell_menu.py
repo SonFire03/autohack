@@ -103,17 +103,20 @@ class RevShellMenu:
             cmd = parts[0].lower()
 
             if cmd == "lh" and len(parts) >= 2:
-                lhost = parts[1]; self._store.set("LHOST", lhost)
+                lhost = parts[1]
+                self._store.set("LHOST", lhost)
                 console.print(f"  [green]✓[/green] LHOST = {lhost}")
                 console.input("[dim]  Entrée…[/dim]")
             elif cmd == "lp" and len(parts) >= 2:
-                lport = parts[1]; self._store.set("LPORT", lport)
+                lport = parts[1]
+                self._store.set("LPORT", lport)
                 console.print(f"  [green]✓[/green] LPORT = {lport}")
                 console.input("[dim]  Entrée…[/dim]")
             elif parts[0].isdigit():
                 if not lhost:
                     console.print("  [red]LHOST non défini.[/red]")
-                    console.input("[dim]  Entrée…[/dim]"); continue
+                    console.input("[dim]  Entrée…[/dim]")
+                    continue
                 payload = None
                 for k, label, _, tpl in SHELLS:
                     if k == parts[0]:
@@ -134,7 +137,9 @@ class RevShellMenu:
                     action = console.input("  [dim]Entrée=copier  b=retour >[/dim] ").strip().lower()
                     if action != "b":
                         try:
-                            import pyperclip; pyperclip.copy(payload)
+                            import pyperclip
+
+                            pyperclip.copy(payload)
                             console.print("  [green]✓[/green] Copié.")
                         except Exception:
                             console.print("  [dim]pyperclip non disponible.[/dim]")

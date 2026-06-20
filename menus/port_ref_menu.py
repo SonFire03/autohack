@@ -2,7 +2,6 @@
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.text import Text
 from rich import box
 from core.theme import help_footer, status_bar
 
@@ -176,11 +175,14 @@ class PortRefMenu:
             cmd = parts[0].lower()
 
             if cmd == "fa":
-                filter_cat = ""; filter_q = ""
+                filter_cat = ""
+                filter_q = ""
             elif cmd == "f" and len(parts) >= 2:
-                filter_q = parts[1]; filter_cat = ""
+                filter_q = parts[1]
+                filter_cat = ""
             elif cmd == "c" and len(parts) >= 2:
-                filter_cat = parts[1].lower(); filter_q = ""
+                filter_cat = parts[1].lower()
+                filter_q = ""
             elif cmd.isdigit():
                 port_num = int(cmd)
                 matches = [p for p in PORTS if p[0] == port_num]
@@ -193,4 +195,5 @@ class PortRefMenu:
                     console.print(f"  [dim]Port {port_num} non référencé.[/dim]")
                 console.input("\n  [dim]Entrée…[/dim]")
             else:
-                filter_q = raw; filter_cat = ""
+                filter_q = raw
+                filter_cat = ""

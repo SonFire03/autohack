@@ -6,7 +6,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 from rich import box
-from core.theme import help_footer, status_bar
+from core.theme import help_footer
 
 console = Console()
 

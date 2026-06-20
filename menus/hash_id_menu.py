@@ -106,10 +106,10 @@ class HashIdMenu:
                     hc = matches[0][1]
                     jn = matches[0][2]
                     console.print()
-                    console.print(f"  [dim]Commande hashcat suggérée :[/dim]")
+                    console.print("  [dim]Commande hashcat suggérée :[/dim]")
                     console.print(f"  [yellow]hashcat {hc} hash.txt -a 0 /usr/share/wordlists/rockyou.txt -O[/yellow]")
                     if jn and jn != "N/A":
-                        console.print(f"  [dim]Commande john suggérée   :[/dim]")
+                        console.print("  [dim]Commande john suggérée   :[/dim]")
                         console.print(f"  [cyan]john hash.txt {jn} --wordlist=/usr/share/wordlists/rockyou.txt[/cyan]")
 
             console.input("\n  [dim]Entrée pour continuer…[/dim]")
