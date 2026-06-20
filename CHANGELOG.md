@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.3
+
+- Added CLI subcommands for `session`, `catalog`, and `admin` flows while keeping legacy flags as compatibility aliases.
+- Normalized install planning around explicit `build_plan()` / `apply_plan()` steps.
+- Updated shell completion to surface the new subcommands.
+- Added regression coverage for the new subcommand entry points.
+
 ## 0.2.2
 
 - Split CLI parsing and dispatch into `core/cli_runtime.py` to keep `main.py` thin.
