@@ -15,7 +15,42 @@ permissions:
   contents: write
 
 jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate release tag matches version
+        run: |
+          python - <<'PY'
+          import pathlib
+          import re
+          import sys
+
+          tag = "${{ inputs.tag }}"
+          version_file = pathlib.Path("config/version.py").read_text(encoding="utf-8")
+          match = re.search(r'__version__\s*=\s*"([^"]+)"', version_file)
+          if not match:
+              raise SystemExit("Could not find __version__ in config/version.py")
+          version = match.group(1)
+          expected = tag[1:] if tag.startswith("v") else tag
+          if version != expected:
+              raise SystemExit(f"Version mismatch: config/version.py={version} tag={tag}")
+          print(f"Version OK: {version}")
+          PY
+
+      - name: Validate catalog schema
+        run: |
+          python scripts/validate_catalog_schema.py
+
   release:
+    needs: preflight
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
