@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4
+
+- Expanded the Command Builder with category filtering, grouped rendering, and multi-word search.
+- Added more reusable command templates across recon, web, AD, post-exploitation, cloud, forensics, binary, transfer, and utility workflows.
+- Enforced unique command strings in the command builder to avoid duplicate templates.
+
 ## 0.2.3
 
 - Added CLI subcommands for `session`, `catalog`, and `admin` flows while keeping legacy flags as compatibility aliases.
