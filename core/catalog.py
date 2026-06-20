@@ -28,6 +28,14 @@ class CommandCatalog:
         normalized = unicodedata.normalize("NFKD", value.casefold())
         return "".join(char for char in normalized if not unicodedata.combining(char))
 
+    @staticmethod
+    def _join_values(value: Any) -> str:
+        if not value:
+            return ""
+        if isinstance(value, str):
+            return value
+        return " ".join(str(item) for item in value)
+
     def load(self) -> None:
         config = ConfigManager()
         if config.get("enforce_catalog_signature"):
@@ -60,7 +68,7 @@ class CommandCatalog:
             "cmd": cmd,
             "id": self._normalize_text(cmd.get("id", "")),
             "name": self._normalize_text(cmd.get("name", "") + " " + cmd.get("short_name", "")),
-            "tags": self._normalize_text(" ".join(cmd.get("tags", []))),
+            "tags": self._normalize_text(self._join_values(cmd.get("tags", []))),
             "desc": self._normalize_text(cmd.get("description", "") + " " + cmd.get("purpose", "")),
             "command": self._normalize_text(cmd.get("command", "")),
         }
@@ -132,8 +140,7 @@ class CommandCatalog:
         wanted_tag = self._normalize_text(tag) if tag else ""
         regexes = []
         if use_regex:
-            for w in words:
-                regexes.append(re.compile(w))
+            regexes = [re.compile(word, re.IGNORECASE) for word in words]
 
         for entry in self._search_index:
             cmd = entry["cmd"]
@@ -149,25 +156,42 @@ class CommandCatalog:
                 continue
 
             score = 0
-            for w in words:
-                regex_match = False
-                if use_regex:
-                    regex_match = any(rgx.search(cmd_id) or rgx.search(name) or rgx.search(tags) or rgx.search(desc) or rgx.search(cmd_text) for rgx in regexes)
-                if (w not in cmd_id and w not in name and w not in tags and w not in desc and w not in cmd_text and not regex_match):
-                    score = -1
-                    break
-                if regex_match:
-                    score += 4
-                if w in cmd_id:
-                    score += 10
-                if w in name:
-                    score += 8
-                if w in tags:
-                    score += 5
-                if w in desc:
-                    score += 2
-                if w in cmd_text:
-                    score += 1
+            if use_regex:
+                for rgx in regexes:
+                    matched = False
+                    if rgx.search(cmd_id):
+                        score += 10
+                        matched = True
+                    if rgx.search(name):
+                        score += 8
+                        matched = True
+                    if rgx.search(tags):
+                        score += 5
+                        matched = True
+                    if rgx.search(desc):
+                        score += 2
+                        matched = True
+                    if rgx.search(cmd_text):
+                        score += 1
+                        matched = True
+                    if not matched:
+                        score = -1
+                        break
+            else:
+                for w in words:
+                    if (w not in cmd_id and w not in name and w not in tags and w not in desc and w not in cmd_text):
+                        score = -1
+                        break
+                    if w in cmd_id:
+                        score += 10
+                    if w in name:
+                        score += 8
+                    if w in tags:
+                        score += 5
+                    if w in desc:
+                        score += 2
+                    if w in cmd_text:
+                        score += 1
 
             if score > 0:
                 scored.append((score, cmd))

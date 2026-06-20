@@ -1,3 +1,4 @@
+import pytest
 import importlib.util
 import json
 from pathlib import Path
@@ -27,3 +28,16 @@ def test_split_catalog_has_expected_category_files():
     expected = {f"{category}.json" for category in build_catalog.CATEGORY_ORDER}
     actual = {path.name for path in (ROOT / "catalog").glob("*.json")}
     assert actual == expected
+
+
+def test_plugin_category_collision_is_rejected(tmp_path):
+    build_catalog = load_build_script()
+    plugin_dir = tmp_path / "plugins" / "catalog"
+    plugin_dir.mkdir(parents=True)
+    (plugin_dir / "system.json").write_text(
+        json.dumps({"name": "Plugin", "commands": [{"id": "p_001", "name": "B", "command": "ls", "risks": "none", "safe_to_run": True}]}),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="collides with a core category"):
+        build_catalog.build_catalog(ROOT / "catalog", plugin_dir)

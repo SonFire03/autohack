@@ -38,9 +38,10 @@ def test_set_invalid_key_ignored(config):
 
 
 def test_set_export_format_valid(config):
-    for fmt in ("markdown", "txt", "json"):
+    for fmt in ("markdown", "md", "txt", "json", "html"):
         config.set("export_format", fmt)
-        assert config.get("export_format") == fmt
+        expected = "markdown" if fmt in ("markdown", "md") else fmt
+        assert config.get("export_format") == expected
 
 
 def test_set_export_format_invalid(config):
@@ -101,3 +102,8 @@ def test_set_command_timeout_zero_raises(config):
 def test_set_strict_shell_mode_bool(config):
     config.set("strict_shell_mode", True)
     assert config.get("strict_shell_mode") is True
+
+
+def test_tool_cache_ttl_must_be_positive(config):
+    with pytest.raises(ValueError, match="entier > 0"):
+        config.set("tool_cache_ttl_seconds", 0)

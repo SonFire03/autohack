@@ -17,8 +17,6 @@ import argparse
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
-
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -856,9 +854,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-    from core.rbac import can
-    from core.i18n import tr
-    from core.config_manager import ConfigManager
-    if not can(_role(), "install"):
-        console.print(f"[bold red]❌ {tr('rbac_denied', ConfigManager().get('lang'))}[/bold red]")
-        sys.exit(1)

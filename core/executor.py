@@ -31,7 +31,8 @@ def _get_variable_store():
     return _VariableStore
 
 # Opérateurs shell nécessitant shell=True
-_SHELL_OPERATORS = ("|", "&&", "||", ">>", "> ", "< ", ";", "$(", "`", "$HOME")
+_SHELL_OPERATORS = ("|", "&&", "||", ">>", ";", "$(", "`")
+_SHELL_META_RE = re.compile(r"(?<!\\)(?:[<>]|(?<!\\)\$[A-Za-z_][A-Za-z0-9_]*|\*)")
 
 # Variables shell natives jamais demandées à l'utilisateur
 _SHELL_NATIVE_VARS = {
@@ -65,12 +66,18 @@ _PLACEHOLDER_HINTS: Dict[str, str] = {
 
 def _run_args(command_str: str) -> dict:
     """Retourne les kwargs subprocess : shell=True uniquement si nécessaire."""
-    if any(op in command_str for op in _SHELL_OPERATORS):
+    if _requires_shell(command_str):
         return {"args": command_str, "shell": True}
     try:
         return {"args": shlex.split(command_str), "shell": False}
     except ValueError:
         return {"args": command_str, "shell": True}
+
+
+def _requires_shell(command_str: str) -> bool:
+    if any(op in command_str for op in _SHELL_OPERATORS):
+        return True
+    return bool(_SHELL_META_RE.search(command_str))
 
 
 class CommandExecutor:
@@ -147,7 +154,7 @@ class CommandExecutor:
         if self._strict_shell_mode and action in {"run", "capture"}:
             command = cmd.get("command", "")
             allow_shell = bool(cmd.get("allow_shell_features"))
-            if (any(op in command for op in _SHELL_OPERATORS)) and not allow_shell:
+            if _requires_shell(command) and not allow_shell:
                 console.print(
                     "[bold red]❌ Mode shell strict: opérateurs shell bloqués "
                     "(ajouter allow_shell_features=true pour cette commande).[/bold red]"

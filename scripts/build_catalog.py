@@ -48,7 +48,10 @@ def load_categories(source_dir: Path) -> dict[str, dict[str, Any]]:
     for category in CATEGORY_ORDER:
         path = source_dir / f"{category}.json"
         if not path.exists():
-            missing.append(str(path.relative_to(ROOT)))
+            try:
+                missing.append(str(path.relative_to(ROOT)))
+            except ValueError:
+                missing.append(str(path))
             continue
         data = load_json(path)
         if "commands" not in data:
@@ -67,11 +70,13 @@ def load_categories(source_dir: Path) -> dict[str, dict[str, Any]]:
     return categories
 
 
-def load_plugin_categories(plugin_dir: Path) -> dict[str, dict[str, Any]]:
+def load_plugin_categories(plugin_dir: Path, reserved: set[str]) -> dict[str, dict[str, Any]]:
     if not plugin_dir.exists():
         return {}
     categories: dict[str, dict[str, Any]] = {}
     for path in sorted(plugin_dir.glob("*.json")):
+        if path.stem in reserved:
+            raise ValueError(f"Plugin category '{path.stem}' collides with a core category")
         data = load_json(path)
         if "commands" not in data:
             raise ValueError(f"{path}: missing 'commands' list")
@@ -106,7 +111,7 @@ def validate_catalog(catalog: dict[str, Any]) -> None:
 
 def build_catalog(source_dir: Path = DEFAULT_SOURCE_DIR, plugin_dir: Path = DEFAULT_PLUGIN_DIR) -> dict[str, Any]:
     merged = load_categories(source_dir)
-    merged.update(load_plugin_categories(plugin_dir))
+    merged.update(load_plugin_categories(plugin_dir, set(merged)))
     catalog = {
         "version": "1.0.0",
         "categories": merged,

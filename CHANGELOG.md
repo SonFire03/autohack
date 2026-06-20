@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
+
+- Hardened catalog search semantics, including correct multi-term regex matching.
+- Normalized configuration export formats and added stronger config validation.
+- Strengthened shell execution policy detection and strict-mode blocking.
+- Cached local API catalog and tool checker instances for fewer repeated loads.
+- Cleaned up CLI entrypoint and removed leftover bootstrap code.
+- Prevented plugin category collisions in catalog builds.
+- Added approval queue expiry cleanup and coverage for the new behavior.
+- Added regression tests for the search, executor, config, approval queue, and catalog build paths.
 
 - Split source catalog into `catalog/*.json` with `scripts/build_catalog.py` generating `commands_catalog.json`.
 - Added functional advanced lab commands for NetExec, Certipy, NTLM relay/coercion, Windows/Linux privesc, and web attack tooling.
@@ -33,6 +42,10 @@
 - Added local usage metrics command (`--usage-metrics`) from execution telemetry.
 - Added mutation-inspired security regression tests (`tests/test_security_mutation_guards.py`).
 - Added binary packaging script + CI workflow (`scripts/build_binary.sh`, `.github/workflows/binary.yml`).
+
+## Unreleased
+
+- No unreleased changes yet.
 
 ## 0.1.0
 

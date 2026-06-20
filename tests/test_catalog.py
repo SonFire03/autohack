@@ -150,6 +150,11 @@ def test_search_regex_mode(catalog):
     assert any(r["id"].startswith("sys_00") for r in results)
 
 
+def test_search_regex_mode_requires_all_terms(catalog):
+    results = catalog.search(r"sys_00[1-3] nonexistent_term", use_regex=True)
+    assert results == []
+
+
 def test_search_sort_by_risk_returns_dangerous_first(catalog):
     results = catalog.search("xss", sort_by="risk")
     assert len(results) > 0

@@ -5,7 +5,7 @@ from typing import Any
 CONFIG_PATH = Path.home() / ".autohack.json"
 
 DEFAULTS: dict[str, Any] = {
-    "export_format": "markdown",   # markdown | txt | json
+    "export_format": "markdown",   # markdown | txt | json | html
     "page_size": 10,               # commandes par page dans les menus
     "log_level": "INFO",
     "export_dir": None,            # None = utiliser le dossier exports/ du projet
@@ -27,15 +27,35 @@ DEFAULTS: dict[str, Any] = {
 class ConfigManager:
     """Lit et écrit la configuration utilisateur dans ~/.autohack.json."""
 
+    _EXPORT_FORMAT_ALIASES = {
+        "md": "markdown",
+        "markdown": "markdown",
+        "txt": "txt",
+        "json": "json",
+        "html": "html",
+    }
+
     def __init__(self) -> None:
         self._data: dict[str, Any] = dict(DEFAULTS)
         self._load()
+
+    def _normalize_value(self, key: str, value: Any) -> Any:
+        if key == "export_format":
+            if not isinstance(value, str):
+                return value
+            normalized = value.strip().lower()
+            return self._EXPORT_FORMAT_ALIASES.get(normalized, value)
+        if key == "export_dir" and value == "":
+            return None
+        return value
 
     def _load(self) -> None:
         if CONFIG_PATH.exists():
             try:
                 saved = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-                self._data.update({k: v for k, v in saved.items() if k in DEFAULTS})
+                for key, value in saved.items():
+                    if key in DEFAULTS:
+                        self._data[key] = self._normalize_value(key, value)
             except Exception:
                 pass  # fichier corrompu → utiliser les défauts
 
@@ -46,19 +66,20 @@ class ConfigManager:
         )
 
     def get(self, key: str) -> Any:
-        return self._data.get(key, DEFAULTS.get(key))
+        return self._normalize_value(key, self._data.get(key, DEFAULTS.get(key)))
 
     _ALLOWED: dict[str, set] = {
-        "export_format": {"markdown", "txt", "json"},
+        "export_format": {"markdown", "txt", "json", "html"},
         "log_level":     {"INFO", "DEBUG", "WARNING"},
         "user_role": {"reader", "operator", "admin"},
         "lang": {"fr", "en"},
     }
-    _POSITIVE_INT_KEYS = {"page_size", "history_size", "command_timeout"}
+    _POSITIVE_INT_KEYS = {"page_size", "history_size", "command_timeout", "tool_cache_ttl_seconds"}
 
     def set(self, key: str, value: Any) -> None:
         if key not in DEFAULTS:
             return
+        value = self._normalize_value(key, value)
         allowed = self._ALLOWED.get(key)
         if allowed and value not in allowed:
             raise ValueError(f"'{value}' non autorisé pour {key} — valeurs : {sorted(allowed)}")

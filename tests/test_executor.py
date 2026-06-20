@@ -24,6 +24,11 @@ def test_run_args_redirect_uses_shell():
     assert result["shell"] is True
 
 
+def test_run_args_redirect_without_space_uses_shell():
+    result = _run_args("echo hello>/tmp/test.txt")
+    assert result["shell"] is True
+
+
 def test_run_args_ampersand_uses_shell():
     result = _run_args("apt update && apt install -y tor")
     assert result["shell"] is True
@@ -264,6 +269,15 @@ def test_confirm_and_run_blocks_shell_operators_in_strict_mode(safe_cmd):
     executor = CommandExecutor(strict_shell_mode=True)
     cmd = dict(safe_cmd)
     cmd["command"] = "echo hello | cat"
+    with patch("subprocess.run") as mock_run:
+        assert executor.confirm_and_run(cmd, skip_confirm=True) is None
+        mock_run.assert_not_called()
+
+
+def test_confirm_and_run_blocks_redirection_without_space_in_strict_mode(safe_cmd):
+    executor = CommandExecutor(strict_shell_mode=True)
+    cmd = dict(safe_cmd)
+    cmd["command"] = "echo hello>/tmp/test.txt"
     with patch("subprocess.run") as mock_run:
         assert executor.confirm_and_run(cmd, skip_confirm=True) is None
         mock_run.assert_not_called()

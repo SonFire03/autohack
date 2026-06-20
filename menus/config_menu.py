@@ -7,7 +7,7 @@ from core.config_manager import ConfigManager, DEFAULTS
 console = Console()
 
 SETTING_LABELS = {
-    "export_format":         ("Format d'export par défaut",  "markdown | txt | json"),
+    "export_format":         ("Format d'export par défaut",  "markdown/md | txt | json | html"),
     "page_size":             ("Commandes par page",           "entier > 0"),
     "confirm_safe_commands": ("Confirmer commandes safe",     "true | false"),
     "show_history_in_menu":  ("Afficher historique en menu",  "true | false"),

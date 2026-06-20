@@ -25,6 +25,24 @@ class ApprovalQueue:
     def _save(self) -> None:
         self._path.write_text(json.dumps(self._data, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    def _is_expired(self, marker: str) -> bool:
+        if not marker.startswith("approved:"):
+            return False
+        ts = marker.split(":", 1)[1]
+        try:
+            at = datetime.fromisoformat(ts)
+        except Exception:
+            return True
+        return datetime.now() - at > timedelta(minutes=self._ttl)
+
+    def _cleanup_expired(self) -> None:
+        expired = [cmd_id for cmd_id, marker in self._data.items() if self._is_expired(str(marker))]
+        if not expired:
+            return
+        for cmd_id in expired:
+            self._data.pop(cmd_id, None)
+        self._save()
+
     def queue(self, cmd_id: str) -> None:
         self._data[cmd_id] = datetime.now().isoformat()
         self._save()
@@ -38,18 +56,14 @@ class ApprovalQueue:
 
     def is_approved(self, cmd_id: str) -> bool:
         marker = self._data.get(cmd_id)
-        if not marker or not marker.startswith("approved:"):
+        if not marker or not isinstance(marker, str) or not marker.startswith("approved:"):
             return False
-        ts = marker.split(":", 1)[1]
-        try:
-            at = datetime.fromisoformat(ts)
-        except Exception:
-            return False
-        if datetime.now() - at > timedelta(minutes=self._ttl):
+        if self._is_expired(marker):
             self._data.pop(cmd_id, None)
             self._save()
             return False
         return True
 
     def list_pending(self) -> list[str]:
+        self._cleanup_expired()
         return sorted(k for k, v in self._data.items() if not str(v).startswith("approved:"))
