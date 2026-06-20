@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+- Improved release packaging around the CLI and catalog runtime.
+- Fixed multi-term regex search semantics and hard shell-strict blocking.
+- Normalized config export formats and added stronger validation.
+- Cached API catalog/checker instances and cleaned approval expiry handling.
+- Prevented plugin category collisions during catalog builds.
+- Added regression coverage for the latest fixes.
+
 ## 0.2.0
 
 - Hardened catalog search semantics, including correct multi-term regex matching.
