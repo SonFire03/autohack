@@ -98,6 +98,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     admin_parser = subparsers.add_parser("admin", help="Actions d'administration")
     admin_sub = admin_parser.add_subparsers(dest="admin_command")
+    admin_sub.add_parser("security-status", help="Afficher l'état de sécurité local")
     admin_sub.add_parser("usage-metrics", help="Afficher les métriques d'usage locales")
     admin_sub.add_parser("verify-audit-chain", help="Vérifier l'intégrité de la chaîne d'audit")
     admin_sub.add_parser("serve-api", help="Lancer l'API locale read-only")
@@ -266,7 +267,9 @@ def main() -> None:
         else:
             parser.error("catalog requires a subcommand")
     elif getattr(args, "command", None) == "admin":
-        if getattr(args, "admin_command", None) == "usage-metrics":
+        if getattr(args, "admin_command", None) == "security-status":
+            app.cli_security_status()
+        elif getattr(args, "admin_command", None) == "usage-metrics":
             app.cli_usage_metrics()
         elif getattr(args, "admin_command", None) == "verify-audit-chain":
             app.cli_verify_audit_chain()

@@ -7,7 +7,7 @@
 ![Tests](https://github.com/SonFire03/autohack/actions/workflows/tests.yml/badge.svg)
 ![Lint](https://img.shields.io/badge/Lint-Ruff-46a2f1)
 
-AUTOHACK LAB COMMANDER is a terminal application for organizing, searching, documenting, and carefully running security lab commands from one place. It is built for students, CTF players, homelab users, and security practitioners who want a structured command catalog instead of scattered notes.
+AUTOHACK LAB COMMANDER is a Security Lab Command Organizer. It helps you organize, search, document, and review security lab commands from one place. It is built for students, CTF players, homelab users, and security practitioners who want a structured command catalog instead of scattered notes.
 
 The project provides both an interactive Rich-powered terminal UI and a non-interactive CLI. The catalog currently contains 1,413 commands across 16 categories, including system checks, local network diagnostics, Tor/Privoxy, Scrapy, Elasticsearch, reconnaissance, web testing, password auditing, post-exploitation lab workflows, cloud/Kubernetes, forensics, binary analysis, and XSS payloads.
 
@@ -41,6 +41,37 @@ AUTOHACK is not:
 - a stealth malware platform
 - a replacement for understanding what commands do
 
+## Safe by Design
+
+The project is designed to keep execution visible and reviewable:
+
+- commands are cataloged with metadata such as category, risk, and tool requirements
+- interactive flows show the command before execution
+- dry-run and copy-only paths remain available for review
+- security-related policies are surfaced in the UI and CLI instead of being hidden
+- catalog verification and signing are available when you want stronger integrity checks
+
+These are design choices, not guarantees that replace operator judgment.
+
+## Use Cases
+
+- build and review command sets for a personal lab
+- prepare CTF notes and reusable workflows
+- keep homelab admin and security checks in one catalog
+- document authorized assessment steps before execution
+- export command catalogs for reports, runbooks, or internal sharing
+
+## Risk Levels
+
+AUTOHACK exposes the risk level already attached to each catalog entry. In practice:
+
+- `safe` is intended for low-risk, read-only, or informational actions
+- `dry_run_only` is meant to be previewed or copied rather than executed directly
+- `lab_only` is intended for controlled environments only
+- `dangerous` highlights commands that deserve extra review before use
+
+The default behavior remains compatible with the current project. Any stronger profile or stricter local policy is optional.
+
 ## Main Features
 
 - Interactive TUI built with `rich`
@@ -55,6 +86,7 @@ AUTOHACK is not:
 - Secret redaction in logs and exports
 - Structured execution telemetry in `logs/executions.jsonl`
 - Local RBAC roles: `reader`, `operator`, `admin`
+- Read-only security status diagnostic (`admin security-status`)
 - Secondary approval queue for sensitive commands
 - Catalog signature verification (`commands_catalog.sig`)
 - Category-based command allowlist execution policy
@@ -117,11 +149,19 @@ python3 -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Dependencies are intentionally small:
+Dependencies are intentionally small and split between runtime, tests, and dev extras:
 
-- `rich` for the terminal UI
-- `pyperclip` for clipboard integration
-- `pytest` for tests
+- Runtime and test baseline from `requirements.txt`:
+  - `rich` for the terminal UI
+  - `pyperclip` for clipboard integration
+  - `fastapi` for the local API server
+  - `uvicorn` for the local API server runtime
+  - `pytest` for tests
+- Development extras from `pyproject.toml`:
+  - `pytest-cov`
+  - `ruff`
+  - `pexpect`
+  - `pyinstaller`
 
 Some catalog commands require external security tools such as `nmap`, `ffuf`, `hydra`, `hashcat`, `sqlmap`, `tor`, `privoxy`, `nuclei`, and others. AUTOHACK can report missing tools, but it does not install system packages automatically.
 
@@ -249,11 +289,6 @@ python3 main.py --install-profile advanced --install-dry-run
 ```
 <img width="1591" height="844" alt="image" src="https://github.com/user-attachments/assets/6060a2ff-9d25-4e66-9e31-95e1083196e7" />
 
-
-The interactive `UTILS` column also includes:
-
-- `Target Workspace` to define the current target, URL, scope, notes, and shared variables.
-- `Command Builder` to render common lab commands from `$TARGET`, `$LHOST`, `$LPORT`, `$WORDLIST`, and related variables without executing them automatically.
 
 The interactive `UTILS` column also includes:
 

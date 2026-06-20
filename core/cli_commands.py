@@ -39,6 +39,53 @@ def _get_core():
     return catalog, executor, checker
 
 
+def cli_security_status() -> None:
+    from core.config_manager import CONFIG_PATH, ConfigManager
+
+    config = ConfigManager()
+    settings = config.all_settings()
+    role = settings.get("user_role", "unknown")
+    checks = [
+        ("User role", role, "bold white"),
+        ("strict_shell_mode", "enabled" if settings.get("strict_shell_mode") else "disabled",
+         "bold green" if settings.get("strict_shell_mode") else "bold yellow"),
+        ("enforce_command_allowlist", "enabled" if settings.get("enforce_command_allowlist") else "disabled",
+         "bold green" if settings.get("enforce_command_allowlist") else "bold yellow"),
+        ("require_secondary_approval", "enabled" if settings.get("require_secondary_approval") else "disabled",
+         "bold green" if settings.get("require_secondary_approval") else "bold yellow"),
+        ("enforce_catalog_signature", "enabled" if settings.get("enforce_catalog_signature") else "disabled",
+         "bold green" if settings.get("enforce_catalog_signature") else "bold yellow"),
+        ("command_timeout", f"{settings.get('command_timeout')}s", "bold white"),
+        ("Config file", str(CONFIG_PATH), "bold white"),
+    ]
+    table = Table(show_header=False, box=box.SIMPLE_HEAVY, padding=(0, 1))
+    table.add_column("Setting", style="bold cyan", width=28)
+    table.add_column("Value", style="white")
+    for label, value, style in checks:
+        table.add_row(label, f"[{style}]{value}[/{style}]")
+    console.print("\n[bold]AUTOHACK Security Status[/bold]\n")
+    console.print(table)
+    console.print(f"[dim]Config file:[/dim] {CONFIG_PATH}")
+
+    permissive = []
+    if not settings.get("strict_shell_mode"):
+        permissive.append("strict_shell_mode")
+    if not settings.get("enforce_command_allowlist"):
+        permissive.append("enforce_command_allowlist")
+    if not settings.get("require_secondary_approval"):
+        permissive.append("require_secondary_approval")
+    if not settings.get("enforce_catalog_signature"):
+        permissive.append("enforce_catalog_signature")
+
+    if permissive:
+        console.print(
+            f"\n[bold yellow]⚠ Configuration permissive:[/bold yellow] {', '.join(permissive)}"
+        )
+        console.print("[dim]Defaults remain compatible with the current project.[/dim]")
+    else:
+        console.print("\n[bold green]Configuration is already hardened.[/bold green]")
+
+
 def cli_run(cmd_id: str) -> None:
     from core.config_manager import ConfigManager
     from core.i18n import tr

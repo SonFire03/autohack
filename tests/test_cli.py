@@ -1,17 +1,20 @@
 """Tests end-to-end du CLI (invocation subprocess de main.py)."""
 import subprocess
 import sys
+import os
+import json
 from pathlib import Path
 
 MAIN = [sys.executable, str(Path(__file__).parent.parent / "main.py")]
 
 
-def run(*args, timeout=10):
+def run(*args, timeout=10, env=None):
     result = subprocess.run(
         MAIN + list(args),
         capture_output=True,
         text=True,
         timeout=timeout,
+        env=env,
     )
     return result
 
@@ -376,6 +379,51 @@ def test_admin_usage_metrics_subcommand():
     r = run("admin", "usage-metrics")
     assert r.returncode == 0
     assert "Usage metrics" in r.stdout
+
+
+def test_admin_security_status_subcommand(tmp_path):
+    config_file = tmp_path / ".autohack.json"
+    config_file.write_text(
+        json.dumps(
+            {
+                "export_format": "markdown",
+                "page_size": 10,
+                "log_level": "INFO",
+                "export_dir": None,
+                "confirm_safe_commands": True,
+                "show_history_in_menu": True,
+                "history_size": 10,
+                "command_timeout": 12,
+                "strict_shell_mode": False,
+                "redact_secrets_in_logs": True,
+                "user_role": "operator",
+                "lang": "fr",
+                "enforce_catalog_signature": False,
+                "require_secondary_approval": True,
+                "tool_cache_ttl_seconds": 120,
+                "enforce_command_allowlist": False,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    env = {**os.environ, "HOME": str(tmp_path)}
+    before = config_file.read_text(encoding="utf-8")
+    r = run("admin", "security-status", env=env)
+    after = config_file.read_text(encoding="utf-8")
+
+    assert r.returncode == 0
+    assert "AUTOHACK Security Status" in r.stdout
+    assert "operator" in r.stdout
+    assert "strict_shell_mode" in r.stdout
+    assert "enforce_command_allowlist" in r.stdout
+    assert "require_secondary_approval" in r.stdout
+    assert "enforce_catalog_signature" in r.stdout
+    assert "command_timeout" in r.stdout
+    assert str(config_file) in r.stdout
+    assert "Configuration permissive" in r.stdout
+    assert before == after
 
 
 def test_catalog_diff_head_to_head():
