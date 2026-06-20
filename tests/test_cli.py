@@ -102,6 +102,12 @@ def test_search_single_keyword():
     assert "résultat" in r.stdout.lower()
 
 
+def test_search_subcommand_single_keyword():
+    r = run("search", "tor")
+    assert r.returncode == 0
+    assert "résultat" in r.stdout.lower()
+
+
 def test_search_multi_keyword():
     r = run("--search", "tor version")
     assert r.returncode == 0
@@ -387,6 +393,13 @@ def test_missing_tools_lists_tools_or_all_ok():
 
 def test_install_profile_basic_dry_run():
     r = run("--install-profile", "basic", "--install-dry-run")
+    assert r.returncode == 0
+    assert "Installation profile" in r.stdout
+    assert "Dry-run only" in r.stdout
+
+
+def test_install_subcommand_basic_dry_run():
+    r = run("install", "--profile", "basic", "--dry-run")
     assert r.returncode == 0
     assert "Installation profile" in r.stdout
     assert "Dry-run only" in r.stdout

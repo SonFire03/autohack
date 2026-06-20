@@ -510,7 +510,7 @@ def cli_missing_tools() -> None:
     console.print(table)
 
 
-def cli_install_profile(profile: str, dry_run: bool = False, assume_yes: bool = False) -> None:
+def cli_install(profile: str, dry_run: bool = False, assume_yes: bool = False) -> None:
     from core.installer import ToolInstaller
     from rich.prompt import Confirm
 
@@ -573,6 +573,10 @@ def cli_install_profile(profile: str, dry_run: bool = False, assume_yes: bool = 
     console.print("[bold green]Installation commands completed.[/bold green]")
 
 
+def cli_install_profile(profile: str, dry_run: bool = False, assume_yes: bool = False) -> None:
+    cli_install(profile, dry_run=dry_run, assume_yes=assume_yes)
+
+
 def cli_list_categories() -> None:
     from config.settings import CATEGORY_ICONS, CATEGORY_LABELS
 
@@ -604,13 +608,19 @@ _autohack_complete() {{
     cur="${{COMP_WORDS[COMP_CWORD]}}"
     prev="${{COMP_WORDS[COMP_CWORD-1]}}"
 
-    local opts="--run --dry-run --search --pack --run-pack --generate-playbook --catalog-diff --usage-metrics --verify-audit-chain --serve-api --apply-profile --approve-command --list-approvals --refresh-tools --export-session --replay-session --category --safe --dangerous --tool --regex --sort-by --limit --export --export-exec-report --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --yes --version"
+    local commands="search run dry-run pack run-pack export install list-ids list-categories stats favorites tag missing-tools generate-completion"
+    local opts="--run --dry-run --search --pack --run-pack --generate-playbook --catalog-diff --usage-metrics --verify-audit-chain --serve-api --apply-profile --approve-command --list-approvals --refresh-tools --export-session --replay-session --category --safe --dangerous --tool --regex --sort-by --limit --export --export-exec-report --check --list-ids --list-categories --stats --favorites --generate-completion --tag --missing-tools --install-profile --install-dry-run --profile --yes --version"
     local ids="{ids}"
     local cats="{cats}"
     local packs="{packs}"
     local formats="md txt json html"
     local shells="bash zsh"
     local profiles="basic advanced all"
+
+    if [[ $COMP_CWORD -eq 1 ]]; then
+        COMPREPLY=($(compgen -W "$commands" -- "$cur"))
+        return
+    fi
 
     case "$prev" in
         --approve-command|--run|--dry-run) COMPREPLY=($(compgen -W "$ids" -- "$cur")) ; return ;;
@@ -619,7 +629,7 @@ _autohack_complete() {{
         --category)      COMPREPLY=($(compgen -W "$cats" -- "$cur")) ; return ;;
         --export)        COMPREPLY=($(compgen -W "$formats" -- "$cur")) ; return ;;
         --generate-completion) COMPREPLY=($(compgen -W "$shells" -- "$cur")) ; return ;;
-        --install-profile) COMPREPLY=($(compgen -W "$profiles" -- "$cur")) ; return ;;
+        --install-profile|--profile) COMPREPLY=($(compgen -W "$profiles" -- "$cur")) ; return ;;
         --sort-by)       COMPREPLY=($(compgen -W "score risk" -- "$cur")) ; return ;;
     esac
 
@@ -639,12 +649,14 @@ complete -F _autohack_complete "python3 main.py"
 # Usage: eval "$(python3 main.py --generate-completion zsh)"
 
 _autohack() {{
-    local -a ids cats packs
+    local -a ids cats packs commands
     ids=({ids})
     cats=({cats})
     packs=({packs})
+    commands=(search run dry-run pack run-pack export install list-ids list-categories stats favorites tag missing-tools generate-completion)
 
     _arguments \\
+        '1:command:($commands)' \\
         '--run[Exécuter une commande]:id:($ids)' \\
         '--dry-run[Afficher sans exécuter]:id:($ids)' \\
         '--search[Rechercher]:keyword:' \\
@@ -679,6 +691,7 @@ _autohack() {{
         '--tag[Lister les commandes ayant un tag]:tag:' \\
         '--missing-tools[Lister les outils requis non installés]' \\
         '--install-profile[Installer les dépendances manquantes]:profile:(basic advanced all)' \\
+        '--profile[Installer les dépendances manquantes]:profile:(basic advanced all)' \\
         '--install-dry-run[Afficher les commandes sans installer]' \\
         '--yes[Confirmer automatiquement]' \\
         '--version[Afficher la version]' \\

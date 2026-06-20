@@ -20,6 +20,50 @@ def build_parser() -> argparse.ArgumentParser:
         description="AUTOHACK LAB COMMANDER — Centralisateur de commandes de lab",
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {APP_VERSION}")
+
+    subparsers = parser.add_subparsers(dest="command")
+
+    search_parser = subparsers.add_parser("search", help="Rechercher dans le catalogue")
+    search_parser.add_argument("keyword", metavar="KEYWORD", help="Mot-clé ou regex de recherche")
+    search_parser.add_argument("--category", metavar="CAT", help="Filtrer par catégorie")
+    search_parser.add_argument("--tool", metavar="TOOL", help="Filtrer par outil requis")
+    search_parser.add_argument("--safe", action="store_true", help="Limiter aux commandes safe")
+    search_parser.add_argument("--dangerous", action="store_true", help="Limiter aux commandes dangereuses")
+    search_parser.add_argument("--regex", action="store_true", help="Interpréter la recherche comme regex")
+    search_parser.add_argument("--sort-by", choices=["score", "risk"], default="score", help="Tri des résultats")
+    search_parser.add_argument("--limit", metavar="N", type=int, help="Limiter le nombre de résultats")
+
+    run_parser = subparsers.add_parser("run", help="Exécuter une commande")
+    run_parser.add_argument("cmd_id", metavar="CMD_ID", help="Identifiant de commande")
+
+    dry_run_parser = subparsers.add_parser("dry-run", help="Afficher une commande sans l'exécuter")
+    dry_run_parser.add_argument("cmd_id", metavar="CMD_ID", help="Identifiant de commande")
+
+    pack_parser = subparsers.add_parser("pack", help="Afficher un pack guidé")
+    pack_parser.add_argument("pack", metavar="PACK", help="Nom du pack")
+
+    run_pack_parser = subparsers.add_parser("run-pack", help="Exécuter un pack guidé pas-à-pas")
+    run_pack_parser.add_argument("pack", metavar="PACK", help="Nom du pack")
+
+    export_parser = subparsers.add_parser("export", help="Exporter le catalogue")
+    export_parser.add_argument("format", choices=["md", "txt", "json", "html"], help="Format d'export")
+
+    install_parser = subparsers.add_parser("install", help="Installer les dépendances d'un profil")
+    install_parser.add_argument("--profile", choices=["basic", "advanced", "all"], required=True,
+                                help="Profil à installer")
+    install_parser.add_argument("--dry-run", action="store_true", help="Afficher les commandes sans exécuter")
+    install_parser.add_argument("-y", "--yes", action="store_true", help="Confirmer automatiquement")
+
+    subparsers.add_parser("list-ids", help="Lister tous les IDs du catalogue")
+    subparsers.add_parser("list-categories", help="Lister les catégories disponibles")
+    subparsers.add_parser("stats", help="Statistiques du catalogue")
+    subparsers.add_parser("favorites", help="Afficher les commandes favorites")
+    tag_parser = subparsers.add_parser("tag", help="Lister les commandes ayant un tag donné")
+    tag_parser.add_argument("tag", metavar="TAG", help="Tag recherché")
+    subparsers.add_parser("missing-tools", help="Lister les outils requis non installés")
+    completion_parser = subparsers.add_parser("generate-completion", help="Générer un script de complétion shell")
+    completion_parser.add_argument("shell", choices=["bash", "zsh"], help="Shell cible")
+
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--run",      metavar="CMD_ID",  help="Exécuter une commande par son ID")
     group.add_argument("--dry-run",  metavar="CMD_ID",  help="Afficher une commande sans l'exécuter")
@@ -84,7 +128,47 @@ def main() -> None:
     args = parser.parse_args()
     app = _app_module()
 
-    if args.run:
+    if getattr(args, "command", None) == "search":
+        app.cli_search(
+            args.keyword,
+            args.category,
+            args.tool,
+            args.safe,
+            args.dangerous,
+            args.limit,
+            args.regex,
+            args.sort_by,
+        )
+    elif getattr(args, "command", None) == "run":
+        app.cli_run(args.cmd_id)
+    elif getattr(args, "command", None) == "dry-run":
+        app.cli_dry_run(args.cmd_id)
+    elif getattr(args, "command", None) == "pack":
+        app.cli_pack(args.pack)
+    elif getattr(args, "command", None) == "run-pack":
+        app.cli_run_pack(args.pack)
+    elif getattr(args, "command", None) == "export":
+        app.cli_export(args.format)
+    elif getattr(args, "command", None) == "install":
+        app.cli_install(args.profile, args.dry_run, args.yes)
+    elif getattr(args, "command", None) == "list-ids":
+        app.cli_list_ids()
+    elif getattr(args, "command", None) == "list-categories":
+        app.cli_list_categories()
+    elif getattr(args, "command", None) == "stats":
+        app.cli_stats()
+    elif getattr(args, "command", None) == "favorites":
+        app.cli_favorites()
+    elif getattr(args, "command", None) == "tag":
+        app.cli_tag(args.tag)
+    elif getattr(args, "command", None) == "missing-tools":
+        app.cli_missing_tools()
+    elif getattr(args, "command", None) == "generate-completion":
+        shell = getattr(args, "generate_completion", None) or getattr(args, "shell", None)
+        if shell is None:
+            parser.error("generate-completion requires a shell argument")
+        app.cli_generate_completion(shell)
+    elif args.run:
         app.cli_run(args.run)
     elif getattr(args, "generate_playbook", None):
         app.cli_generate_playbook(args.generate_playbook)
@@ -147,7 +231,7 @@ def main() -> None:
     elif getattr(args, "missing_tools", False):
         app.cli_missing_tools()
     elif getattr(args, "install_profile", None):
-        app.cli_install_profile(args.install_profile, args.install_dry_run, args.yes)
+        app.cli_install(args.install_profile, args.install_dry_run, args.yes)
     elif getattr(args, "refresh_tools", False):
         _, _, checker = app._get_core()
         checker.refresh()
