@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2
+
+- Split CLI parsing and dispatch into `core/cli_runtime.py` to keep `main.py` thin.
+- Centralized catalog schema validation in `core/catalog_schema.py`.
+- Enforced the same schema rules at build time, validation time, and runtime load.
+- Added tests for unknown fields, invalid types, duplicate IDs, and plugin/category collisions.
+
 ## 0.2.1
 
 - Improved release packaging around the CLI and catalog runtime.
