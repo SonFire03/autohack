@@ -241,9 +241,8 @@ def test_validate_detects_duplicate_ids():
     orig = cat_module.CATALOG_PATH
     cat_module.CATALOG_PATH = tmp
     try:
-        c = CommandCatalog()
-        issues = c.validate()
-        assert any("dupliqué" in i for i in issues)
+        with pytest.raises(ValueError, match="duplicate id"):
+            CommandCatalog()
     finally:
         cat_module.CATALOG_PATH = orig
         tmp.unlink()
@@ -274,6 +273,44 @@ def test_load_raises_on_missing_required_field():
     cat_module.CATALOG_PATH = tmp
     try:
         with pytest.raises(ValueError, match="invalide"):
+            CommandCatalog()
+    finally:
+        cat_module.CATALOG_PATH = orig
+        tmp.unlink()
+
+
+def test_load_raises_on_unknown_field():
+    from core.catalog import CommandCatalog
+    import json
+    from pathlib import Path
+    import tempfile
+
+    data = {
+        "categories": {
+            "test": {
+                "name": "Test",
+                "commands": [
+                    {
+                        "id": "bad_002",
+                        "name": "Bad",
+                        "command": "ls",
+                        "risks": "none",
+                        "safe_to_run": True,
+                        "mystery": True,
+                    }
+                ]
+            }
+        }
+    }
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        json.dump(data, f)
+        tmp = Path(f.name)
+
+    import core.catalog as cat_module
+    orig = cat_module.CATALOG_PATH
+    cat_module.CATALOG_PATH = tmp
+    try:
+        with pytest.raises(ValueError, match="schéma non conforme"):
             CommandCatalog()
     finally:
         cat_module.CATALOG_PATH = orig

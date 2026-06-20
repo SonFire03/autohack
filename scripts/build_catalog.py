@@ -8,6 +8,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from core.catalog_schema import validate_catalog_data
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE_DIR = ROOT / "catalog"
@@ -85,25 +87,14 @@ def load_plugin_categories(plugin_dir: Path, reserved: set[str]) -> dict[str, di
 
 
 def validate_catalog(catalog: dict[str, Any]) -> None:
-    ids_seen: set[str] = set()
-    errors = []
-
+    errors = validate_catalog_data(catalog)
     for category, data in catalog["categories"].items():
         commands = data.get("commands", [])
         if not isinstance(commands, list):
-            errors.append(f"[{category}] commands must be a list")
             continue
-
         for command in commands:
-            command_id = command.get("id", "?")
-            missing = [field for field in REQUIRED_FIELDS if field not in command]
-            if missing:
-                errors.append(f"[{command_id}] missing fields: {', '.join(missing)}")
-            if command_id in ids_seen:
-                errors.append(f"[{command_id}] duplicate command id")
-            ids_seen.add(command_id)
-            if command.get("category") and command["category"] != category:
-                errors.append(f"[{command_id}] category field does not match '{category}'")
+            if isinstance(command, dict) and command.get("category") and command["category"] != category:
+                errors.append(f"[{command.get('id', '?')}] category field does not match '{category}'")
 
     if errors:
         raise ValueError("Invalid catalog:\n" + "\n".join(errors))

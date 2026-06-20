@@ -41,3 +41,50 @@ def test_plugin_category_collision_is_rejected(tmp_path):
 
     with pytest.raises(ValueError, match="collides with a core category"):
         build_catalog.build_catalog(ROOT / "catalog", plugin_dir)
+
+
+def test_validate_catalog_rejects_unknown_field(tmp_path):
+    build_catalog = load_build_script()
+    source_dir = tmp_path / "catalog"
+    source_dir.mkdir(parents=True)
+    for category in build_catalog.CATEGORY_ORDER:
+        payload = {
+            "name": category,
+            "commands": [
+                {
+                    "id": f"{category[:3]}_001",
+                    "name": "A",
+                    "command": "ls",
+                    "risks": "none",
+                    "safe_to_run": True,
+                    "extra_field": "boom",
+                }
+            ],
+        }
+        (source_dir / f"{category}.json").write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="unknown fields"):
+        build_catalog.build_catalog(source_dir)
+
+
+def test_validate_catalog_rejects_bad_type(tmp_path):
+    build_catalog = load_build_script()
+    source_dir = tmp_path / "catalog"
+    source_dir.mkdir(parents=True)
+    for category in build_catalog.CATEGORY_ORDER:
+        payload = {
+            "name": category,
+            "commands": [
+                {
+                    "id": f"{category[:3]}_001",
+                    "name": "A",
+                    "command": "ls",
+                    "risks": "none",
+                    "safe_to_run": "yes",
+                }
+            ],
+        }
+        (source_dir / f"{category}.json").write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="expected bool"):
+        build_catalog.build_catalog(source_dir)

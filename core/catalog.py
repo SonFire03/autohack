@@ -7,6 +7,7 @@ from config.settings import CATALOG_PATH
 from core.catalog_signature import SIG_PATH, verify_signature
 from core.config_manager import ConfigManager
 from core.i18n import tr
+from core.catalog_schema import validate_catalog_data
 
 
 class CommandCatalog:
@@ -46,10 +47,15 @@ class CommandCatalog:
                 raise ValueError(tr("catalog_sig_invalid", config.get("lang")))
         with open(CATALOG_PATH, encoding="utf-8") as f:
             self._data = json.load(f)
+        schema_errors = validate_catalog_data(self._data)
+        if schema_errors:
+            raise ValueError("Catalogue invalide — schéma non conforme :\n" + "\n".join(schema_errors))
         self._all_commands = []
         errors = []
         for cat_key, cat in self._data["categories"].items():
             for cmd in cat["commands"]:
+                if isinstance(cmd, dict) and cmd.get("category") and cmd["category"] != cat_key:
+                    errors.append(f"[{cmd.get('id', '?')}] category field does not match '{cat_key}'")
                 cmd["category"] = cat_key
                 missing = [f for f in self.REQUIRED_FIELDS if f not in cmd]
                 if missing:
