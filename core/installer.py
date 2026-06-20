@@ -271,7 +271,7 @@ class ToolInstaller:
             return set(self._required_tools)
         raise ValueError(f"Unknown install profile: {profile}")
 
-    def plan(
+    def build_plan(
         self,
         profile: str,
         only_missing: bool = True,
@@ -302,8 +302,20 @@ class ToolInstaller:
                 )
         return InstallPlan(profile, self.detect_package_manager(), apt_packages, pipx_packages, go_packages, manual)
 
+    def plan(
+        self,
+        profile: str,
+        only_missing: bool = True,
+        check_apt_availability: bool = True,
+    ) -> InstallPlan:
+        return self.build_plan(
+            profile,
+            only_missing=only_missing,
+            check_apt_availability=check_apt_availability,
+        )
+
     @staticmethod
-    def run(plan: InstallPlan, dry_run: bool = False) -> int:
+    def apply_plan(plan: InstallPlan, dry_run: bool = False) -> int:
         for command in plan.commands():
             if dry_run:
                 continue
@@ -311,6 +323,11 @@ class ToolInstaller:
             if result.returncode != 0:
                 return result.returncode
         return 0
+
+    @staticmethod
+    def run(plan: InstallPlan, dry_run: bool = False) -> int:
+        return ToolInstaller.apply_plan(plan, dry_run=dry_run)
+
     @staticmethod
     def detect_package_manager() -> str:
         if shutil.which("apt-get"):

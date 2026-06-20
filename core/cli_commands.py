@@ -519,7 +519,7 @@ def cli_install_profile(profile: str, dry_run: bool = False, assume_yes: bool = 
         catalog, _, _ = _get_core()
         required_tools = [cmd.get("tool_required", "") for cmd in catalog.get_all()]
     installer = ToolInstaller(required_tools)
-    plan = installer.plan(profile, check_apt_availability=not dry_run)
+    plan = installer.build_plan(profile, check_apt_availability=not dry_run)
     commands = plan.commands()
 
     console.print(f"\n[bold]Installation profile:[/bold] [cyan]{profile}[/cyan]\n")
@@ -566,7 +566,7 @@ def cli_install_profile(profile: str, dry_run: bool = False, assume_yes: bool = 
         console.print("[dim]Installation cancelled.[/dim]")
         return
 
-    code = installer.run(plan)
+    code = installer.apply_plan(plan)
     if code != 0:
         console.print(f"[bold red]Installation failed with exit code {code}.[/bold red]")
         sys.exit(code)
