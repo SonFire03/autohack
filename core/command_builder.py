@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 
 PLACEHOLDER_RE = re.compile(r"\$([A-Z][A-Z0-9_]*)")
+TEMPLATE_CATEGORY_ORDER = ("recon", "network", "kali", "web", "passwords", "ad", "post", "cloud", "forensics", "binary", "transfer", "utils")
 
 
 @dataclass(frozen=True)
@@ -467,7 +468,200 @@ COMMAND_TEMPLATES: tuple[CommandTemplate, ...] = (
         "patchelf --print-rpath $BINARY",
         "Inspecte le RPATH d'un binaire ELF.",
     ),
+    CommandTemplate(
+        "amass-passive",
+        "Amass passive enum",
+        "recon",
+        "amass enum -passive -d $DOMAIN",
+        "Énumération passive additionnelle des sous-domaines.",
+    ),
+    CommandTemplate(
+        "dnsrecon-std",
+        "DNSRecon standard",
+        "recon",
+        "dnsrecon -d $DOMAIN -t std",
+        "Requêtes DNS standard pour cartographier la surface exposée.",
+    ),
+    CommandTemplate(
+        "theharvester-all",
+        "theHarvester all",
+        "recon",
+        "theHarvester -d $DOMAIN -b all",
+        "Collecte d'emails, sous-domaines et métadonnées publiques.",
+    ),
+    CommandTemplate(
+        "feroxbuster-dir",
+        "Feroxbuster directory scan",
+        "web",
+        "feroxbuster -u http://$TARGET -w $WORDLIST -x php,txt,html",
+        "Scan de répertoires et fichiers web avec récursion.",
+    ),
+    CommandTemplate(
+        "gobuster-vhost",
+        "Gobuster vhost scan",
+        "web",
+        "gobuster vhost -u http://$TARGET -w $WORDLIST",
+        "Découverte de virtual hosts sur une cible HTTP.",
+    ),
+    CommandTemplate(
+        "xsser-check",
+        "XSser check",
+        "web",
+        "xsser -u '$URL'",
+        "Vérification XSS de base sur une URL explicitement autorisée.",
+    ),
+    CommandTemplate(
+        "medusa-ssh",
+        "Medusa SSH",
+        "passwords",
+        "medusa -h $TARGET -u $USER -P $WORDLIST -M ssh",
+        "Test de mot de passe SSH avec Medusa en lab autorisé.",
+    ),
+    CommandTemplate(
+        "enum4linux-ng",
+        "enum4linux-ng",
+        "ad",
+        "enum4linux-ng -A $TARGET",
+        "Énumération SMB/AD rapide d'un hôte Windows autorisé.",
+    ),
+    CommandTemplate(
+        "ldapdomaindump",
+        "LDAP domain dump",
+        "ad",
+        "ldapdomaindump -u '$USER' -p '$PASSWORD' ldap://$DC_IP",
+        "Extraction structurée d'objets LDAP d'un domaine autorisé.",
+    ),
+    CommandTemplate(
+        "bloodhound-ce",
+        "BloodHound CE ingest",
+        "ad",
+        "bloodhound-python -u $USER -p '$PASSWORD' -d $DOMAIN -ns $DC_IP -c DCOnly,Session,Trusts,LocalAdmin",
+        "Collecte ciblée pour BloodHound Community Edition.",
+    ),
+    CommandTemplate(
+        "kubectl-nodes",
+        "Kubectl get nodes",
+        "cloud",
+        "kubectl get nodes -o wide",
+        "Vue des nœuds d'un cluster Kubernetes autorisé.",
+    ),
+    CommandTemplate(
+        "aws-s3-ls",
+        "AWS S3 list",
+        "cloud",
+        "aws s3 ls",
+        "Liste rapide des buckets S3 visibles avec les identifiants courants.",
+    ),
+    CommandTemplate(
+        "foremost-recover",
+        "Foremost recover",
+        "forensics",
+        "foremost -i $IMAGE -o $OUTPUT_DIR",
+        "Tentative d'extraction de fichiers depuis une image ou un média.",
+    ),
+    CommandTemplate(
+        "file-magic",
+        "File magic",
+        "forensics",
+        "file $FILE",
+        "Identification rapide du type réel d'un fichier.",
+    ),
+    CommandTemplate(
+        "gdb-attach",
+        "GDB open",
+        "binary",
+        "gdb -q $BINARY",
+        "Ouverture interactive d'un binaire dans GDB.",
+    ),
+    CommandTemplate(
+        "ldd-binary",
+        "Ldd binary",
+        "binary",
+        "ldd $BINARY",
+        "Liste les dépendances dynamiques d'un binaire.",
+    ),
+    CommandTemplate(
+        "wget-transfer",
+        "Wget download",
+        "transfer",
+        "wget http://$LHOST:$PORT/$FILE -O $FILE",
+        "Téléchargement simple depuis un serveur HTTP local.",
+    ),
+    CommandTemplate(
+        "openssl-s_client",
+        "OpenSSL s_client",
+        "utils",
+        "openssl s_client -connect $HOST:$PORT -servername $SNI",
+        "Inspection TLS rapide d'un service distant autorisé.",
+    ),
+    CommandTemplate(
+        "base64-decode",
+        "Base64 decode",
+        "utils",
+        "printf '%s' '$DATA' | base64 -d",
+        "Décodage Base64 d'une chaîne fournie.",
+    ),
+    CommandTemplate(
+        "base64-encode",
+        "Base64 encode",
+        "utils",
+        "printf '%s' '$DATA' | base64 -w 0",
+        "Encodage Base64 d'une chaîne fournie.",
+    ),
+    CommandTemplate(
+        "jq-pretty",
+        "jq pretty print",
+        "utils",
+        "jq '.' $FILE",
+        "Formatage lisible de JSON avec jq.",
+    ),
+    CommandTemplate(
+        "sha256sum-file",
+        "SHA256 sum",
+        "utils",
+        "sha256sum $FILE",
+        "Calcul du hash SHA-256 d'un fichier.",
+    ),
 )
+
+
+def _category_order(category: str) -> int:
+    wanted = category.strip().lower()
+    try:
+        return TEMPLATE_CATEGORY_ORDER.index(wanted)
+    except ValueError:
+        return len(TEMPLATE_CATEGORY_ORDER)
+
+
+def available_categories() -> list[str]:
+    seen: list[str] = []
+    for template in COMMAND_TEMPLATES:
+        if template.category not in seen:
+            seen.append(template.category)
+    return sorted(seen, key=_category_order)
+
+
+def templates_by_category(category: str | None = None) -> list[CommandTemplate]:
+    if category:
+        wanted = category.strip().lower()
+        templates = [tpl for tpl in COMMAND_TEMPLATES if tpl.category == wanted]
+    else:
+        templates = list(COMMAND_TEMPLATES)
+    return sorted(templates, key=lambda tpl: (_category_order(tpl.category), tpl.label.casefold(), tpl.key))
+
+
+def search_templates(query: str = "", category: str | None = None) -> list[CommandTemplate]:
+    query_terms = [term.casefold() for term in query.split() if term]
+    templates = templates_by_category(category)
+    if not query_terms:
+        return templates
+
+    filtered: list[CommandTemplate] = []
+    for template in templates:
+        haystack = " ".join((template.key, template.label, template.category, template.description, template.command)).casefold()
+        if all(term in haystack for term in query_terms):
+            filtered.append(template)
+    return filtered
 
 
 def template_by_key(key: str) -> CommandTemplate | None:
@@ -494,3 +688,8 @@ def render_template(template: CommandTemplate, variables: dict[str, str]) -> tup
 
 def placeholders_for(template: CommandTemplate) -> list[str]:
     return sorted(set(PLACEHOLDER_RE.findall(template.command)))
+
+
+_COMMAND_TEXTS = {template.command for template in COMMAND_TEMPLATES}
+if len(_COMMAND_TEXTS) != len(COMMAND_TEMPLATES):  # pragma: no cover - import-time guard
+    raise ValueError("Duplicate command strings detected in COMMAND_TEMPLATES")
