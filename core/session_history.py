@@ -1,7 +1,8 @@
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+
+from core.secure_storage import read_json_file, write_json_atomic
 
 HISTORY_PATH = Path.home() / ".autohack_history.json"
 _PERSIST_FIELDS = ("id", "name", "command", "category", "exit_code", "dry_run", "timestamp")
@@ -20,23 +21,13 @@ class SessionHistory:
     # ── Persistance ───────────────────────────────────────────────────────────
 
     def _load(self) -> None:
-        if self._path and self._path.exists():
-            try:
-                data = json.loads(self._path.read_text(encoding="utf-8"))
-                if isinstance(data, list):
-                    self._entries = data[-self._max:]
-            except Exception:
-                pass  # historique corrompu → repartir de zéro
+        data = read_json_file(self._path, []) if self._path else []
+        if isinstance(data, list):
+            self._entries = data[-self._max:]
 
     def _save(self) -> None:
         if self._path:
-            try:
-                self._path.write_text(
-                    json.dumps(self._entries, ensure_ascii=False, indent=2),
-                    encoding="utf-8",
-                )
-            except Exception:
-                pass  # échec silencieux (droits, disque plein…)
+            write_json_atomic(self._path, self._entries)
 
     # ── API publique ──────────────────────────────────────────────────────────
 

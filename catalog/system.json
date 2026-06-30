@@ -437,20 +437,21 @@
       "command": "mv ~/lab/ancien_nom.txt ~/lab/nouveau_nom.txt",
       "purpose": "Renommer ou déplacer des fichiers. Contrairement à cp, mv supprime la source après la copie.",
       "expected_output": "Aucune sortie (succès silencieux)",
-      "risks": "Modéré — déplace définitivement, peut écraser si destination existe",
+      "risks": "Modéré — déplace définitivement, peut écraser si destination existe — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "Droits sur source et destination"
       ],
       "tool_required": "mv",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "system",
       "tags": [
         "filesystem",
         "move",
         "rename"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "sys_021",

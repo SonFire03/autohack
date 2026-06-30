@@ -90,7 +90,7 @@
       ],
       "tool_required": "systemctl",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": true,
       "category": "tor",
       "tags": [
@@ -344,8 +344,8 @@
         "HashedControlPassword ou CookieAuthentication configuré"
       ],
       "tool_required": "nc",
-      "safe_to_run": true,
-      "dangerous": false,
+      "safe_to_run": false,
+      "dangerous": true,
       "requires_sudo": false,
       "tags": [
         "tor",

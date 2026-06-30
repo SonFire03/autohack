@@ -1,39 +1,27 @@
 #!/usr/bin/env python3
 """Build the merged AUTOHACK command catalog from per-category files."""
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
-from core.catalog_schema import validate_catalog_data
-
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from core.catalog_schema import validate_catalog_data
+from core.catalog_source import CATEGORY_ORDER
+
+
 DEFAULT_SOURCE_DIR = ROOT / "catalog"
 DEFAULT_PLUGIN_DIR = ROOT / "plugins" / "catalog"
 DEFAULT_OUTPUT = ROOT / "commands_catalog.json"
-
-CATEGORY_ORDER = [
-    "system",
-    "network",
-    "tor",
-    "privoxy",
-    "scrapy",
-    "json_export",
-    "elastic",
-    "diagnostic",
-    "recon",
-    "web_attack",
-    "passwords",
-    "post_exploit",
-    "cloud",
-    "forensics",
-    "binary",
-    "xss",
-]
 
 REQUIRED_FIELDS = ("id", "name", "command", "risks", "safe_to_run")
 

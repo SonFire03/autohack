@@ -42,7 +42,7 @@
       ],
       "tool_required": "checksec",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "binary",
       "tags": [
@@ -51,7 +51,7 @@
         "elf",
         "mitigations"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "bin_003",
@@ -253,7 +253,7 @@
         "pwn",
         "exploit-dev"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "bin_011",
@@ -279,7 +279,7 @@
         "libc",
         "rop"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "bin_012",

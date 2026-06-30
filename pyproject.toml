@@ -34,7 +34,10 @@ autohack = "main:main"
 py-modules = ["main"]
 
 [tool.setuptools.packages.find]
-include = ["config*", "core*", "menus*"]
+include = ["api*", "catalog*", "config*", "core*", "menus*"]
+
+[tool.setuptools.package-data]
+catalog = ["*.json"]
 
 [tool.setuptools.dynamic]
 version = { attr = "config.version.__version__" }

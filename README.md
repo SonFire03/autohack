@@ -49,6 +49,8 @@ The project is designed to keep execution visible and reviewable:
 - interactive flows show the command before execution
 - dry-run and copy-only paths remain available for review
 - security-related policies are surfaced in the UI and CLI instead of being hidden
+- sensitive commands are deliberately slowed by `lab_only` or `dry_run_only` policies
+- local storage keeps history, variables, loot, and approvals on your machine only; it is not an encrypted vault
 - catalog verification and signing are available when you want stronger integrity checks
 
 These are design choices, not guarantees that replace operator judgment.

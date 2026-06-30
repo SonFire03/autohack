@@ -1,10 +1,10 @@
-import json
 import os
 import re
 import unicodedata
 from typing import List, Dict, Any, Optional
 from config.settings import CATALOG_PATH
 from core.catalog_signature import SIG_PATH, verify_signature
+from core.catalog_source import load_catalog_document
 from core.config_manager import ConfigManager
 from core.i18n import tr
 from core.catalog_schema import validate_catalog_data
@@ -39,14 +39,13 @@ class CommandCatalog:
 
     def load(self) -> None:
         config = ConfigManager()
-        if config.get("enforce_catalog_signature"):
+        if config.get("enforce_catalog_signature") and CATALOG_PATH.exists():
             secret = os.environ.get("AUTOHACK_CATALOG_SECRET", "")
             if not secret:
                 raise ValueError(tr("catalog_sig_missing", config.get("lang")))
             if not verify_signature(CATALOG_PATH, SIG_PATH, secret):
                 raise ValueError(tr("catalog_sig_invalid", config.get("lang")))
-        with open(CATALOG_PATH, encoding="utf-8") as f:
-            self._data = json.load(f)
+        self._data = load_catalog_document(CATALOG_PATH)
         schema_errors = validate_catalog_data(self._data)
         if schema_errors:
             raise ValueError("Catalogue invalide — schéma non conforme :\n" + "\n".join(schema_errors))

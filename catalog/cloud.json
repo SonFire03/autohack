@@ -90,14 +90,14 @@
       "command": "grype $IMAGE --fail-on high",
       "purpose": "Détecter les vulnérabilités exploitables dans les composants logiciels.",
       "expected_output": "CVE, sévérité, paquet affecté, version fix",
-      "risks": "Peut échouer volontairement si vulnérabilités high détectées.",
+      "risks": "Peut échouer volontairement si vulnérabilités high détectées — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "grype installé",
         "Image ou SBOM autorisé"
       ],
       "tool_required": "grype",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "cloud",
       "tags": [
@@ -106,7 +106,7 @@
         "sbom",
         "container"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "cloud_005",
@@ -219,7 +219,7 @@
       "command": "kubectl get secret $SECRET -n $NAMESPACE -o jsonpath='{.data}' | jq 'map_values(@base64d)'",
       "purpose": "Lire les valeurs d'un secret accessible via RBAC.",
       "expected_output": "Données du secret décodées",
-      "risks": "Expose directement des secrets. À utiliser uniquement avec autorisation.",
+      "risks": "Expose directement des secrets. À utiliser uniquement avec autorisation — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "kubectl installé",
         "jq installé",
@@ -236,7 +236,7 @@
         "credentials",
         "rbac"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "cloud_010",
@@ -296,14 +296,14 @@
       "command": "prowler aws --profile $AWS_PROFILE --output-formats csv json html",
       "purpose": "Auditer IAM, S3, CloudTrail, GuardDuty et services AWS.",
       "expected_output": "Rapports CSV/JSON/HTML avec findings par contrôle",
-      "risks": "Nécessite credentials AWS; peut lister beaucoup de ressources sensibles.",
+      "risks": "Nécessite credentials AWS; peut lister beaucoup de ressources sensibles — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "prowler installé",
         "Profil AWS autorisé"
       ],
       "tool_required": "prowler",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "cloud",
       "tags": [
@@ -312,7 +312,7 @@
         "audit",
         "prowler"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "cloud_013",
@@ -322,14 +322,14 @@
       "command": "scout aws --profile $AWS_PROFILE --report-dir scoutsuite-report",
       "purpose": "Cartographier les risques de configuration AWS.",
       "expected_output": "Rapport HTML ScoutSuite",
-      "risks": "Lecture de ressources cloud sensibles via credentials.",
+      "risks": "Lecture de ressources cloud sensibles via credentials — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "ScoutSuite installé",
         "Profil AWS autorisé"
       ],
       "tool_required": "scout",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "cloud",
       "tags": [
@@ -338,7 +338,7 @@
         "cloud",
         "audit"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "cloud_014",
@@ -400,14 +400,14 @@
       "command": "aws s3 ls --profile $AWS_PROFILE",
       "purpose": "Identifier les buckets accessibles au profil courant.",
       "expected_output": "Liste de buckets et dates",
-      "risks": "Peut révéler des noms de ressources sensibles.",
+      "risks": "Peut révéler des noms de ressources sensibles — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "awscli installé",
         "Profil AWS autorisé"
       ],
       "tool_required": "aws",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "cloud",
       "tags": [
@@ -416,7 +416,7 @@
         "enum",
         "cloud"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "cloud_017",

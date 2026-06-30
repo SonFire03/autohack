@@ -1,7 +1,8 @@
 """Global variable store — persist $TARGET, $LHOST, $LPORT etc. across commands."""
-import json
 from pathlib import Path
 from typing import Dict, Optional
+
+from core.secure_storage import read_json_file, write_json_atomic
 
 VARIABLES_PATH = Path.home() / ".autohack_variables.json"
 
@@ -38,22 +39,12 @@ class VariableStore:
         self._load()
 
     def _load(self) -> None:
-        if self._path.exists():
-            try:
-                data = json.loads(self._path.read_text(encoding="utf-8"))
-                if isinstance(data, dict):
-                    self._vars = {k: str(v) for k, v in data.items()}
-            except Exception:
-                pass
+        data = read_json_file(self._path, {})
+        if isinstance(data, dict):
+            self._vars = {k: str(v) for k, v in data.items()}
 
     def _save(self) -> None:
-        try:
-            self._path.write_text(
-                json.dumps(self._vars, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-        except Exception:
-            pass
+        write_json_atomic(self._path, self._vars)
 
     def get(self, name: str) -> Optional[str]:
         return self._vars.get(name.upper())

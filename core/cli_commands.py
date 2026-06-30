@@ -380,9 +380,20 @@ def cli_verify_audit_chain() -> None:
 
 
 def cli_serve_api() -> None:
-    import uvicorn
+    try:
+        import uvicorn
+        from api.server import app
+    except ModuleNotFoundError as exc:
+        console.print(f"[bold red]❌ API locale indisponible : {exc}[/bold red]")
+        sys.exit(1)
 
-    uvicorn.run("api.server:app", host="127.0.0.1", port=8765, reload=False)
+    if app is None:
+        console.print(
+            "[bold red]❌ API locale indisponible : FastAPI n'est pas installé.[/bold red]"
+        )
+        sys.exit(1)
+
+    uvicorn.run(app, host="127.0.0.1", port=8765, reload=False)
 
 
 def cli_apply_profile(name: str) -> None:

@@ -1,6 +1,7 @@
-import json
 from pathlib import Path
 from typing import List
+
+from core.secure_storage import read_json_file, write_json_atomic
 
 FAVORITES_PATH = Path.home() / ".autohack_favorites.json"
 
@@ -14,22 +15,12 @@ class Favorites:
         self._load()
 
     def _load(self) -> None:
-        if self._path.exists():
-            try:
-                data = json.loads(self._path.read_text(encoding="utf-8"))
-                if isinstance(data, list):
-                    self._ids = [str(x) for x in data]
-            except Exception:
-                pass
+        data = read_json_file(self._path, [])
+        if isinstance(data, list):
+            self._ids = [str(x) for x in data]
 
     def _save(self) -> None:
-        try:
-            self._path.write_text(
-                json.dumps(self._ids, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-        except Exception:
-            pass
+        write_json_atomic(self._path, self._ids)
 
     def add(self, cmd_id: str) -> bool:
         """Ajoute un ID aux favoris. Retourne True si ajouté, False si déjà présent."""

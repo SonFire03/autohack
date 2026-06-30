@@ -1,9 +1,10 @@
 """Loot vault — store captured credentials, hashes, flags and keys."""
-import json
 import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
+
+from core.secure_storage import read_json_file, write_json_atomic
 
 LOOT_PATH = Path.home() / ".autohack_loot.json"
 
@@ -28,22 +29,12 @@ class LootVault:
         self._load()
 
     def _load(self) -> None:
-        if self._path.exists():
-            try:
-                data = json.loads(self._path.read_text(encoding="utf-8"))
-                if isinstance(data, list):
-                    self._entries = data
-            except Exception:
-                pass
+        data = read_json_file(self._path, [])
+        if isinstance(data, list):
+            self._entries = data
 
     def _save(self) -> None:
-        try:
-            self._path.write_text(
-                json.dumps(self._entries, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-        except Exception:
-            pass
+        write_json_atomic(self._path, self._entries)
 
     def add(
         self,

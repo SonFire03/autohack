@@ -4,7 +4,9 @@ import hashlib
 import hmac
 from pathlib import Path
 
-SIG_PATH = Path(__file__).resolve().parents[1] / "commands_catalog.sig"
+from core.paths import runtime_root
+
+SIG_PATH = runtime_root() / "commands_catalog.sig"
 
 
 def digest_catalog(path: Path) -> str:

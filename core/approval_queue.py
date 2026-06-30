@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime, timedelta
 from pathlib import Path
+
+from core.secure_storage import read_json_file, write_json_atomic
 
 APPROVAL_PATH = Path.home() / ".autohack_approvals.json"
 
@@ -14,16 +15,11 @@ class ApprovalQueue:
         self._data = self._load()
 
     def _load(self) -> dict[str, str]:
-        if not self._path.exists():
-            return {}
-        try:
-            raw = json.loads(self._path.read_text(encoding="utf-8"))
-            return raw if isinstance(raw, dict) else {}
-        except Exception:
-            return {}
+        raw = read_json_file(self._path, {})
+        return raw if isinstance(raw, dict) else {}
 
     def _save(self) -> None:
-        self._path.write_text(json.dumps(self._data, ensure_ascii=False, indent=2), encoding="utf-8")
+        write_json_atomic(self._path, self._data)
 
     def _is_expired(self, marker: str) -> bool:
         if not marker.startswith("approved:"):

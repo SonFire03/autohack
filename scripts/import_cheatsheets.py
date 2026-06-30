@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 """Import an external cheatsheet JSON file into AUTOHACK-compatible templates."""
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from core.cheatsheet_importer import (
     build_external_templates,
@@ -65,9 +71,9 @@ def main() -> int:
     )
 
     if source.is_dir():
-        default_output = Path("catalog/external_cheatsheets") / f"{source.name}.json"
+        default_output = ROOT / "catalog" / "external_cheatsheets" / f"{source.name}.json"
     else:
-        default_output = Path("catalog/external_cheatsheets") / f"{source.stem}.json"
+        default_output = ROOT / "catalog" / "external_cheatsheets" / f"{source.stem}.json"
     output = args.output or default_output
 
     print(f"Loaded: {len(records)}")
