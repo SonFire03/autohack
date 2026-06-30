@@ -44,3 +44,12 @@ The importer skips templates that duplicate an existing command or key.
 
 Each entry is passed through the local cheatsheet policy helper before import. Entries that conflict with the visible security policy are rejected.
 
+## Import script
+
+You can convert a JSON source into an AUTOHACK-compatible file with:
+
+```bash
+python3 scripts/import_cheatsheets.py path/to/source.json
+```
+
+Use `--dry-run` to preview the result and `--output` to choose the destination file.

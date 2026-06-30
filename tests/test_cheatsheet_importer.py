@@ -64,3 +64,25 @@ def test_external_file_loader_reads_json_list(tmp_path):
     )
     records = load_external_cheatsheets(root)
     assert len(records) == 1
+
+
+def test_write_external_cheatsheets_roundtrip(tmp_path):
+    from core.cheatsheet_importer import write_external_cheatsheets
+
+    output = tmp_path / "out.json"
+    write_external_cheatsheets(
+        [
+            {
+                "key": "extra-web",
+                "title": "Extra web audit",
+                "category": "web",
+                "command": "whatweb http://$TARGET",
+                "description": "authorized web audit",
+                "policy": "safe",
+                "policy_reasons": [],
+            }
+        ],
+        output,
+    )
+    assert output.exists()
+    assert output.read_text(encoding="utf-8")

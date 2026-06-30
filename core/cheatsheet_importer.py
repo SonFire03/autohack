@@ -79,3 +79,10 @@ def build_external_templates(
         seen_commands.add(command)
 
     return templates, skipped
+
+
+def write_external_cheatsheets(templates: Iterable[dict[str, object]], output_path: Path) -> None:
+    """Write normalized cheatsheets to a JSON file compatible with the loader."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"templates": list(templates)}
+    output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
