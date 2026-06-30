@@ -2,15 +2,18 @@
 
 from collections import OrderedDict
 
+from rich.align import Align
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.syntax import Syntax
+from rich.text import Text
 from rich.table import Table
 
 from core.command_builder import (
     available_categories,
     placeholders_for,
+    policy_counts,
     render_template,
     search_templates,
 )
@@ -33,16 +36,14 @@ class CommandBuilderMenu:
         while True:
             visible = self._visible_templates_for_current_filter()
             console.clear()
-            console.print(Panel(
-                "[bold cyan]Command Builder[/bold cyan]  [dim]— générer des commandes depuis le workspace[/dim]",
-                border_style="cyan",
-                padding=(0, 1),
-            ))
+            console.print(self._render_hero())
             console.print()
 
             status_bar([
                 ("Templates", str(len(visible)), "bold bright_cyan"),
                 ("Variables", str(len(self._store)), "bold white"),
+                ("Safe", str(policy_counts()["safe"]), "bold bright_green"),
+                ("Lab only", str(policy_counts()["lab_only"]), "bold bright_yellow"),
                 ("Filtre", self._query or "aucun", "bold bright_yellow"),
                 ("Catégorie", self._category or "toutes", "bold bright_green"),
                 ("Exécution", "jamais automatique", "bold bright_yellow"),
@@ -73,14 +74,62 @@ class CommandBuilderMenu:
 
             self._handle(raw)
 
+    def _render_hero(self) -> Panel:
+        title = Text()
+        title.append("Command Builder", style="bold bright_cyan")
+        title.append("  ", style="")
+        title.append("commandes réutilisables depuis le workspace", style="grey70")
+
+        grid = Table.grid(expand=True, padding=(0, 2))
+        grid.add_column(justify="left")
+        grid.add_column(justify="left")
+        grid.add_column(justify="left")
+
+        filters = Text()
+        filters.append("Filtre ", style="grey50")
+        filters.append(self._query or "aucun", style="bold bright_yellow")
+        filters.append("  Catégorie ", style="grey50")
+        filters.append(self._category or "toutes", style="bold bright_green")
+
+        shortcuts = Text()
+        shortcuts.append("f texte", style="bold bright_cyan")
+        shortcuts.append(" • ", style="grey35")
+        shortcuts.append("cat web", style="bold bright_cyan")
+        shortcuts.append(" • ", style="grey35")
+        shortcuts.append("all", style="bold bright_cyan")
+
+        guidance = Text()
+        guidance.append("Numéro pour générer, ", style="grey70")
+        guidance.append("c <n>", style="bold bright_cyan")
+        guidance.append(" pour copier, ", style="grey70")
+        guidance.append("cats", style="bold bright_cyan")
+        guidance.append(" pour l'inventaire.", style="grey70")
+
+        grid.add_row(filters, shortcuts, guidance)
+
+        return Panel(
+            Align.left(grid),
+            title=title,
+            title_align="left",
+            border_style="cyan",
+            padding=(0, 1),
+        )
+
     def _visible_templates_for_current_filter(self):
         return search_templates(self._query, self._category)
 
     def _render_templates(self, templates) -> None:
         self._visible_templates = list(templates)
         if not self._visible_templates:
+            hint = Text()
+            hint.append("Aucun template ne correspond aux filtres actuels. ", style="grey70")
+            hint.append("Utilise ", style="grey70")
+            hint.append("all", style="bold bright_cyan")
+            hint.append(" pour réinitialiser ou ", style="grey70")
+            hint.append("cats", style="bold bright_cyan")
+            hint.append(" pour explorer.", style="grey70")
             console.print(Panel(
-                "[dim]Aucun template ne correspond aux filtres actuels.[/dim]",
+                Align.center(hint),
                 title=" Templates disponibles ",
                 title_align="left",
                 border_style="dim blue",
@@ -115,11 +164,13 @@ class CommandBuilderMenu:
                 )
                 index += 1
 
+            count = len(grouped[category])
+            border_style = "bright_cyan" if self._category == category else "dim blue"
             console.print(Panel(
                 table,
-                title=f" {category} ",
+                title=f" {category}  •  {count} template" + ("s" if count != 1 else "") + " ",
                 title_align="left",
-                border_style="dim blue",
+                border_style=border_style,
                 padding=(0, 1),
             ))
 

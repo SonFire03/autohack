@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from functools import lru_cache
 
 from core.cheatsheet_policy import assess_cheatsheet
+from core.cheatsheet_importer import build_external_templates, load_external_cheatsheets
 
 
 PLACEHOLDER_RE = re.compile(r"\$([A-Z][A-Z0-9_]*)")
@@ -637,7 +639,7 @@ def _category_order(category: str) -> int:
 
 def available_categories() -> list[str]:
     seen: list[str] = []
-    for template in COMMAND_TEMPLATES:
+    for template in all_templates():
         if template.category not in seen:
             seen.append(template.category)
     return sorted(seen, key=_category_order)
@@ -646,9 +648,9 @@ def available_categories() -> list[str]:
 def templates_by_category(category: str | None = None) -> list[CommandTemplate]:
     if category:
         wanted = category.strip().lower()
-        templates = [tpl for tpl in COMMAND_TEMPLATES if tpl.category == wanted]
+        templates = [tpl for tpl in all_templates() if tpl.category == wanted]
     else:
-        templates = list(COMMAND_TEMPLATES)
+        templates = list(all_templates())
     return sorted(templates, key=lambda tpl: (_category_order(tpl.category), tpl.label.casefold(), tpl.key))
 
 
@@ -668,7 +670,7 @@ def search_templates(query: str = "", category: str | None = None) -> list[Comma
 
 def template_by_key(key: str) -> CommandTemplate | None:
     wanted = key.strip().lower()
-    return next((tpl for tpl in COMMAND_TEMPLATES if tpl.key == wanted), None)
+    return next((tpl for tpl in all_templates() if tpl.key == wanted), None)
 
 
 def render_template(template: CommandTemplate, variables: dict[str, str]) -> tuple[str, list[str]]:
@@ -700,9 +702,31 @@ def policy_for_template(template: CommandTemplate) -> str:
 def policy_counts() -> dict[str, int]:
     """Count templates per policy label."""
     counts = {"safe": 0, "lab_only": 0, "blocked": 0}
-    for template in COMMAND_TEMPLATES:
+    for template in all_templates():
         counts[policy_for_template(template)] += 1
     return counts
+
+
+@lru_cache(maxsize=1)
+def all_templates() -> tuple[CommandTemplate, ...]:
+    """Return built-in templates plus deduplicated external templates."""
+    external_records = load_external_cheatsheets()
+    external_templates, _ = build_external_templates(
+        external_records,
+        existing_commands=(tpl.command for tpl in COMMAND_TEMPLATES),
+        existing_keys=(tpl.key for tpl in COMMAND_TEMPLATES),
+    )
+    merged = list(COMMAND_TEMPLATES) + [
+        CommandTemplate(
+            tpl["key"],
+            str(tpl["title"]),
+            str(tpl["category"]),
+            str(tpl["command"]),
+            str(tpl["description"]),
+        )
+        for tpl in external_templates
+    ]
+    return tuple(merged)
 
 
 _COMMAND_TEXTS = {template.command for template in COMMAND_TEMPLATES}

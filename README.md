@@ -294,6 +294,7 @@ The interactive `UTILS` column also includes:
 
 - `Target Workspace` to define the current target, URL, scope, notes, and shared variables.
 - `Command Builder` to render common lab commands from `$TARGET`, `$LHOST`, `$LPORT`, `$WORDLIST`, and related variables without executing them automatically.
+- Optional external cheatsheets can be imported from local JSON files and filtered by policy before being shown in the builder.
 
 ## CLI Reference
 

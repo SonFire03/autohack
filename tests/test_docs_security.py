@@ -16,6 +16,7 @@ def test_readme_mentions_security_and_use_cases():
     assert "Safe by Design" in readme
     assert "Use Cases" in readme
     assert "Risk Levels" in readme
+    assert "external cheatsheets" in readme.lower()
     assert "fastapi" in readme.lower()
     assert "uvicorn" in readme.lower()
     assert "pytest-cov" in readme.lower()
