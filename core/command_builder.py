@@ -5,6 +5,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from core.cheatsheet_policy import assess_cheatsheet
+
 
 PLACEHOLDER_RE = re.compile(r"\$([A-Z][A-Z0-9_]*)")
 TEMPLATE_CATEGORY_ORDER = ("recon", "network", "kali", "web", "passwords", "ad", "post", "cloud", "forensics", "binary", "transfer", "utils")
@@ -688,6 +690,19 @@ def render_template(template: CommandTemplate, variables: dict[str, str]) -> tup
 
 def placeholders_for(template: CommandTemplate) -> list[str]:
     return sorted(set(PLACEHOLDER_RE.findall(template.command)))
+
+
+def policy_for_template(template: CommandTemplate) -> str:
+    """Classify a built-in template according to the visible cheatsheet policy."""
+    return assess_cheatsheet(template.label, template.description, template.command).policy
+
+
+def policy_counts() -> dict[str, int]:
+    """Count templates per policy label."""
+    counts = {"safe": 0, "lab_only": 0, "blocked": 0}
+    for template in COMMAND_TEMPLATES:
+        counts[policy_for_template(template)] += 1
+    return counts
 
 
 _COMMAND_TEXTS = {template.command for template in COMMAND_TEMPLATES}
