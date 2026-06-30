@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- Hardened packaging and local storage handling.
+- Tightened catalog risk classification and documentation for sensitive lab commands.
+- Added release-oriented regression tests for secure storage, packaging imports, and risk classification.
+
 ## 0.2.4
 
 - Expanded the Command Builder with category filtering, grouped rendering, and multi-word search.
@@ -74,10 +80,7 @@
 
 ## Unreleased
 
-- Tightened risk classification for sensitive lab commands across the catalog.
-- Clarified the security documentation around local storage and policy-based execution.
-- Added resilient runtime path resolution for installed packages.
-- Hardened local JSON storage with atomic writes and restrictive permissions when possible.
+- No unreleased changes yet.
 - Made the local API import tolerant to missing optional dependencies and improved CLI error messages.
 - Added packaging regression tests for secure storage and installable API imports.
 

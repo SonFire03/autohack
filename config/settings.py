@@ -1,13 +1,13 @@
-from pathlib import Path
 from config.version import __version__
+from core.paths import project_root, runtime_catalog_path, runtime_exports_dir, runtime_logs_dir
 
-BASE_DIR = Path(__file__).parent.parent
-CATALOG_PATH = BASE_DIR / "commands_catalog.json"
-LOGS_DIR = BASE_DIR / "logs"
-EXPORTS_DIR = BASE_DIR / "exports"
+BASE_DIR = project_root()
+CATALOG_PATH = runtime_catalog_path()
+LOGS_DIR = runtime_logs_dir()
+EXPORTS_DIR = runtime_exports_dir()
 
-LOGS_DIR.mkdir(exist_ok=True)
-EXPORTS_DIR.mkdir(exist_ok=True)
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 LOG_FILE = LOGS_DIR / "autohack.log"
 EXECUTION_LOG_FILE = LOGS_DIR / "executions.jsonl"
