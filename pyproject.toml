@@ -50,7 +50,9 @@ addopts = "-q"
 branch = true
 source = ["config", "core", "menus"]
 omit = [
-  "tests/*"
+  "tests/*",
+  # Interactive terminal menus (prompt/Rich UI) are exercised manually, not by unit tests.
+  "menus/*"
 ]
 
 [tool.coverage.report]
